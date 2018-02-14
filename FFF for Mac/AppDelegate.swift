@@ -10,11 +10,13 @@ import Cocoa
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
+	static let appVersion = "1.0.0"
+	var restGateway: Gateway!
 
 
 
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
-		// Insert code here to initialize your application
+		restGateway = Gateway()
 	}
 
 	func applicationWillTerminate(_ aNotification: Notification) {

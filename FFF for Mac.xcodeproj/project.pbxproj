@@ -11,6 +11,13 @@
 		F4467EDB2033DB690058D0D8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467EDA2033DB690058D0D8 /* ViewController.swift */; };
 		F4467EDD2033DB690058D0D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4467EDC2033DB690058D0D8 /* Assets.xcassets */; };
 		F4467EE02033DB690058D0D8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4467EDE2033DB690058D0D8 /* Main.storyboard */; };
+		F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F062033E17D0058D0D8 /* Transaction.swift */; };
+		F4467F092033E17D0058D0D8 /* TransactionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F072033E17D0058D0D8 /* TransactionType.swift */; };
+		F4467F0F2033E1A70058D0D8 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0E2033E1A40058D0D8 /* Notifications.swift */; };
+		F4467F102033E4710058D0D8 /* Balance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0C2033E1920058D0D8 /* Balance.swift */; };
+		F4467F112033E4710058D0D8 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0B2033E1920058D0D8 /* Category.swift */; };
+		F4467F122033E4710058D0D8 /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0D2033E1920058D0D8 /* Gateway.swift */; };
+		F4467F132033E4710058D0D8 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0A2033E1920058D0D8 /* Message.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +28,13 @@
 		F4467EDF2033DB690058D0D8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F4467EE12033DB690058D0D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F4467EE22033DB690058D0D8 /* FFF_for_Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FFF_for_Mac.entitlements; sourceTree = "<group>"; };
+		F4467F062033E17D0058D0D8 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
+		F4467F072033E17D0058D0D8 /* TransactionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionType.swift; sourceTree = "<group>"; };
+		F4467F0A2033E1920058D0D8 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		F4467F0B2033E1920058D0D8 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		F4467F0C2033E1920058D0D8 /* Balance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Balance.swift; sourceTree = "<group>"; };
+		F4467F0D2033E1920058D0D8 /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
+		F4467F0E2033E1A40058D0D8 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +67,9 @@
 		F4467ED72033DB690058D0D8 /* FFF for Mac */ = {
 			isa = PBXGroup;
 			children = (
+				F4467F052033E1710058D0D8 /* Entities */,
+				F4467F042033E15B0058D0D8 /* REST Gateway */,
+				F4467F0E2033E1A40058D0D8 /* Notifications.swift */,
 				F4467ED82033DB690058D0D8 /* AppDelegate.swift */,
 				F4467EDA2033DB690058D0D8 /* ViewController.swift */,
 				F4467EDC2033DB690058D0D8 /* Assets.xcassets */,
@@ -61,6 +78,26 @@
 				F4467EE22033DB690058D0D8 /* FFF_for_Mac.entitlements */,
 			);
 			path = "FFF for Mac";
+			sourceTree = "<group>";
+		};
+		F4467F042033E15B0058D0D8 /* REST Gateway */ = {
+			isa = PBXGroup;
+			children = (
+				F4467F0C2033E1920058D0D8 /* Balance.swift */,
+				F4467F0B2033E1920058D0D8 /* Category.swift */,
+				F4467F0D2033E1920058D0D8 /* Gateway.swift */,
+				F4467F0A2033E1920058D0D8 /* Message.swift */,
+			);
+			path = "REST Gateway";
+			sourceTree = "<group>";
+		};
+		F4467F052033E1710058D0D8 /* Entities */ = {
+			isa = PBXGroup;
+			children = (
+				F4467F062033E17D0058D0D8 /* Transaction.swift */,
+				F4467F072033E17D0058D0D8 /* TransactionType.swift */,
+			);
+			path = Entities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -134,8 +171,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F4467F102033E4710058D0D8 /* Balance.swift in Sources */,
+				F4467F112033E4710058D0D8 /* Category.swift in Sources */,
+				F4467F122033E4710058D0D8 /* Gateway.swift in Sources */,
+				F4467F132033E4710058D0D8 /* Message.swift in Sources */,
+				F4467F0F2033E1A70058D0D8 /* Notifications.swift in Sources */,
+				F4467F092033E17D0058D0D8 /* TransactionType.swift in Sources */,
 				F4467EDB2033DB690058D0D8 /* ViewController.swift in Sources */,
 				F4467ED92033DB690058D0D8 /* AppDelegate.swift in Sources */,
+				F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
