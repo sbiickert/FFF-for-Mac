@@ -59,7 +59,21 @@ enum DateArgOption: String {
 	case YearMonthDay = "YMD"
 }
 
-
+struct Token {
+	static let lifespanInSeconds = 300
+	
+	public init(token: String) {
+		tokenString = token
+		expires = Calendar.current.date(byAdding: .second, value: Token.lifespanInSeconds, to: Date())
+	}
+	
+	let tokenString: String
+	let expires: Date!
+	
+	var isExpired: Bool {
+		return expires < Date()
+	}
+}
 
 class Gateway: NSObject, URLSessionDelegate {
 	var url: String!
@@ -67,25 +81,7 @@ class Gateway: NSObject, URLSessionDelegate {
 	var password: String!
 	var fullName: String?
 	
-	var token: String? {
-		didSet {
-			if token != nil {
-				tokenExpires = Calendar.current.date(byAdding: .second, value: tokenLifespanInSeconds, to: Date())
-			}
-			else {
-				tokenExpires = nil
-			}
-		}
-	}
-	private var tokenLifespanInSeconds: Int
-	private var tokenExpires: Date?
-	var tokenExpired: Bool {
-		if tokenExpires != nil && tokenExpires! < Date() {
-			token = nil
-			return true
-		}
-		return false
-	}
+	var token: Token?
 
 	static func urlArgumentForDate(_ date: Date, withOption option: DateArgOption) -> String {
 		var argumentString = ""
@@ -113,8 +109,6 @@ class Gateway: NSObject, URLSessionDelegate {
 		
 		let defaults = UserDefaults.standard
 		self.url = defaults.string(forKey: DefaultsKey.ServerUrl.rawValue);
-		self.tokenLifespanInSeconds = 300 // 5 minutes
-//		self.tokenLifespanInSeconds = defaults.integer(forKey: DefaultsKey.ServerTokenLifespan.rawValue);
 		super.init()
 		
 		let (u, p) = Gateway.getStoredCredentials()
@@ -162,7 +156,7 @@ class Gateway: NSObject, URLSessionDelegate {
 				//let content = message.content[ResponseKey.Message.rawValue] as! NSDictionary
 				let tokenInfo = message.content[ResponseKey.Token.rawValue] as! NSDictionary
 				self?.fullName = tokenInfo[ResponseKey.FullName.rawValue] as? String;
-				self?.token = tokenInfo[ResponseKey.Key.rawValue] as? String;
+				self?.token = Token(token: tokenInfo[ResponseKey.Key.rawValue] as! String)
 				print("\(String(describing: self?.fullName)) fetched a key: \(String(describing: self?.token))");
 				
 				if var waiting = self?.waitingResourceRequests {
@@ -183,7 +177,7 @@ class Gateway: NSObject, URLSessionDelegate {
 	
 	func retrieveResource(_ userInfo: NSDictionary) {
 		if self.token != nil {
-			var fullUrl = String(format: "%@/%@/json?token=%@", arguments: [self.url, userInfo[ResponseKey.ResourcePath.rawValue] as! String, self.token!])
+			var fullUrl = String(format: "%@/%@/json?token=%@", arguments: [self.url, userInfo[ResponseKey.ResourcePath.rawValue] as! String, self.token!.tokenString])
 			
 			if let qParams = userInfo[ResponseKey.ResourceQParams.rawValue] as? String {
 				fullUrl = fullUrl.appendingFormat("&%@", qParams)
@@ -215,7 +209,7 @@ class Gateway: NSObject, URLSessionDelegate {
 			baseUrl = baseUrl.appendingFormat("/%d", transaction.id)
 		}
 		
-		let fullUrl = baseUrl.appendingFormat("?token=%@", self.token!)
+		let fullUrl = baseUrl.appendingFormat("?token=%@", self.token!.tokenString)
 		print("Update transaction: \(transaction)")
 
 		// Turn the transaction into a POST/PUT body
