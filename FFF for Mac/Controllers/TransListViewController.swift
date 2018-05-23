@@ -1,14 +1,14 @@
 //
-//  BrowseViewController.swift
+//  GridViewController.swift
 //  FFF for Mac
 //
-//  Created by Simon Biickert on 2018-02-17.
+//  Created by Simon Biickert on 2018-02-21.
 //  Copyright © 2018 ii Softwerks. All rights reserved.
 //
 
 import Cocoa
 
-class MainViewController: NSViewController {
+class TransListViewController: NSViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

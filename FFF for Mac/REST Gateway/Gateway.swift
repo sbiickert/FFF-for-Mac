@@ -51,6 +51,7 @@ enum ResponseKey: String {
 	case ExpenseTypes = "expenseTypes"
 	case Transactions = "transactions"
 	case Token = "token"
+	case BalanceSummary = "summary"
 }
 
 enum DateArgOption: String {

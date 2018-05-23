@@ -9,17 +9,11 @@
 import Cocoa
 
 class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDelegate, NSSearchFieldDelegate {
-	private let ViewSelectorToolbarItemID = NSToolbarItem.Identifier(rawValue: "ViewSelector")
 	private let SpinnerToolbarItemID = NSToolbarItem.Identifier(rawValue: "Spinner")
 	private let SearchToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Search")
 
-	@IBOutlet var viewSelector: NSSegmentedControl!
 	@IBOutlet var spinner: NSProgressIndicator!
 	@IBOutlet var searchField: NSSearchField!
-	
-	@IBAction func selectView(_ sender: NSSegmentedControl) {
-		print("Selecting a different view")
-	}
 	
 	private var currentDate = Date() {
 		didSet {
@@ -88,10 +82,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		/* We create a new NSToolbarItem, and then go through the process of setting up its
 		attributes from the master toolbar item matching that identifier in our dictionary of items.
 		*/
-		if (itemIdentifier == ViewSelectorToolbarItemID) {
-			toolbarItem = customToolbarItem(itemForItemIdentifier: ViewSelectorToolbarItemID, label: "View Select", paletteLabel:"View Select", toolTip: "Switch View", target: self, itemContent: self.viewSelector, action: nil)!
-		}
-		else if (itemIdentifier == SearchToolbarItemID) {
+		if (itemIdentifier == SearchToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: SearchToolbarItemID, label: "Search", paletteLabel: "Search", toolTip: "Search for transactions", target: self, itemContent: self.searchField, action: nil)!
 		}
 		else if (itemIdentifier == SpinnerToolbarItemID) {
@@ -102,15 +93,14 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		}
 		
 		return toolbarItem
-
 	}
 	
 	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [ViewSelectorToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SpinnerToolbarItemID, SearchToolbarItemID]
+		return [SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID]
 	}
 	
 	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [NSToolbarItem.Identifier.flexibleSpace, ViewSelectorToolbarItemID, SearchToolbarItemID, SpinnerToolbarItemID]
+		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID]
 	}
 	
 	func windowDidBecomeMain(_ notification: Notification) {
