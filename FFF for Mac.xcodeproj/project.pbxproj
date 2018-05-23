@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F4383E8B2041BDD0007357CE /* DayViewCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4383E892041BDD0007357CE /* DayViewCollectionViewItem.swift */; };
+		F4383E8C2041BDD0007357CE /* DayViewCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4383E8A2041BDD0007357CE /* DayViewCollectionViewItem.xib */; };
 		F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C302038B11200A0A64E /* MainWindowController.swift */; };
 		F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C342038B1E600A0A64E /* MainSplitViewController.swift */; };
 		F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C362038B29C00A0A64E /* DetailViewController.swift */; };
-		F4449C3A2038B2DE00A0A64E /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C382038B2DE00A0A64E /* MainViewController.swift */; };
+		F4449C3A2038B2DE00A0A64E /* CalendarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C382038B2DE00A0A64E /* CalendarViewController.swift */; };
 		F4449C40203A19D300A0A64E /* DetailTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C3F203A19D300A0A64E /* DetailTableCellView.swift */; };
 		F4449C43203B3D0200A0A64E /* LoginWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C41203B3D0200A0A64E /* LoginWindowController.swift */; };
 		F4449C44203B3D0200A0A64E /* LoginWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4449C42203B3D0200A0A64E /* LoginWindowController.xib */; };
@@ -24,13 +26,17 @@
 		F4467F112033E4710058D0D8 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0B2033E1920058D0D8 /* Category.swift */; };
 		F4467F122033E4710058D0D8 /* Gateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0D2033E1920058D0D8 /* Gateway.swift */; };
 		F4467F132033E4710058D0D8 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0A2033E1920058D0D8 /* Message.swift */; };
+		F46219D020432BEA006E08B9 /* DayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46219CF20432BEA006E08B9 /* DayView.swift */; };
+		F4728C36203E40FD0085C04F /* TransListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4728C35203E40FD0085C04F /* TransListViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F4383E892041BDD0007357CE /* DayViewCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayViewCollectionViewItem.swift; sourceTree = "<group>"; };
+		F4383E8A2041BDD0007357CE /* DayViewCollectionViewItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DayViewCollectionViewItem.xib; sourceTree = "<group>"; };
 		F4449C302038B11200A0A64E /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
 		F4449C342038B1E600A0A64E /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
 		F4449C362038B29C00A0A64E /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
-		F4449C382038B2DE00A0A64E /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		F4449C382038B2DE00A0A64E /* CalendarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewController.swift; sourceTree = "<group>"; };
 		F4449C3F203A19D300A0A64E /* DetailTableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableCellView.swift; sourceTree = "<group>"; };
 		F4449C41203B3D0200A0A64E /* LoginWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWindowController.swift; sourceTree = "<group>"; };
 		F4449C42203B3D0200A0A64E /* LoginWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginWindowController.xib; sourceTree = "<group>"; };
@@ -39,7 +45,6 @@
 		F4467EDC2033DB690058D0D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F4467EDF2033DB690058D0D8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F4467EE12033DB690058D0D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F4467EE22033DB690058D0D8 /* FFF_for_Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FFF_for_Mac.entitlements; sourceTree = "<group>"; };
 		F4467F062033E17D0058D0D8 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		F4467F072033E17D0058D0D8 /* TransactionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionType.swift; sourceTree = "<group>"; };
 		F4467F0A2033E1920058D0D8 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
@@ -47,6 +52,8 @@
 		F4467F0C2033E1920058D0D8 /* Balance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Balance.swift; sourceTree = "<group>"; };
 		F4467F0D2033E1920058D0D8 /* Gateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gateway.swift; sourceTree = "<group>"; };
 		F4467F0E2033E1A40058D0D8 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
+		F46219CF20432BEA006E08B9 /* DayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayView.swift; sourceTree = "<group>"; };
+		F4728C35203E40FD0085C04F /* TransListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransListViewController.swift; sourceTree = "<group>"; };
 		F4E5F677203D356B005C5266 /* FFF for Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "FFF for Mac.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -67,9 +74,10 @@
 				F4449C302038B11200A0A64E /* MainWindowController.swift */,
 				F4449C342038B1E600A0A64E /* MainSplitViewController.swift */,
 				F4449C362038B29C00A0A64E /* DetailViewController.swift */,
-				F4449C382038B2DE00A0A64E /* MainViewController.swift */,
+				F4449C382038B2DE00A0A64E /* CalendarViewController.swift */,
 				F4449C41203B3D0200A0A64E /* LoginWindowController.swift */,
 				F4449C42203B3D0200A0A64E /* LoginWindowController.xib */,
+				F4728C35203E40FD0085C04F /* TransListViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -78,6 +86,9 @@
 			isa = PBXGroup;
 			children = (
 				F4449C3F203A19D300A0A64E /* DetailTableCellView.swift */,
+				F4383E892041BDD0007357CE /* DayViewCollectionViewItem.swift */,
+				F4383E8A2041BDD0007357CE /* DayViewCollectionViewItem.xib */,
+				F46219CF20432BEA006E08B9 /* DayView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -101,17 +112,15 @@
 		F4467ED72033DB690058D0D8 /* FFF for Mac */ = {
 			isa = PBXGroup;
 			children = (
-				F4E5F677203D356B005C5266 /* FFF for Mac.entitlements */,
 				F4467ED82033DB690058D0D8 /* AppDelegate.swift */,
+				F4467EDE2033DB690058D0D8 /* Main.storyboard */,
 				F4449C2F2038B0ED00A0A64E /* Controllers */,
 				F4449C3E203A19AA00A0A64E /* Views */,
 				F4467F052033E1710058D0D8 /* Entities */,
 				F4467F042033E15B0058D0D8 /* REST Gateway */,
 				F4467F0E2033E1A40058D0D8 /* Notifications.swift */,
 				F4467EDC2033DB690058D0D8 /* Assets.xcassets */,
-				F4467EDE2033DB690058D0D8 /* Main.storyboard */,
-				F4467EE12033DB690058D0D8 /* Info.plist */,
-				F4467EE22033DB690058D0D8 /* FFF_for_Mac.entitlements */,
+				F4B69A802040DB26008AEF0E /* Supporting Files */,
 			);
 			path = "FFF for Mac";
 			sourceTree = "<group>";
@@ -134,6 +143,15 @@
 				F4467F072033E17D0058D0D8 /* TransactionType.swift */,
 			);
 			path = Entities;
+			sourceTree = "<group>";
+		};
+		F4B69A802040DB26008AEF0E /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F4E5F677203D356B005C5266 /* FFF for Mac.entitlements */,
+				F4467EE12033DB690058D0D8 /* Info.plist */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -201,6 +219,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4449C44203B3D0200A0A64E /* LoginWindowController.xib in Resources */,
+				F4383E8C2041BDD0007357CE /* DayViewCollectionViewItem.xib in Resources */,
 				F4467EDD2033DB690058D0D8 /* Assets.xcassets in Resources */,
 				F4467EE02033DB690058D0D8 /* Main.storyboard in Resources */,
 			);
@@ -219,12 +238,15 @@
 				F4467F112033E4710058D0D8 /* Category.swift in Sources */,
 				F4467F122033E4710058D0D8 /* Gateway.swift in Sources */,
 				F4467F132033E4710058D0D8 /* Message.swift in Sources */,
-				F4449C3A2038B2DE00A0A64E /* MainViewController.swift in Sources */,
+				F4449C3A2038B2DE00A0A64E /* CalendarViewController.swift in Sources */,
 				F4467F0F2033E1A70058D0D8 /* Notifications.swift in Sources */,
 				F4467F092033E17D0058D0D8 /* TransactionType.swift in Sources */,
 				F4467ED92033DB690058D0D8 /* AppDelegate.swift in Sources */,
 				F4449C40203A19D300A0A64E /* DetailTableCellView.swift in Sources */,
+				F4383E8B2041BDD0007357CE /* DayViewCollectionViewItem.swift in Sources */,
+				F4728C36203E40FD0085C04F /* TransListViewController.swift in Sources */,
 				F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */,
+				F46219D020432BEA006E08B9 /* DayView.swift in Sources */,
 				F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */,
 				F4449C43203B3D0200A0A64E /* LoginWindowController.swift in Sources */,
 			);
