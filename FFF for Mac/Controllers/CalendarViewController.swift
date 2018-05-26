@@ -55,7 +55,9 @@ class CalendarViewController: NSViewController {
 			monthLabel.stringValue = CalendarViewController.monthFormatter.string(from: currentDate)
 			
 			// Request balance
-			requestSummaryForMonth(currentDate)
+			if Gateway.shared.isLoggedIn {
+				requestSummaryForMonth(currentDate)
+			}
 		}
 	}
 	
@@ -90,17 +92,10 @@ class CalendarViewController: NSViewController {
 	
 	override func viewDidLoad() {
         super.viewDidLoad()
-		let nCenter = NotificationCenter.default
-		nCenter.addObserver(self,
-							selector: #selector(loginNotificationReceived(_:)),
-							name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-							object: nil)
-		nCenter.addObserver(self,
-							selector: #selector(currentMonthSummaryNotificationReceived(_:)),
-							name: NSNotification.Name(rawValue: CalendarVCNotificationNameKey.CurrentMonthSummaryRetreived.rawValue),
-							object: nil)
-
-
+		NotificationCenter.default.addObserver(self,
+								selector: #selector(loginNotificationReceived(_:)),
+								name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
+								object: nil)
 	}
 	
 	override func viewWillAppear() {
@@ -164,12 +159,13 @@ class CalendarViewController: NSViewController {
 	}
 
 	func requestSummaryForMonth(_ date: Date) {
-		let dateArg = Gateway.urlArgumentForDate(date, withOption: DateArgOption.YearMonth)
-		let userInfo:[String: AnyObject]? = [ResponseKey.ResourcePath.rawValue: String(format:"balance%@", dateArg) as AnyObject,
-											 ResponseKey.ResourceNotificationName.rawValue: CalendarVCNotificationNameKey.CurrentMonthSummaryRetreived.rawValue as AnyObject]
-		NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.ResourceRequest.rawValue),
-										object: self,
-										userInfo: userInfo)
+		let units: Set<Calendar.Component> = [.month, .year]
+		let components = Calendar.current.dateComponents(units, from: date)
+		let year = components.year!
+		let month = components.month!
+		Gateway.shared.getBalanceSummary(forYear: year, month: month) {message in
+			// message.balanceSummary
+		}
 	}
 
 }

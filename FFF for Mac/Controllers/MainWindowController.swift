@@ -42,11 +42,12 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
         super.windowDidLoad()
 
 		NotificationCenter.default.addObserver(self,
-											   selector: #selector(loginResponseNotificationReceived(_:)),
+											   selector: #selector(loginNotificationReceived(_:)),
 											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
 											   object: nil)
 
     }
+	
 	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?) -> NSToolbarItem? {
 		
 		let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
@@ -105,7 +106,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	func windowDidBecomeMain(_ notification: Notification) {
 		// Check for valid user credentials
-		if haveToken == false {
+		if Gateway.shared.isLoggedIn == false {
 			// Present modal sheet
 			let loginWindowController = LoginWindowController(windowNibName: NSNib.Name("LoginWindowController"))
 			window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
@@ -116,10 +117,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 				Gateway.setStoredCredentials(u, password: p)
 
 				// Send off the request to the Gateway to log in
-				NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.LoginRequest.rawValue),
-												object: self,
-												userInfo: nil)
-
+				Gateway.shared.login()
 				self.isTokenRequestInProgress = true
 				
 				loginWindowController.window?.close()
@@ -127,16 +125,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		}
 	}
 	
-	private var haveToken: Bool {
-		if let delegate = NSApplication.shared.delegate as? AppDelegate {
-			if delegate.restGateway.token != nil && delegate.restGateway.token?.isExpired == false {
-				return true
-			}
-		}
-		return false
-	}
-	
-	@objc func loginResponseNotificationReceived(_ notification: Notification) {
+	@objc func loginNotificationReceived(_ notification: Notification) {
 		// Ignore unless the login form is showing: it's a refetch of the token.
 		isTokenRequestInProgress = false
 	}
