@@ -196,12 +196,15 @@ class Gateway: NSObject, URLSessionDelegate {
 	func getTransactions(forYear year:Int, month:Int, limitedTo tt:TransactionType?,
 						 callback: @escaping (Message) -> Void) {
 		// url/transactions/year/month/day/json?token=
-		let fullUrl = String(format: "%@/%@/%@/%@/-1/json?token=%@",
+		var fullUrl = String(format: "%@/%@/%@/%@/-1/json?token=%@",
 							 self.url,
 							 RestResource.TransactionsResource.rawValue,
 							 String(year),
 							 String(month),
 							 self.token!.tokenString)
+		if tt != nil {
+			fullUrl += "&tt=" + String(tt!.code)
+		}
 		print("Fetching transactions: \(fullUrl)");
 		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
 		self.makeRequest(request: request, callback: callback)

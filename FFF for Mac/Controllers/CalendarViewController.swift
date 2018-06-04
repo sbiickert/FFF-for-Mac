@@ -7,24 +7,23 @@
 //
 
 import Cocoa
-enum CalendarVCNotificationNameKey: String {
-	case CurrentMonthSummaryRetreived = "CalendarVCCurrentMonthSummaryRetrievedNotification"
-}
 
 class CalendarViewController: NSViewController {
-	private var dayViews = [DayView]()
-	@IBOutlet weak var monthLabel: NSTextField!
-	@IBOutlet weak var previousMonthButton: NSButton!
-	@IBOutlet weak var nextMonthButton: NSButton!
-	
-	@IBAction func previousMonth(_ sender: Any) {
-		if let newDate = Calendar.current.date(byAdding: .month, value:-1, to: currentDate) {
-			currentDate = newDate
-		}
+	struct Values {
+		static let insets = 8
+		static let normalBackgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+		static let selectedBackgroundColor = #colorLiteral(red: 0.9951301731, green: 1, blue: 0.7860673396, alpha: 1)
 	}
-	@IBAction func nextMonth(_ sender: Any) {
-		if let newDate = Calendar.current.date(byAdding: .month, value:1, to: currentDate) {
-			currentDate = newDate
+	
+	@IBOutlet weak var calendarView: NSView!
+	private var grid = Grid(layout: Grid.Layout.dimensions(rowCount: 6, columnCount: 7))
+	private var dayViews = [DayView]()
+	
+	private var monthBalance: BalanceSummary?
+	
+	private var app:AppDelegate {
+		get {
+			return NSApplication.shared.delegate as! AppDelegate
 		}
 	}
 	
@@ -35,29 +34,12 @@ class CalendarViewController: NSViewController {
 		return formatter
 	}()
 
-	var currentDate = Date() {
-		didSet {
-			// Set up the days in the calendar
-			for i in 0..<dayViews.count {
-				dayViews[i].dayOfMonth = 0
-				dayViews[i].incomeAmount = 0
-				dayViews[i].expenseAmount = 0
-			}
-
-			let numberOfDaysInMonth = numberOfDaysInCurrentMonth
-			for i in 1...numberOfDaysInMonth {
-				if let dayView = dayViewFor(dayOfMonth: i) {
-					dayView.dayOfMonth = i
-				}
-			}
-			
-			// Change the header text
-			monthLabel.stringValue = CalendarViewController.monthFormatter.string(from: currentDate)
-			
-			// Request balance
-			if Gateway.shared.isLoggedIn {
-				requestSummaryForMonth(currentDate)
-			}
+	var currentDate:Date {
+		get {
+			return app.currentDate
+		}
+		set(value) {
+			app.currentDate = value
 		}
 	}
 	
@@ -69,7 +51,7 @@ class CalendarViewController: NSViewController {
 			let firstComponents = Calendar.current.dateComponents(in: TimeZone.current, from: firstOfTheMonth)
 			// 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday
 			// 1=January
-			return firstComponents.weekday! - 2
+			return firstComponents.weekday! - 1
 		}
 	}
 	
@@ -90,81 +72,123 @@ class CalendarViewController: NSViewController {
 		}
 	}
 	
+	//MARK: View Controller
+	
 	override func viewDidLoad() {
         super.viewDidLoad()
 		NotificationCenter.default.addObserver(self,
-								selector: #selector(loginNotificationReceived(_:)),
-								name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-								object: nil)
+											   selector: #selector(loginNotificationReceived(_:)),
+											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
+											   object: nil)
+		NotificationCenter.default.addObserver(self,
+											   selector: #selector(logoutNotificationReceived(_:)),
+											   name: NSNotification.Name(rawValue: Notifications.LogoutResponse.rawValue),
+											   object: nil)
+		NotificationCenter.default.addObserver(self,
+											   selector: #selector(currentDateChanged(_:)),
+											   name: NSNotification.Name(rawValue: Notifications.CurrentDateChanged.rawValue),
+											   object: nil)
+		for _ in 0..<grid.cellCount {
+			let dayView = DayView(frame:CGRect.zero)
+			self.calendarView.addSubview(dayView)
+			dayViews.append(dayView)
+		}
 	}
 	
 	override func viewWillAppear() {
 		super.viewWillAppear()
-		configureCalendarView()
-		currentDate = Date()
+		updateView()
 	}
 	
-	private func configureCalendarView() {
-		// This is a big assumption that the views in the storyboard are in order
-		// It seems like it is a valid assumption for the moment
-		let views = getDaysInView(view: view)
-		
-		for view in views {
-			view.wantsLayer = true
-			view.layer?.backgroundColor = NSColor.controlShadowColor.cgColor
-			view.layer?.cornerRadius = 8.0
-		}
-		
-		dayViews = views
+	override func viewDidLayout() {
+		super.viewDidLayout()
+		updateView()
 	}
 	
-	private func getDaysInView(view: NSView) -> [DayView] {
-		var results = [DayView]()
-		for subview in view.subviews as [NSView] {
-			if let dayView = subview as? DayView {
-				dayView.initLabels()
-				results += [dayView]
-			} else {
-				results += getDaysInView(view: subview)
-			}
-		}
-		return results
-	}
-	
-	@objc func loginNotificationReceived(_ notification: Notification) {
-		if let userInfo = (notification as NSNotification).userInfo {
-			if (userInfo[ResponseKey.Success.rawValue] as! NSNumber).boolValue {
-				requestSummaryForMonth(currentDate)
-			}
-		}
-	}
-	
-	@objc func currentMonthSummaryNotificationReceived(_ notification: Notification) {
-		if let userInfo = (notification as NSNotification).userInfo {
-			if (userInfo[ResponseKey.Success.rawValue] as! NSNumber).boolValue {
-				let message = userInfo[ResponseKey.Message.rawValue] as! Message
-
-				let summaryDict = message.content[ResponseKey.BalanceSummary.rawValue] as! NSDictionary
-				let balanceSummary = BalanceSummary(dictionary: summaryDict)
-
-				for i in 1...numberOfDaysInCurrentMonth {
-					if let dayBalance = balanceSummary.dayBalances[i] {
-						let dayView = dayViewFor(dayOfMonth: i)
-						dayView?.incomeAmount = dayBalance.income.doubleValue
-						dayView?.expenseAmount = dayBalance.expense.doubleValue
+	private func updateView(forceUpdate force:Bool = false) {
+		if updateGrid() || force {
+			let components = app.currentDateComponents
+			// Animate day views to grid
+			for (index, dayView) in dayViews.enumerated() {
+				let dayOfMonth = index - dayOfWeekOffsetForTheFirst + 1 // +1 because we don't start with day zero
+				if dayOfMonth >= 1 && dayOfMonth <= numberOfDaysInCurrentMonth {
+					dayView.dayOfMonth = dayOfMonth
+					if dayOfMonth == components.day {
+						dayView.backgroundColor = Values.selectedBackgroundColor
 					}
+					else {
+						dayView.backgroundColor = Values.normalBackgroundColor
+					}
+					if let bal = monthBalance, let dayBal = bal.dayBalances[dayOfMonth] {
+						dayView.expenseAmount = dayBal.expense.doubleValue
+						dayView.incomeAmount = dayBal.income.doubleValue
+					}
+				}
+				else {
+					dayView.dayOfMonth = -1
+					dayView.expenseAmount = 0.0
+					dayView.incomeAmount = 0.0
+				}
+				if let frame = getFrame(for: dayView) {
+					relocateDayView(dayView, to: frame)
 				}
 			}
 		}
 	}
+	
+	@discardableResult
+	func updateGrid() -> Bool {
+		var gridChanged = false
+		if grid.frame != self.calendarView.bounds {
+			grid.frame = self.calendarView.bounds
+			gridChanged = true
+		}
+		return gridChanged
+	}
+
+	private func getFrame(for dayView:DayView) -> CGRect? {
+		for (index, otherView) in dayViews.enumerated() {
+			if dayView == otherView {
+				let frame = grid[index]!
+				let converted = calendarView.convert(frame, to: view)
+				return converted
+			}
+		}
+		return nil
+	}
+	
+	private func relocateDayView(_ dayView: DayView, to frame:CGRect) {
+		NSAnimationContext.runAnimationGroup({_ in
+			NSAnimationContext.current.duration = 0.1
+			dayView.animator().frame = frame
+		}, completionHandler: {})
+	}
+	
+
+	// MARK: Notifications
+	
+	@objc func loginNotificationReceived(_ notification: Notification) {
+		requestSummaryForMonth(currentDate)
+	}
+	
+	@objc func logoutNotificationReceived(_ notification: Notification) {
+		monthBalance = nil
+		DispatchQueue.main.async {
+			self.updateView(forceUpdate: true)
+		}
+	}
+
+	@objc func currentDateChanged(_ notification: Notification) {
+		requestSummaryForMonth(app.currentDate)
+	}
 
 	func requestSummaryForMonth(_ date: Date) {
-		let units: Set<Calendar.Component> = [.month, .year]
-		let components = Calendar.current.dateComponents(units, from: date)
-		let year = components.year!
-		let month = components.month!
-		Gateway.shared.getBalanceSummary(forYear: year, month: month) {message in
-			// message.balanceSummary
+		let components = app.currentDateComponents
+		Gateway.shared.getBalanceSummary(forYear: components.year, month: components.month) {message in
+			self.monthBalance = message.balanceSummary
+			DispatchQueue.main.async {
+				self.updateView(forceUpdate: true)
+			}
 		}
 	}
 

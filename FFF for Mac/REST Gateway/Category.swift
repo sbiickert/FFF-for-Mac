@@ -23,6 +23,8 @@ struct Category {
 	var transactionTypeID: Int
 	var transactionTypeName: String
 	
+	var transactions = [Transaction]() // Loaded in an optional separate call
+	
 	init(dictionary: NSDictionary) {
 		var tempNumber = dictionary[CategoryKey.Amount.rawValue] as! NSNumber
 		amount = tempNumber.floatValue
@@ -59,6 +61,45 @@ struct CategorySummary {
 			}
 			else {
 				income.append(category)
+			}
+		}
+	}
+	
+	func categoryFor(transactionTypeID ttID:Int) -> Category? {
+		for cat in expenses {
+			if cat.transactionTypeID == ttID {
+				return cat
+			}
+		}
+		for cat in income {
+			if cat.transactionTypeID == ttID {
+				return cat
+			}
+		}
+		return nil
+	}
+	
+	mutating func assignTransactions(_ transactions: [Transaction]) {
+		for transaction in transactions {
+			if let tt = transaction.transactionType {
+				if tt.isExpense {
+					for (i, var cat) in self.expenses.enumerated() {
+						if cat.transactionTypeID == tt.code {
+							cat.transactions.append(transaction)
+							self.expenses[i] = cat
+							break
+						}
+					}
+				}
+				else {
+					for (i, var cat) in self.income.enumerated() {
+						if cat.transactionTypeID == tt.code {
+							cat.transactions.append(transaction)
+							self.income[i] = cat
+							break
+						}
+					}
+				}
 			}
 		}
 	}

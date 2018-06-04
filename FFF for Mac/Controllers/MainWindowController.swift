@@ -11,13 +11,20 @@ import Cocoa
 class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDelegate, NSSearchFieldDelegate {
 	private let SpinnerToolbarItemID = NSToolbarItem.Identifier(rawValue: "Spinner")
 	private let SearchToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Search")
+	private let DateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Date")
 
 	@IBOutlet var spinner: NSProgressIndicator!
+	@IBOutlet var datePicker: NSDatePicker!
 	@IBOutlet var searchField: NSSearchField!
-	
-	private var currentDate = Date() {
-		didSet {
-			// TODO: Refresh the detail pane
+
+	var currentDate: Date {
+		get {
+			let app = NSApplication.shared.delegate as! AppDelegate
+			return app.currentDate
+		}
+		set(value) {
+			let app = NSApplication.shared.delegate as! AppDelegate
+			app.currentDate = value
 		}
 	}
 	private var isTokenRequestInProgress = false
@@ -46,6 +53,12 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
 											   object: nil)
 
+		NotificationCenter.default.addObserver(self,
+											   selector: #selector(dateChangeNotificationReceived(_:)),
+											   name: NSNotification.Name(rawValue: Notifications.CurrentDateChanged.rawValue),
+											   object: nil)
+		
+		datePicker.dateValue = currentDate
     }
 	
 	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?) -> NSToolbarItem? {
@@ -89,6 +102,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		else if (itemIdentifier == SpinnerToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: SpinnerToolbarItemID, label: "Waiting", paletteLabel: "Waiting", toolTip: "Waiting for a response", target: self, itemContent: self.spinner, action: nil)!
 		}
+		else if (itemIdentifier == DateToolbarItemID) {
+			toolbarItem = customToolbarItem(itemForItemIdentifier: DateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.datePicker, action: nil)!
+		}
 		else if (itemIdentifier == NSToolbarItem.Identifier.flexibleSpace) {
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 		}
@@ -97,11 +113,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 	
 	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID]
+		return [DateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID]
 	}
 	
 	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID]
+		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID]
 	}
 	
 	func windowDidBecomeMain(_ notification: Notification) {
@@ -130,6 +146,10 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		isTokenRequestInProgress = false
 	}
 	
+	@objc func dateChangeNotificationReceived(_ note: NSNotification) {
+		datePicker.dateValue = currentDate
+	}
+
 	func searchFieldDidStartSearching(_ sender: NSSearchField) {
 		// TODO
 		print("Starting to search for \(sender.stringValue)")
@@ -139,7 +159,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		// TODO
 	}
 	
-//	func window(_ window: NSWindow, willEncodeRestorableState state: NSCoder) {
+	@IBAction func changeDate(_ sender: NSDatePicker) {
+		currentDate = datePicker.dateValue
+	}
+	
+	//	func window(_ window: NSWindow, willEncodeRestorableState state: NSCoder) {
 //		// Use encodeRestorableState(with: <#T##NSCoder#>)
 //	}
 //

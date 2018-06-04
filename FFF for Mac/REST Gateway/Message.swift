@@ -75,6 +75,7 @@ class Message: NSObject {
 					let transaction = Transaction(dictionary: tDict)
 					transactions.append(transaction)
 				}
+				return transactions
 			}
 			return nil
         }
@@ -108,7 +109,7 @@ class Message: NSObject {
     
     var balanceSummary: BalanceSummary? {
         get {
-			if let balDict = content[ResponseKey.Message.rawValue] as? NSDictionary {
+			if let balDict = content[ResponseKey.BalanceSummary.rawValue] as? NSDictionary {
 				return BalanceSummary(dictionary: balDict)
 			}
 			return nil
@@ -117,7 +118,7 @@ class Message: NSObject {
     
     var categorySummary: CategorySummary? {
         get {
-			if let catDict = content[ResponseKey.Message.rawValue] as? NSDictionary {
+			if let catDict = content[ResponseKey.BalanceSummary.rawValue] as? NSDictionary {
 				return CategorySummary(dictionary: catDict)
 			}
 			return nil

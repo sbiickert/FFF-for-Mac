@@ -29,7 +29,7 @@ class TransactionWrapper :NSObject {
 	}
 }
 
-class Transaction {
+struct Transaction {
 	static var currencyFormatter: NumberFormatter = {
 		var formatter = NumberFormatter()
 		formatter.formatterBehavior = NumberFormatter.Behavior.behavior10_4
@@ -63,8 +63,7 @@ class Transaction {
 		}
 	}
 	
-	convenience init(dictionary: NSDictionary) {
-		self.init()
+	init(dictionary: NSDictionary) {
 		// The ID is returned as an integer string, Amount as decimal string, Date as date string
 		let tempID = Int(dictionary[TransactionKey.ID.rawValue] as! String)
 		self.id = tempID!

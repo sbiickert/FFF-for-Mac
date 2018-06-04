@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F4383E8B2041BDD0007357CE /* DayViewCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4383E892041BDD0007357CE /* DayViewCollectionViewItem.swift */; };
-		F4383E8C2041BDD0007357CE /* DayViewCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = F4383E8A2041BDD0007357CE /* DayViewCollectionViewItem.xib */; };
+		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
+		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
 		F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C302038B11200A0A64E /* MainWindowController.swift */; };
 		F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C342038B1E600A0A64E /* MainSplitViewController.swift */; };
 		F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C362038B29C00A0A64E /* DetailViewController.swift */; };
@@ -31,8 +31,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		F4383E892041BDD0007357CE /* DayViewCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayViewCollectionViewItem.swift; sourceTree = "<group>"; };
-		F4383E8A2041BDD0007357CE /* DayViewCollectionViewItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DayViewCollectionViewItem.xib; sourceTree = "<group>"; };
+		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
+		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		F4449C302038B11200A0A64E /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
 		F4449C342038B1E600A0A64E /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
 		F4449C362038B29C00A0A64E /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
@@ -78,6 +78,7 @@
 				F4449C41203B3D0200A0A64E /* LoginWindowController.swift */,
 				F4449C42203B3D0200A0A64E /* LoginWindowController.xib */,
 				F4728C35203E40FD0085C04F /* TransListViewController.swift */,
+				B89B029B20BF98C40071EDCD /* CategoryViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -86,9 +87,8 @@
 			isa = PBXGroup;
 			children = (
 				F4449C3F203A19D300A0A64E /* DetailTableCellView.swift */,
-				F4383E892041BDD0007357CE /* DayViewCollectionViewItem.swift */,
-				F4383E8A2041BDD0007357CE /* DayViewCollectionViewItem.xib */,
 				F46219CF20432BEA006E08B9 /* DayView.swift */,
+				B8F37FAE20BEEE8400AFE471 /* Grid.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -128,10 +128,10 @@
 		F4467F042033E15B0058D0D8 /* REST Gateway */ = {
 			isa = PBXGroup;
 			children = (
-				F4467F0C2033E1920058D0D8 /* Balance.swift */,
-				F4467F0B2033E1920058D0D8 /* Category.swift */,
 				F4467F0D2033E1920058D0D8 /* Gateway.swift */,
 				F4467F0A2033E1920058D0D8 /* Message.swift */,
+				F4467F0C2033E1920058D0D8 /* Balance.swift */,
+				F4467F0B2033E1920058D0D8 /* Category.swift */,
 			);
 			path = "REST Gateway";
 			sourceTree = "<group>";
@@ -219,7 +219,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4449C44203B3D0200A0A64E /* LoginWindowController.xib in Resources */,
-				F4383E8C2041BDD0007357CE /* DayViewCollectionViewItem.xib in Resources */,
 				F4467EDD2033DB690058D0D8 /* Assets.xcassets in Resources */,
 				F4467EE02033DB690058D0D8 /* Main.storyboard in Resources */,
 			);
@@ -235,6 +234,7 @@
 				F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */,
 				F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */,
 				F4467F102033E4710058D0D8 /* Balance.swift in Sources */,
+				B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */,
 				F4467F112033E4710058D0D8 /* Category.swift in Sources */,
 				F4467F122033E4710058D0D8 /* Gateway.swift in Sources */,
 				F4467F132033E4710058D0D8 /* Message.swift in Sources */,
@@ -243,12 +243,12 @@
 				F4467F092033E17D0058D0D8 /* TransactionType.swift in Sources */,
 				F4467ED92033DB690058D0D8 /* AppDelegate.swift in Sources */,
 				F4449C40203A19D300A0A64E /* DetailTableCellView.swift in Sources */,
-				F4383E8B2041BDD0007357CE /* DayViewCollectionViewItem.swift in Sources */,
 				F4728C36203E40FD0085C04F /* TransListViewController.swift in Sources */,
 				F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */,
 				F46219D020432BEA006E08B9 /* DayView.swift in Sources */,
 				F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */,
 				F4449C43203B3D0200A0A64E /* LoginWindowController.swift in Sources */,
+				B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
