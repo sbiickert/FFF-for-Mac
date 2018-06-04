@@ -24,6 +24,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			return (year:components.year!, month:components.month!, day:components.day!)
 		}
 	}
+	
+	func setDayOfMonth(_ day:Int) {
+		let units: Set<Calendar.Component> = [.month, .year, .day]
+		var components = Calendar.current.dateComponents(units, from: currentDate)
+		components.setValue(day, for: .day)
+		if let newDate = Calendar.current.date(from: components) {
+			currentDate = newDate
+		}
+	}
 
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		let defaults = UserDefaults.standard

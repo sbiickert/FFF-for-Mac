@@ -92,6 +92,8 @@ class CalendarViewController: NSViewController {
 			let dayView = DayView(frame:CGRect.zero)
 			self.calendarView.addSubview(dayView)
 			dayViews.append(dayView)
+			let clickRecognizer = NSClickGestureRecognizer(target: self, action: #selector(dayClicked(_:)))
+			dayView.addGestureRecognizer(clickRecognizer)
 		}
 	}
 	
@@ -164,6 +166,11 @@ class CalendarViewController: NSViewController {
 		}, completionHandler: {})
 	}
 	
+	@IBAction func dayClicked(_ gestureRecognizer: NSClickGestureRecognizer) {
+		if let dayView = gestureRecognizer.view as? DayView {
+			app.setDayOfMonth(dayView.dayOfMonth)
+		}
+	}
 
 	// MARK: Notifications
 	
