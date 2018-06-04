@@ -16,14 +16,19 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	@IBOutlet var spinner: NSProgressIndicator!
 	@IBOutlet var datePicker: NSDatePicker!
 	@IBOutlet var searchField: NSSearchField!
+	
+	private let titleDateFormatter = DateFormatter()
 
+	var app:AppDelegate {
+		get {
+			return NSApplication.shared.delegate as! AppDelegate
+		}
+	}
 	var currentDate: Date {
 		get {
-			let app = NSApplication.shared.delegate as! AppDelegate
 			return app.currentDate
 		}
 		set(value) {
-			let app = NSApplication.shared.delegate as! AppDelegate
 			app.currentDate = value
 		}
 	}
@@ -59,6 +64,8 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 											   object: nil)
 		
 		datePicker.dateValue = currentDate
+		titleDateFormatter.dateStyle = .long
+		window?.title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
     }
 	
 	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?) -> NSToolbarItem? {
@@ -148,6 +155,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	@objc func dateChangeNotificationReceived(_ note: NSNotification) {
 		datePicker.dateValue = currentDate
+		window?.title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
 	}
 
 	func searchFieldDidStartSearching(_ sender: NSSearchField) {

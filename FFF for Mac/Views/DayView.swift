@@ -45,7 +45,7 @@ class DayView: NSView {
 	}
 	
 	var inset: CGFloat {
-		return bounds.size.width * 0.05
+		return 4.0
 	}
 	var cornerRadius: CGFloat {
 		return bounds.size.width * 0.05
@@ -114,19 +114,21 @@ class DayView: NSView {
 		dayBackgroundPath.stroke()
 		
 		var insetRect = drawingRect.insetBy(dx: inset, dy: inset)
-		NSString(string: "\(dayOfMonth)").draw(in: insetRect, withAttributes: dayOfMonthTextAttributes)
-		
+		let dayAttrString = NSAttributedString(string: "\(dayOfMonth)", attributes: dayOfMonthTextAttributes)
+		dayAttrString.draw(in: insetRect)
+		var offsetY:CGFloat = dayAttrString.size().height
+
 		let currFormatter = NumberFormatter()
 		currFormatter.numberStyle = .currency
 
-		var incomeOffsetY:CGFloat = 0.0
 		if expenseAmount > 0 {
+			insetRect.origin.y -= offsetY
 			let attrString = NSAttributedString(string: currFormatter.string(from: expenseNumber) ?? "", attributes: expenseAmountTextAttributes)
 			attrString.draw(in: insetRect)
-			incomeOffsetY = attrString.size().height
+			offsetY = attrString.size().height
 		}
 		if incomeAmount > 0 {
-			insetRect.origin.y -= incomeOffsetY
+			insetRect.origin.y -= offsetY
 			let attrString = NSAttributedString(string: currFormatter.string(from: incomeNumber) ?? "", attributes: incomeAmountTextAttributes)
 			attrString.draw(in: insetRect)
 		}
