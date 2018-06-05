@@ -171,7 +171,7 @@ extension TransListViewController: NSTableViewDelegate {
 			cellIdentifier = CellID.Amount
 		}
 		else if tableColumn == tableView.tableColumns[2] {
-			text = t.transactionType!.description
+			text = t.transactionType!.emoji + " " + t.transactionType!.description
 			image = t.transactionType!.icon
 			cellIdentifier = CellID.TransactionType
 		}
