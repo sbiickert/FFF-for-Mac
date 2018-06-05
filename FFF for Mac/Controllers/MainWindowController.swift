@@ -17,6 +17,8 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	@IBOutlet var datePicker: NSDatePicker!
 	@IBOutlet var searchField: NSSearchField!
 	
+	private var tabViewController: NSTabViewController?
+	
 	private let titleDateFormatter = DateFormatter()
 
 	var app:AppDelegate {
@@ -66,6 +68,8 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		datePicker.dateValue = currentDate
 		titleDateFormatter.dateStyle = .long
 		window?.title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
+		
+		tabViewController = window?.contentViewController as? NSTabViewController
     }
 	
 	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?) -> NSToolbarItem? {
@@ -169,6 +173,22 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	@IBAction func changeDate(_ sender: NSDatePicker) {
 		currentDate = datePicker.dateValue
+	}
+	
+	@IBAction func showCalendarMenuItemSelected(_ sender: Any) {
+		tabViewController?.selectedTabViewItemIndex = 0
+	}
+	
+	@IBAction func showListMenuItemSelected(_ sender: Any) {
+		tabViewController?.selectedTabViewItemIndex = 1
+	}
+	
+	@IBAction func showCategoriesMenuItemSelected(_ sender: Any) {
+		tabViewController?.selectedTabViewItemIndex = 2
+	}
+	
+	@IBAction func showCheckBankMenuItemSelected(_ sender: Any) {
+		tabViewController?.selectedTabViewItemIndex = 3
 	}
 	
 	//	func window(_ window: NSWindow, willEncodeRestorableState state: NSCoder) {
