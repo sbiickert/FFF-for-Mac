@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class CalendarViewController: NSViewController {
+class CalendarViewController: FFFViewController {
 	struct Values {
 		static let insets = 8
 		static let normalBackgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
@@ -21,27 +21,12 @@ class CalendarViewController: NSViewController {
 	
 	private var monthBalance: BalanceSummary?
 	
-	private var app:AppDelegate {
-		get {
-			return NSApplication.shared.delegate as! AppDelegate
-		}
-	}
-	
 	static var monthFormatter: DateFormatter = {
 		let monthFormat = DateFormatter.dateFormat(fromTemplate: "MMMMYYYY", options: 0, locale: Locale.current)
 		var formatter = DateFormatter()
 		formatter.dateFormat = monthFormat
 		return formatter
 	}()
-
-	var currentDate:Date {
-		get {
-			return app.currentDate
-		}
-		set(value) {
-			app.currentDate = value
-		}
-	}
 	
 	private var dayOfWeekOffsetForTheFirst: Int {
 		get {
@@ -76,18 +61,6 @@ class CalendarViewController: NSViewController {
 	
 	override func viewDidLoad() {
         super.viewDidLoad()
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(loginNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-											   object: nil)
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(logoutNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LogoutResponse.rawValue),
-											   object: nil)
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(currentDateChanged(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.CurrentDateChanged.rawValue),
-											   object: nil)
 		for _ in 0..<grid.cellCount {
 			let dayView = DayView(frame:CGRect.zero)
 			self.calendarView.addSubview(dayView)
@@ -174,18 +147,26 @@ class CalendarViewController: NSViewController {
 
 	// MARK: Notifications
 	
-	@objc func loginNotificationReceived(_ notification: Notification) {
+	override func loginNotificationReceived(_ notification: Notification) {
 		requestSummaryForMonth(currentDate)
 	}
 	
-	@objc func logoutNotificationReceived(_ notification: Notification) {
+	override func logoutNotificationReceived(_ notification: Notification) {
 		monthBalance = nil
 		DispatchQueue.main.async {
 			self.updateView(forceUpdate: true)
 		}
 	}
 
-	@objc func currentDateChanged(_ notification: Notification) {
+	override func currentDateChanged(_ notification: Notification) {
+		requestSummaryForMonth(app.currentDate)
+	}
+
+	override func currentDayChanged(_ notification: Notification) {
+		updateView(forceUpdate: true)
+	}
+
+	override func dataUpdated(_ notification: Notification) {
 		requestSummaryForMonth(app.currentDate)
 	}
 

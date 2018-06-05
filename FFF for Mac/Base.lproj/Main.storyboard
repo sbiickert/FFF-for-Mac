@@ -850,7 +850,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="DateCellID" id="av3-sw-fcK">
-                                                            <rect key="frame" x="1" y="1" width="140" height="40"/>
+                                                            <rect key="frame" x="1" y="1" width="141" height="40"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="m0C-cn-hBi">

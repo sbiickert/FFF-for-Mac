@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
+		B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */; };
 		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
 		F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C302038B11200A0A64E /* MainWindowController.swift */; };
 		F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C342038B1E600A0A64E /* MainSplitViewController.swift */; };
@@ -32,6 +33,7 @@
 
 /* Begin PBXFileReference section */
 		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
+		B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFFViewController.swift; sourceTree = "<group>"; };
 		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		F4449C302038B11200A0A64E /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
 		F4449C342038B1E600A0A64E /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
@@ -73,12 +75,13 @@
 			children = (
 				F4449C302038B11200A0A64E /* MainWindowController.swift */,
 				F4449C342038B1E600A0A64E /* MainSplitViewController.swift */,
-				F4449C362038B29C00A0A64E /* DetailViewController.swift */,
+				B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */,
 				F4449C382038B2DE00A0A64E /* CalendarViewController.swift */,
-				F4449C41203B3D0200A0A64E /* LoginWindowController.swift */,
-				F4449C42203B3D0200A0A64E /* LoginWindowController.xib */,
+				F4449C362038B29C00A0A64E /* DetailViewController.swift */,
 				F4728C35203E40FD0085C04F /* TransListViewController.swift */,
 				B89B029B20BF98C40071EDCD /* CategoryViewController.swift */,
+				F4449C41203B3D0200A0A64E /* LoginWindowController.swift */,
+				F4449C42203B3D0200A0A64E /* LoginWindowController.xib */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -247,6 +250,7 @@
 				F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */,
 				F46219D020432BEA006E08B9 /* DayView.swift in Sources */,
 				F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */,
+				B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */,
 				F4449C43203B3D0200A0A64E /* LoginWindowController.swift in Sources */,
 				B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */,
 			);

@@ -62,7 +62,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(dateChangeNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.CurrentDateChanged.rawValue),
+											   name: NSNotification.Name(rawValue: Notifications.CurrentMonthChanged.rawValue),
 											   object: nil)
 		
 		datePicker.dateValue = currentDate

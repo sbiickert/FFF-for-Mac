@@ -8,29 +8,22 @@
 
 import Cocoa
 
-class CategoryViewController: NSViewController {
+class CategoryViewController: FFFViewController {
 	@IBOutlet weak var outlineView: NSOutlineView!
 	
 	private var categorySummary: CategorySummary?
 	
-	private var app:AppDelegate {
-		get {
-			return NSApplication.shared.delegate as! AppDelegate
-		}
-	}
-	private var currentDate = Date() {
-		didSet {
-			if Gateway.shared.isLoggedIn {
-				let components = app.currentDateComponents
-				Gateway.shared.getCategorySummary(forYear: components.year, month: components.month) {[weak self] message in
-					if var cs = message.categorySummary {
-						Gateway.shared.getTransactions(forYear: components.year, month: components.month) { [weak self] message in
-							if let transactions = message.transactions {
-								cs.assignTransactions(transactions)
-								self?.categorySummary = cs
-								DispatchQueue.main.async{
-									self?.outlineView.reloadData()
-								}
+	private func requestSummary() {
+		if Gateway.shared.isLoggedIn {
+			let components = app.currentDateComponents
+			Gateway.shared.getCategorySummary(forYear: components.year, month: components.month) {[weak self] message in
+				if var cs = message.categorySummary {
+					Gateway.shared.getTransactions(forYear: components.year, month: components.month) { [weak self] message in
+						if let transactions = message.transactions {
+							cs.assignTransactions(transactions)
+							self?.categorySummary = cs
+							DispatchQueue.main.async{
+								self?.outlineView.reloadData()
 							}
 						}
 					}
@@ -40,17 +33,17 @@ class CategoryViewController: NSViewController {
 	}
 	
 	// MARK: Notifications
-	@objc func loginNotificationReceived(_ note: NSNotification) {
-		self.currentDate = app.currentDate
+	override func loginNotificationReceived(_ note: Notification) {
+		self.requestSummary()
 	}
 	
-	@objc func logoutNotificationReceived(_ note: NSNotification) {
+	override func logoutNotificationReceived(_ note: Notification) {
 		self.categorySummary = nil
 		outlineView.reloadData()
 	}
 	
-	@objc func dateChangeNotificationReceived(_ note: NSNotification) {
-		currentDate = app.currentDate
+	override func currentDateChanged(_ notification: Notification) {
+		self.requestSummary()
 	}
 
     override func viewDidLoad() {
@@ -58,25 +51,10 @@ class CategoryViewController: NSViewController {
         // Do view setup here.
 		outlineView.delegate = self
 		outlineView.dataSource = self
-	
-		// Subscribe to notifications on date change and login/logout
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(loginNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-											   object: nil)
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(logoutNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-											   object: nil)
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(dateChangeNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.CurrentDateChanged.rawValue),
-											   object: nil)
 	}
 	
 	override func viewWillAppear() {
 		super.viewWillAppear()
-		currentDate = app.currentDate
 	}
 }
 
@@ -181,24 +159,4 @@ extension CategoryViewController: NSOutlineViewDelegate {
 
 		return view
 	}
-//	func outlineViewItemWillExpand(_ notification: Notification) {
-//		print(notification)
-//		if let cat = notification.userInfo!["NSObject"] as? Category {
-//			let outlineRow = 0 // self.outlineView.row(forItem: cat)
-//			// Need to fetch the transactions for this category
-//			let components = app.currentDateComponents
-//			let tt = TransactionType.transactionType(forCode: cat.transactionTypeID)
-//			Gateway.shared.getTransactions(forYear: components.year, month: components.month, limitedTo: tt) { [weak self] message in
-//				if let transactions = message.transactions {
-//					self?.categorySummary?.assignTransactions(transactions)
-//					DispatchQueue.main.async {
-//						if let categoryToUpdate = self?.outlineView.item(atRow: outlineRow) {
-//							//self?.outlineView.reloadData()
-//							self?.outlineView.reloadItem(categoryToUpdate, reloadChildren: true)
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
 }

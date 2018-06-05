@@ -13,12 +13,10 @@ enum NotificationKeys: String {
 }
 
 enum Notifications: String {
-	// case CurrentDateRequest = "fff_current_date_request"
-	case CurrentDateChanged = "fff_current_date_changed"
+	case CurrentMonthChanged = "fff_current_month_changed"
+	case CurrentDayChanged = "fff_current_day_changed"
 	case DataUpdated = "fff_data_updated"
 	
 	case LoginResponse = "fff_login_response"
 	case LogoutResponse = "fff_logout_response"
-	
-	case ShowTransactionsForDay = "fff_show_transactions_for_day"
 }

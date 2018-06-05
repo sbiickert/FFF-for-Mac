@@ -8,15 +8,11 @@
 
 import Cocoa
 
-class TransListViewController: NSViewController {
+class TransListViewController: FFFViewController {
 	@IBOutlet weak var tableView: NSTableView!
 	
 	private var transactions = [Transaction]()
-	private var app:AppDelegate {
-		get {
-			return NSApplication.shared.delegate as! AppDelegate
-		}
-	}
+
 	private func requestTransactions() {
 		if Gateway.shared.isLoggedIn {
 			let components = app.currentDateComponents
@@ -32,16 +28,16 @@ class TransListViewController: NSViewController {
 	}
 	
 	// MARK: Notifications
-	@objc func loginNotificationReceived(_ note: NSNotification) {
+	override func loginNotificationReceived(_ note: Notification) {
 		requestTransactions()
 	}
 	
-	@objc func logoutNotificationReceived(_ note: NSNotification) {
+	override func logoutNotificationReceived(_ note: Notification) {
 		self.transactions.removeAll()
 		tableView.reloadData()
 	}
 	
-	@objc func dateChangeNotificationReceived(_ note: NSNotification) {
+	override func currentDateChanged(_ notification: Notification) {
 		requestTransactions()
 	}
 	
@@ -66,20 +62,6 @@ class TransListViewController: NSViewController {
 		tableView.tableColumns[1].sortDescriptorPrototype = descriptorAmount
 		tableView.tableColumns[2].sortDescriptorPrototype = descriptorType
 		tableView.tableColumns[3].sortDescriptorPrototype = descriptorDesc
-
-        // Subscribe to notifications on date change and login/logout
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(loginNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-											   object: nil)
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(logoutNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-											   object: nil)
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(dateChangeNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.CurrentDateChanged.rawValue),
-											   object: nil)
     }
 	
 	override func viewWillAppear() {
