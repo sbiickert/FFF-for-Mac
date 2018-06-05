@@ -190,17 +190,23 @@ class Gateway: NSObject, URLSessionDelegate {
 
 	func getTransactions(forYear year:Int, month:Int,
 						 callback: @escaping (Message) -> Void) {
-		self.getTransactions(forYear: year, month: month, limitedTo: nil, callback: callback)
+		self.getTransactions(forYear: year, month: month, day:-1, limitedTo: nil, callback: callback)
 	}
-	
-	func getTransactions(forYear year:Int, month:Int, limitedTo tt:TransactionType?,
+
+	func getTransactions(forYear year:Int, month:Int, day:Int,
+						 callback: @escaping (Message) -> Void) {
+		self.getTransactions(forYear: year, month: month, day: day, limitedTo: nil, callback: callback)
+	}
+
+	func getTransactions(forYear year:Int, month:Int, day: Int, limitedTo tt:TransactionType?,
 						 callback: @escaping (Message) -> Void) {
 		// url/transactions/year/month/day/json?token=
-		var fullUrl = String(format: "%@/%@/%@/%@/-1/json?token=%@",
+		var fullUrl = String(format: "%@/%@/%@/%@/%@/json?token=%@",
 							 self.url,
 							 RestResource.TransactionsResource.rawValue,
 							 String(year),
 							 String(month),
+							 String(day),
 							 self.token!.tokenString)
 		if tt != nil {
 			fullUrl += "&tt=" + String(tt!.code)

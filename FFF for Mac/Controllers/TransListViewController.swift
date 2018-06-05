@@ -17,16 +17,14 @@ class TransListViewController: NSViewController {
 			return NSApplication.shared.delegate as! AppDelegate
 		}
 	}
-	private var currentDate = Date() {
-		didSet {
-			if Gateway.shared.isLoggedIn {
-				let components = app.currentDateComponents
-				Gateway.shared.getTransactions(forYear:components.year, month: components.month) {[weak self] message in
-					if let t = message.transactions {
-						self?.transactions = t
-						DispatchQueue.main.async{
-							self?.tableView.reloadData()
-						}
+	private func requestTransactions() {
+		if Gateway.shared.isLoggedIn {
+			let components = app.currentDateComponents
+			Gateway.shared.getTransactions(forYear:components.year, month: components.month) {[weak self] message in
+				if let t = message.transactions {
+					self?.transactions = t
+					DispatchQueue.main.async{
+						self?.tableView.reloadData()
 					}
 				}
 			}
@@ -35,7 +33,7 @@ class TransListViewController: NSViewController {
 	
 	// MARK: Notifications
 	@objc func loginNotificationReceived(_ note: NSNotification) {
-		self.currentDate = app.currentDate
+		requestTransactions()
 	}
 	
 	@objc func logoutNotificationReceived(_ note: NSNotification) {
@@ -44,7 +42,7 @@ class TransListViewController: NSViewController {
 	}
 	
 	@objc func dateChangeNotificationReceived(_ note: NSNotification) {
-		currentDate = app.currentDate
+		requestTransactions()
 	}
 	
 	// MARK: ViewController
@@ -86,10 +84,6 @@ class TransListViewController: NSViewController {
 	
 	override func viewWillAppear() {
 		super.viewWillAppear()
-
-		//print("TransListViewController viewWillAppear")
-
-		currentDate = app.currentDate
 	}
 }
 
