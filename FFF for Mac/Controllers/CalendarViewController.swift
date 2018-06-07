@@ -18,8 +18,15 @@ class CalendarViewController: FFFViewController {
 	@IBOutlet weak var calendarView: NSView!
 	private var grid = Grid(layout: Grid.Layout.dimensions(rowCount: 6, columnCount: 7))
 	private var dayViews = [DayView]()
-	
 	private var monthBalance: BalanceSummary?
+
+	@IBOutlet weak var sundayLabel: NSTextField!
+	@IBOutlet weak var mondayLabel: NSTextField!
+	@IBOutlet weak var tuesdayLabel: NSTextField!
+	@IBOutlet weak var wednesdayLabel: NSTextField!
+	@IBOutlet weak var thursdayLabel: NSTextField!
+	@IBOutlet weak var fridayLabel: NSTextField!
+	@IBOutlet weak var saturdayLabel: NSTextField!
 	
 	static var monthFormatter: DateFormatter = {
 		let monthFormat = DateFormatter.dateFormat(fromTemplate: "MMMMYYYY", options: 0, locale: Locale.current)
@@ -68,6 +75,27 @@ class CalendarViewController: FFFViewController {
 			let clickRecognizer = NSClickGestureRecognizer(target: self, action: #selector(dayClicked(_:)))
 			dayView.addGestureRecognizer(clickRecognizer)
 		}
+		repointCenteringConstraint(for: sundayLabel, to: dayViews[0])
+		repointCenteringConstraint(for: mondayLabel, to: dayViews[1])
+		repointCenteringConstraint(for: tuesdayLabel, to: dayViews[2])
+		repointCenteringConstraint(for: wednesdayLabel, to: dayViews[3])
+		repointCenteringConstraint(for: thursdayLabel, to: dayViews[4])
+		repointCenteringConstraint(for: fridayLabel, to: dayViews[5])
+		repointCenteringConstraint(for: saturdayLabel, to: dayViews[6])
+		view.needsLayout = true
+	}
+	
+	private func repointCenteringConstraint(for item:NSView, to target:NSView) {
+		var remove = [NSLayoutConstraint]()
+		var add = [NSLayoutConstraint]()
+		
+		let constraints = view.constraints.filter {$0.firstItem as! NSView == item && $0.firstAttribute == NSLayoutConstraint.Attribute.centerX}
+		if let constraint = constraints.first {
+			remove.append(constraint)
+			add.append(NSLayoutConstraint(item: item, attribute: constraint.firstAttribute, relatedBy: constraint.relation, toItem: target, attribute: constraint.secondAttribute, multiplier: constraint.multiplier, constant: constraint.constant))
+		}
+		view.removeConstraints(remove)
+		view.addConstraints(add)
 	}
 	
 	override func viewWillAppear() {

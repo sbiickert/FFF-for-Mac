@@ -1039,101 +1039,96 @@
                         <rect key="frame" x="0.0" y="0.0" width="862" height="665"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nBl-pn-HFD">
+                                <rect key="frame" x="405" y="628" width="53" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Sunday" id="VeR-4p-ULT">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nQA-RC-NaX">
+                                <rect key="frame" x="403" y="628" width="57" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Monday" id="smQ-fa-hIi">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OT3-iv-rA8">
+                                <rect key="frame" x="402" y="628" width="59" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Tuesday" id="hcN-i6-FYI">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7Sn-Bk-J2E">
+                                <rect key="frame" x="392" y="628" width="79" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Wednesday" id="zGb-lg-HaZ">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="doU-mx-cv9">
+                                <rect key="frame" x="399" y="628" width="65" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Thursday" id="csw-9Q-iYy">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JKi-Ic-Hab">
+                                <rect key="frame" x="408" y="628" width="46" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Friday" id="ugK-pH-Tfe">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dbu-nN-TaV">
+                                <rect key="frame" x="400" y="628" width="62" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Saturday" id="BXE-2J-MHY">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="2eb-kr-kc8">
                                 <rect key="frame" x="0.0" y="0.0" width="862" height="620"/>
                             </customView>
-                            <stackView distribution="fillEqually" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="H0Y-4b-LYJ">
-                                <rect key="frame" x="4" y="628" width="854" height="17"/>
-                                <subviews>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nBl-pn-HFD">
-                                        <rect key="frame" x="-2" y="0.0" width="119" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Sunday" id="VeR-4p-ULT">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nQA-RC-NaX">
-                                        <rect key="frame" x="121" y="0.0" width="119" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Monday" id="smQ-fa-hIi">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="OT3-iv-rA8">
-                                        <rect key="frame" x="244" y="0.0" width="119" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Tuesday" id="hcN-i6-FYI">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7Sn-Bk-J2E">
-                                        <rect key="frame" x="367" y="0.0" width="120" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Wednesday" id="zGb-lg-HaZ">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="doU-mx-cv9">
-                                        <rect key="frame" x="491" y="0.0" width="119" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Thursday" id="csw-9Q-iYy">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JKi-Ic-Hab">
-                                        <rect key="frame" x="614" y="0.0" width="119" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Friday" id="ugK-pH-Tfe">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="dbu-nN-TaV">
-                                        <rect key="frame" x="737" y="0.0" width="119" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Saturday" id="BXE-2J-MHY">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                </subviews>
-                                <visibilityPriorities>
-                                    <integer value="1000"/>
-                                    <integer value="1000"/>
-                                    <integer value="1000"/>
-                                    <integer value="1000"/>
-                                    <integer value="1000"/>
-                                    <integer value="1000"/>
-                                    <integer value="1000"/>
-                                </visibilityPriorities>
-                                <customSpacing>
-                                    <real value="3.4028234663852886e+38"/>
-                                    <real value="3.4028234663852886e+38"/>
-                                    <real value="3.4028234663852886e+38"/>
-                                    <real value="3.4028234663852886e+38"/>
-                                    <real value="3.4028234663852886e+38"/>
-                                    <real value="3.4028234663852886e+38"/>
-                                    <real value="3.4028234663852886e+38"/>
-                                </customSpacing>
-                            </stackView>
                         </subviews>
                         <constraints>
-                            <constraint firstItem="2eb-kr-kc8" firstAttribute="top" secondItem="H0Y-4b-LYJ" secondAttribute="bottom" constant="8" id="3Wn-im-K28"/>
-                            <constraint firstAttribute="trailing" secondItem="H0Y-4b-LYJ" secondAttribute="trailing" constant="4" id="4aN-sP-Rnk"/>
-                            <constraint firstItem="H0Y-4b-LYJ" firstAttribute="leading" secondItem="Ce4-uB-oOd" secondAttribute="leading" constant="4" id="BIN-B0-e7U"/>
-                            <constraint firstAttribute="bottom" secondItem="2eb-kr-kc8" secondAttribute="bottom" id="aNO-rn-dXW"/>
-                            <constraint firstItem="2eb-kr-kc8" firstAttribute="leading" secondItem="Ce4-uB-oOd" secondAttribute="leading" id="bXZ-qy-jSH"/>
-                            <constraint firstItem="H0Y-4b-LYJ" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="jQH-qr-CwE"/>
-                            <constraint firstAttribute="trailing" secondItem="2eb-kr-kc8" secondAttribute="trailing" id="vXv-To-zYW"/>
+                            <constraint firstItem="nBl-pn-HFD" firstAttribute="centerX" secondItem="2eb-kr-kc8" secondAttribute="centerX" id="2FC-7m-BX5"/>
+                            <constraint firstItem="7Sn-Bk-J2E" firstAttribute="centerX" secondItem="2eb-kr-kc8" secondAttribute="centerX" id="9rx-Sw-fUh"/>
+                            <constraint firstItem="7Sn-Bk-J2E" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="Dqe-lg-tRO"/>
+                            <constraint firstItem="2eb-kr-kc8" firstAttribute="leading" secondItem="Ce4-uB-oOd" secondAttribute="leading" id="FeU-hI-Ym4"/>
+                            <constraint firstItem="JKi-Ic-Hab" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="H7C-NQ-0Lu"/>
+                            <constraint firstItem="nQA-RC-NaX" firstAttribute="centerX" secondItem="2eb-kr-kc8" secondAttribute="centerX" id="Pzd-e4-nB9"/>
+                            <constraint firstItem="nQA-RC-NaX" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="RJQ-rA-VFs"/>
+                            <constraint firstItem="doU-mx-cv9" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="Wmi-Ws-HzR"/>
+                            <constraint firstItem="doU-mx-cv9" firstAttribute="centerX" secondItem="2eb-kr-kc8" secondAttribute="centerX" id="YVt-hT-vo8"/>
+                            <constraint firstItem="dbu-nN-TaV" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="ZbM-gR-rmO"/>
+                            <constraint firstAttribute="trailing" secondItem="2eb-kr-kc8" secondAttribute="trailing" id="hBO-wT-sGT"/>
+                            <constraint firstItem="JKi-Ic-Hab" firstAttribute="centerX" secondItem="2eb-kr-kc8" secondAttribute="centerX" id="ipU-qy-M7B"/>
+                            <constraint firstItem="nBl-pn-HFD" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="jTx-KH-tmm"/>
+                            <constraint firstItem="OT3-iv-rA8" firstAttribute="centerX" secondItem="2eb-kr-kc8" secondAttribute="centerX" id="kZN-iK-tN9"/>
+                            <constraint firstItem="2eb-kr-kc8" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="45" id="pyg-af-tMh"/>
+                            <constraint firstAttribute="bottom" secondItem="2eb-kr-kc8" secondAttribute="bottom" id="qNb-El-4BP"/>
+                            <constraint firstItem="dbu-nN-TaV" firstAttribute="centerX" secondItem="2eb-kr-kc8" secondAttribute="centerX" id="uGz-51-SPM"/>
+                            <constraint firstItem="OT3-iv-rA8" firstAttribute="top" secondItem="Ce4-uB-oOd" secondAttribute="top" constant="20" id="zM4-YD-hGp"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="calendarView" destination="2eb-kr-kc8" id="Ymt-1x-nqH"/>
+                        <outlet property="fridayLabel" destination="JKi-Ic-Hab" id="Vcv-nD-oE3"/>
+                        <outlet property="mondayLabel" destination="nQA-RC-NaX" id="VL7-mD-2Nt"/>
+                        <outlet property="saturdayLabel" destination="dbu-nN-TaV" id="erG-Os-OFi"/>
+                        <outlet property="sundayLabel" destination="nBl-pn-HFD" id="ONL-rn-irC"/>
+                        <outlet property="thursdayLabel" destination="doU-mx-cv9" id="U4B-Ht-oba"/>
+                        <outlet property="tuesdayLabel" destination="OT3-iv-rA8" id="iDe-mP-hD8"/>
+                        <outlet property="wednesdayLabel" destination="7Sn-Bk-J2E" id="k4Q-F5-yle"/>
                     </connections>
                 </viewController>
                 <customObject id="0QM-4q-xoO" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
