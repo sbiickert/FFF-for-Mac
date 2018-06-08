@@ -162,6 +162,11 @@ DQ
                             <real value="3.4028234663852886e+38"/>
                         </customSpacing>
                     </stackView>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kJq-sL-4p3">
+                        <rect key="frame" x="20" y="20" width="81" height="81"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="Frog" id="fuB-1l-6A8"/>
+                    </imageView>
                 </subviews>
             </view>
             <connections>
@@ -170,4 +175,7 @@ DQ
             <point key="canvasLocation" x="132" y="87.5"/>
         </window>
     </objects>
+    <resources>
+        <image name="Frog" width="435" height="432"/>
+    </resources>
 </document>
