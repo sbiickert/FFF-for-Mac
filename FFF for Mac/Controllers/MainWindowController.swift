@@ -12,10 +12,12 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	private let SpinnerToolbarItemID = NSToolbarItem.Identifier(rawValue: "Spinner")
 	private let SearchToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Search")
 	private let DateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Date")
+	private let AddToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Add")
 
 	@IBOutlet var spinner: NSProgressIndicator!
 	@IBOutlet var datePicker: NSDatePicker!
 	@IBOutlet var searchField: NSSearchField!
+	@IBOutlet var addButton: NSButton!
 	
 	private var tabViewController: NSTabViewController?
 	
@@ -64,7 +66,12 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 											   selector: #selector(dateChangeNotificationReceived(_:)),
 											   name: NSNotification.Name(rawValue: Notifications.CurrentMonthChanged.rawValue),
 											   object: nil)
-		
+
+		NotificationCenter.default.addObserver(self,
+											   selector: #selector(transactionEditRequest(_:)),
+											   name: NSNotification.Name(rawValue: Notifications.ShowEditForm.rawValue),
+											   object: nil)
+
 		datePicker.dateValue = currentDate
 		titleDateFormatter.dateStyle = .long
 		window?.title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
@@ -116,6 +123,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		else if (itemIdentifier == DateToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: DateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.datePicker, action: nil)!
 		}
+		else if (itemIdentifier == AddToolbarItemID) {
+			toolbarItem = customToolbarItem(itemForItemIdentifier: AddToolbarItemID, label: "Add Transaction", paletteLabel: "Add", toolTip: "Create a new transaction", target: self, itemContent: self.addButton, action: nil)!
+		}
 		else if (itemIdentifier == NSToolbarItem.Identifier.flexibleSpace) {
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 		}
@@ -124,11 +134,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 	
 	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [DateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID]
+		return [DateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID]
 	}
 	
 	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID]
+		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID, AddToolbarItemID]
 	}
 	
 	func windowDidBecomeMain(_ notification: Notification) {
@@ -137,16 +147,17 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 			// Present modal sheet
 			let loginWindowController = LoginWindowController(windowNibName: NSNib.Name("LoginWindowController"))
 			window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
-				// User pressed OK. Submit credentials. Dismiss sheet if successful.
-				// Store form values in defaults
-				let u = loginWindowController.usernameTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
-				let p = loginWindowController.passwordTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
-				Gateway.setStoredCredentials(u, password: p)
+				if responseCode == .stop {
+					// User pressed OK. Submit credentials. Dismiss sheet if successful.
+					// Store form values in defaults
+					let u = loginWindowController.usernameTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
+					let p = loginWindowController.passwordTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
+					Gateway.setStoredCredentials(u, password: p)
 
-				// Send off the request to the Gateway to log in
-				Gateway.shared.login()
-				self.isTokenRequestInProgress = true
-				
+					// Send off the request to the Gateway to log in
+					Gateway.shared.login()
+					self.isTokenRequestInProgress = true
+				} // Quit is .abort
 				loginWindowController.window?.close()
 			})
 		}
@@ -160,6 +171,45 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	@objc func dateChangeNotificationReceived(_ note: NSNotification) {
 		datePicker.dateValue = currentDate
 		window?.title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
+	}
+	
+	@objc func transactionEditRequest(_ note: NSNotification) {
+		if let info = note.userInfo as? Dictionary<String, Transaction> {
+			let transaction = info.first?.value
+			showEditForm(for: transaction)
+		}
+	}
+	
+	private func showEditForm(for transaction:Transaction?) {
+		// Present modal sheet
+		let editWindowController = EditTransactionWindowController(windowNibName: NSNib.Name("EditTransactionWindowController"))
+		editWindowController.transaction = transaction
+		window?.beginSheet(editWindowController.window!, completionHandler: { responseCode in
+			if responseCode == .stop {
+				// User pressed OK or Delete. Submit update/insert/delete.
+				if let t = editWindowController.transaction {
+					switch editWindowController.result {
+					case .Create:
+						Gateway.shared.createTransaction(transaction: t, callback: self.editCallback)
+					case .Update:
+						Gateway.shared.updateTransaction(transaction: t, callback: self.editCallback)
+					case .Delete:
+						Gateway.shared.deleteTransaction(transaction: t, callback: self.editCallback)
+					}
+				}
+			} // Cancel is .abort
+			
+			editWindowController.window?.close()
+		})
+	}
+	
+	private func editCallback(message: Message) {
+		if message.isError {
+			print(message)
+		}
+		else {
+			NotificationCenter.default.post(name: NSNotification.Name(Notifications.DataUpdated.rawValue), object: nil)
+		}
 	}
 
 	func searchFieldDidStartSearching(_ sender: NSSearchField) {
@@ -175,10 +225,18 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		currentDate = datePicker.dateValue
 	}
 	
+	@IBAction func addTransaction(_ sender: NSButton) {
+		showEditForm(for: nil)
+	}
+	
+	@IBAction func todayMenuItemSelected(_ sender: Any) {
+		app.currentDate = Date()
+	}
+	
 	@IBAction func showCalendarMenuItemSelected(_ sender: Any) {
 		tabViewController?.selectedTabViewItemIndex = 0
 	}
-	
+
 	@IBAction func showListMenuItemSelected(_ sender: Any) {
 		tabViewController?.selectedTabViewItemIndex = 1
 	}

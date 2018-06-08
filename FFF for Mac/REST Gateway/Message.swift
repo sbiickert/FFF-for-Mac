@@ -43,14 +43,16 @@ class Message: NSObject {
         }
     }
 	
-	private let createdTransactionIDRegEx = "created transaction (\\d+)"
+	private let createdTransactionIDRegEx = try! NSRegularExpression(pattern: "\\d+", options: .caseInsensitive)
 	var createdTransactionID: Int? {
 		get {
-			let searchString = content[ResponseKey.Message.rawValue] as? String
-			if let range = searchString?.range(of:createdTransactionIDRegEx,
-											  options: .regularExpression) {
-				let idString = Int(searchString![range])
-				return idString
+			if let searchString = content[ResponseKey.Message.rawValue] as? String {
+				let results = createdTransactionIDRegEx.matches(in: searchString, range: NSRange(searchString.startIndex..., in: searchString))
+			
+				let matches = results.map { String(searchString[Range($0.range, in: searchString)!]) }
+				if let idString = matches.first {
+					return Int(idString)
+				}
 			}
 			return nil
 		}

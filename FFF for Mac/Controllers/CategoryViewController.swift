@@ -45,14 +45,31 @@ class CategoryViewController: FFFViewController {
 	override func currentDateChanged(_ notification: Notification) {
 		self.requestSummary()
 	}
+	
+	override func dataUpdated(_ notification: Notification) {
+		self.requestSummary()
+	}
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
 		outlineView.delegate = self
 		outlineView.dataSource = self
+		
+		// Double-click to edit
+		outlineView.target = self
+		outlineView.doubleAction = #selector(doubleAction(_:))
 	}
 	
+	@objc func doubleAction(_ outlineView:NSOutlineView) {
+		let item = outlineView.item(atRow: outlineView.clickedRow)
+		if let t = item as? Transaction {
+			NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+											object: self,
+											userInfo: ["t": t])
+		}
+	}
+
 	override func viewWillAppear() {
 		super.viewWillAppear()
 	}
@@ -115,6 +132,8 @@ extension CategoryViewController: NSOutlineViewDelegate {
 		let pctFormatter = NumberFormatter()
 		pctFormatter.numberStyle = .percent
 		
+		var tagAsIncome: Bool = false
+		
 		if let cat = item as? Category {
 			if tableColumn == outlineView.tableColumns[0] {
 				let emoji = TransactionType.transactionType(forCode: cat.transactionTypeID)?.emoji ?? "💥"
@@ -125,6 +144,7 @@ extension CategoryViewController: NSOutlineViewDelegate {
 			else if tableColumn == outlineView.tableColumns[1] {
 				text = currFormatter.string(from: NSNumber(value: cat.amount))!
 				cellIdentifier = CellID.Amount
+				tagAsIncome = cat.isExpense == false
 			}
 			else if tableColumn == outlineView.tableColumns[2] {
 				text = pctFormatter.string(from: NSNumber(value: cat.percent))!
@@ -139,6 +159,7 @@ extension CategoryViewController: NSOutlineViewDelegate {
 			else if tableColumn == outlineView.tableColumns[1] {
 				text = currFormatter.string(from: NSNumber(value: t.amount))!
 				cellIdentifier = CellID.Amount
+				tagAsIncome = t.transactionType!.isExpense == false
 			}
 			else if tableColumn == outlineView.tableColumns[2] {
 				text = ""
@@ -151,7 +172,12 @@ extension CategoryViewController: NSOutlineViewDelegate {
 		view = outlineView.makeView(withIdentifier: id, owner: self) as? NSTableCellView
 		if let textField = view?.textField {
 			textField.stringValue = text
-			//textField.sizeToFit()
+			if tagAsIncome {
+				textField.textColor = NSColor.blue
+			}
+			else {
+				textField.textColor = NSColor.textColor
+			}
 		}
 		if let imageView = view?.imageView {
 			imageView.image = image

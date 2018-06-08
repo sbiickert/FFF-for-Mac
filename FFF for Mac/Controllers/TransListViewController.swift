@@ -41,6 +41,10 @@ class TransListViewController: FFFViewController {
 		requestTransactions()
 	}
 	
+	override func dataUpdated(_ notification: Notification) {
+		requestTransactions()
+	}
+	
 	// MARK: ViewController
 
     override func viewDidLoad() {
@@ -62,8 +66,19 @@ class TransListViewController: FFFViewController {
 		tableView.tableColumns[1].sortDescriptorPrototype = descriptorAmount
 		tableView.tableColumns[2].sortDescriptorPrototype = descriptorType
 		tableView.tableColumns[3].sortDescriptorPrototype = descriptorDesc
-    }
+		
+		// Double-click to edit
+		tableView.target = self
+		tableView.doubleAction = #selector(doubleAction(_:))
+	}
 	
+	@objc func doubleAction(_ tableView:NSTableView) {
+		let t = transactions[tableView.clickedRow]
+		NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+										object: self,
+										userInfo: ["t": t])
+	}
+
 	override func viewWillAppear() {
 		super.viewWillAppear()
 	}

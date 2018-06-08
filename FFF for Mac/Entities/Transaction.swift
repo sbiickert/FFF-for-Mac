@@ -63,19 +63,21 @@ struct Transaction {
 		}
 	}
 	
-	init(dictionary: NSDictionary) {
-		// The ID is returned as an integer string, Amount as decimal string, Date as date string
-		let tempID = Int(dictionary[TransactionKey.ID.rawValue] as! String)
-		self.id = tempID!
-		let tempAmount = Float(dictionary[TransactionKey.Amount.rawValue] as! String)
-		self.amount = tempAmount!
-		let dateString = dictionary[TransactionKey.Date.rawValue] as! String
-		self.date = DataFormatter.dateFromFFFDateString(dateString)!
-		self.description = dictionary[TransactionKey.Description.rawValue] as? String
-		self.isNew = false
-		
-		let tempTTDict = dictionary[TransactionKey.TransactionType.rawValue] as! NSDictionary
-		self.transactionType = TransactionType(dictionary: tempTTDict)
+	init(dictionary: NSDictionary? = nil) {
+		if let dict = dictionary {
+			// The ID is returned as an integer string, Amount as decimal string, Date as date string
+			let tempID = Int(dict[TransactionKey.ID.rawValue] as! String)
+			self.id = tempID!
+			let tempAmount = Float(dict[TransactionKey.Amount.rawValue] as! String)
+			self.amount = tempAmount!
+			let dateString = dict[TransactionKey.Date.rawValue] as! String
+			self.date = DataFormatter.dateFromFFFDateString(dateString)!
+			self.description = dict[TransactionKey.Description.rawValue] as? String
+			self.isNew = false
+			
+			let tempTTDict = dict[TransactionKey.TransactionType.rawValue] as! NSDictionary
+			self.transactionType = TransactionType(dictionary: tempTTDict)
+		}
 	}
 	
 }

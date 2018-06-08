@@ -114,6 +114,9 @@ class CalendarViewController: FFFViewController {
 			// Animate day views to grid
 			for (index, dayView) in dayViews.enumerated() {
 				let dayOfMonth = index - dayOfWeekOffsetForTheFirst + 1 // +1 because we don't start with day zero
+				dayView.dayOfMonth = -1
+				dayView.expenseAmount = 0.0
+				dayView.incomeAmount = 0.0
 				if dayOfMonth >= 1 && dayOfMonth <= numberOfDaysInCurrentMonth {
 					dayView.dayOfMonth = dayOfMonth
 					if dayOfMonth == components.day {
@@ -122,15 +125,14 @@ class CalendarViewController: FFFViewController {
 					else {
 						dayView.backgroundColor = Values.normalBackgroundColor
 					}
-					if let bal = monthBalance, let dayBal = bal.dayBalances[dayOfMonth] {
-						dayView.expenseAmount = dayBal.expense.doubleValue
-						dayView.incomeAmount = dayBal.income.doubleValue
+					if let bal = monthBalance {
+						if dayOfMonth < bal.dayBalances.count {
+							if let dayBal = bal.dayBalances[dayOfMonth] {
+								dayView.expenseAmount = dayBal.expense.doubleValue
+								dayView.incomeAmount = dayBal.income.doubleValue
+							}
+						}
 					}
-				}
-				else {
-					dayView.dayOfMonth = -1
-					dayView.expenseAmount = 0.0
-					dayView.incomeAmount = 0.0
 				}
 				if let frame = getFrame(for: dayView) {
 					relocateDayView(dayView, to: frame)

@@ -19,4 +19,6 @@ enum Notifications: String {
 	
 	case LoginResponse = "fff_login_response"
 	case LogoutResponse = "fff_logout_response"
+	
+	case ShowEditForm = "fff_show_edit_form"
 }

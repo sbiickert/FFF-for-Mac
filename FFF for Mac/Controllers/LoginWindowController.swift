@@ -13,6 +13,7 @@ class LoginWindowController: NSWindowController {
 	@IBOutlet weak var usernameTextField: NSTextField!
 	@IBOutlet weak var passwordTextField: NSSecureTextField!
 	@IBOutlet weak var okButton: NSButton!
+	@IBOutlet weak var quitButton: NSButton!
 	@IBOutlet weak var spinner: NSProgressIndicator!
 	
 	@IBAction func textChanged(_ sender: NSTextField) {
@@ -22,6 +23,11 @@ class LoginWindowController: NSWindowController {
 	@IBAction func submit(_ sender: Any) {
 		spinner.startAnimation(self)
 		self.window?.sheetParent?.endSheet(self.window!)
+	}
+	
+	@IBAction func quit(_ sender: Any) {
+		self.window?.sheetParent?.endSheet(self.window!, returnCode: .abort)
+		NSApp.terminate(self)
 	}
 	
 	override func controlTextDidChange(_ obj: Notification) {

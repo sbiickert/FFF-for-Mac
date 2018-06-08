@@ -9,13 +9,10 @@
 import Cocoa
 
 class DetailTableCellView: NSTableCellView {
-	@IBOutlet weak var iconImageButton: NSButton!
+	@IBOutlet weak var iconLabel: NSTextField!
 	@IBOutlet weak var transactionTypeNameLabel: NSTextField!
 	@IBOutlet weak var amountLabel: NSTextField!
 	@IBOutlet weak var descriptionLabel: NSTextField!
-	
-	@IBAction func iconButtonClicked(_ sender: NSButton) {
-	}
 	
 //	override func draw(_ dirtyRect: NSRect) {
 //        super.draw(dirtyRect)

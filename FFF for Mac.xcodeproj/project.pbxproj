@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */; };
+		B81C7AF820CAD72F007C6D69 /* EditTransactionWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */; };
 		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
 		B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */; };
 		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
@@ -32,6 +34,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTransactionWindowController.swift; sourceTree = "<group>"; };
+		B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditTransactionWindowController.xib; sourceTree = "<group>"; };
 		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 		B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFFViewController.swift; sourceTree = "<group>"; };
 		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
@@ -82,6 +86,8 @@
 				B89B029B20BF98C40071EDCD /* CategoryViewController.swift */,
 				F4449C41203B3D0200A0A64E /* LoginWindowController.swift */,
 				F4449C42203B3D0200A0A64E /* LoginWindowController.xib */,
+				B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */,
+				B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -221,6 +227,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B81C7AF820CAD72F007C6D69 /* EditTransactionWindowController.xib in Resources */,
 				F4449C44203B3D0200A0A64E /* LoginWindowController.xib in Resources */,
 				F4467EDD2033DB690058D0D8 /* Assets.xcassets in Resources */,
 				F4467EE02033DB690058D0D8 /* Main.storyboard in Resources */,
@@ -234,6 +241,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */,
 				F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */,
 				F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */,
 				F4467F102033E4710058D0D8 /* Balance.swift in Sources */,

@@ -46,7 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		let defaults = UserDefaults.standard
 		let storedUrl = defaults.string(forKey: DefaultsKey.ServerUrl.rawValue)
 		if storedUrl == nil {
-			defaults.set(Gateway.defaultURL, forKey: DefaultsKey.ServerUrl.rawValue)
+			defaults.set(Gateway.shared.url, forKey: DefaultsKey.ServerUrl.rawValue)
 		}
 		
 		// Update the list of transaction types

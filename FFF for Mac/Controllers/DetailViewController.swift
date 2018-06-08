@@ -45,6 +45,10 @@ class DetailViewController: FFFViewController {
 	override func currentDayChanged(_ note: Notification) {
 		requestTransactions()
 	}
+	
+	override func dataUpdated(_ notification: Notification) {
+		requestTransactions()
+	}
 
 	// MARK: ViewController
 
@@ -54,8 +58,18 @@ class DetailViewController: FFFViewController {
 		// Hook up the tableview delegate and datasource
 		tableView.delegate = self
 		tableView.dataSource = self
+		
+		// Double-click to edit
+		tableView.target = self
+		tableView.doubleAction = #selector(doubleAction(_:))
     }
-    
+	
+	@objc func doubleAction(_ tableView:NSTableView) {
+		let t = transactions[tableView.clickedRow]
+		NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+										object: self,
+										userInfo: ["t": t])
+	}
 }
 
 extension DetailViewController: NSTableViewDataSource {
@@ -76,7 +90,7 @@ extension DetailViewController: NSTableViewDelegate {
 		if let cell = tableView.makeView(withIdentifier: id, owner: nil) as? DetailTableCellView {
 			cell.amountLabel.stringValue = currFormatter.string(from: NSNumber(value: t.amount))!
 			cell.descriptionLabel.stringValue = t.description ?? ""
-			cell.iconImageButton.title = (t.transactionType?.emoji)!
+			cell.iconLabel.stringValue = (t.transactionType?.emoji)!
 			cell.transactionTypeNameLabel.stringValue = t.transactionType?.description ?? ""
 			return cell
 		}

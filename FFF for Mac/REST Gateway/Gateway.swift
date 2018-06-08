@@ -81,20 +81,24 @@ struct Token {
 }
 
 class Gateway: NSObject, URLSessionDelegate {
-	static let defaultURL = "https://www.biickert.ca/FFF4/services/web/app.php"
+	private static let debugURL:String? = nil // "http://localhost/FFF/services/web"  // set to nil to ignore
+	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web/app.php"
 	static let shared = Gateway()
 	
 	var userName: String!
 	var fullName: String?
 	
-	private var url: String!
+	private(set) var url: String!
 	private var password: String!
 	private var session: URLSession?
 	private var token: Token?
 	
 	private override init() {
 		super.init()
-		if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
+		if Gateway.debugURL != nil {
+			self.url = Gateway.debugURL!
+		}
+		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
 			self.url = defaultsUrl
 		}
 		else {
@@ -274,8 +278,6 @@ class Gateway: NSObject, URLSessionDelegate {
 	
 	private func retrieveToken() {
 		// Get the latest, just in case they've been updated
-		let defaults = UserDefaults.standard
-		self.url = defaults.string(forKey: DefaultsKey.ServerUrl.rawValue);
 		let (u, p) = Gateway.getStoredCredentials()
 		self.userName = String(u!)
 		self.password = String(p!)
@@ -292,10 +294,15 @@ class Gateway: NSObject, URLSessionDelegate {
 				self?.fullName = tokenInfo[ResponseKey.FullName.rawValue] as? String;
 				self?.token = Token(token: tokenInfo[ResponseKey.Key.rawValue] as! String)
 				print("\(String(describing: self?.fullName)) fetched a key: \(String(describing: self?.token))");
+				
+				DispatchQueue.main.async {
+					self?.postLoginNotification(info)
+				}
 			}
-			
-			DispatchQueue.main.sync {
-				self?.postLoginNotification(info)
+			else {
+				DispatchQueue.main.async {
+					self?.login()
+				}
 			}
 		}
 	}
