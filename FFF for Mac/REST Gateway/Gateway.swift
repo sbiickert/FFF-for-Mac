@@ -30,6 +30,7 @@ enum DefaultsKey: String {
 enum RestResource: String {
 	// For making resource requests
 	case BalanceResource = "balance"
+	case SearchResource = "search"
 	case SummaryResource = "summary"
 	case TokenResource = "token"
 	case TransactionResource = "transaction"
@@ -216,6 +217,19 @@ class Gateway: NSObject, URLSessionDelegate {
 			fullUrl += "&tt=" + String(tt!.code)
 		}
 		print("Fetching transactions: \(fullUrl)");
+		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
+		self.makeRequest(request: request, callback: callback)
+	}
+	
+	func getSearchResults(_ query:String ,
+							callback: @escaping (Message) -> Void) {
+		// url/search/json?token=&q=
+		let fullUrl = String(format: "%@/%@/json?token=%@&q=%@",
+							 self.url,
+							 RestResource.SearchResource.rawValue,
+							 self.token!.tokenString,
+							 query)
+		print("Searching for transactions: \(fullUrl)");
 		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
 		self.makeRequest(request: request, callback: callback)
 	}

@@ -11,16 +11,50 @@ import Cocoa
 class TransListViewController: FFFViewController {
 	@IBOutlet weak var tableView: NSTableView!
 	
+	var searchString: String? {
+		didSet {
+			print("TransListViewController searchString set to \(String(describing: searchString))")
+			requestTransactions()
+		}
+	}
 	private var transactions = [Transaction]()
 
+	private var savedSortDescriptors: [NSSortDescriptor]?
+	
 	private func requestTransactions() {
 		if Gateway.shared.isLoggedIn {
-			let components = app.currentDateComponents
-			Gateway.shared.getTransactions(forYear:components.year, month: components.month) {[weak self] message in
-				if let t = message.transactions {
-					self?.transactions = t
-					DispatchQueue.main.async{
-						self?.tableView.reloadData()
+			if searchString == nil || searchString!.trimmingCharacters(in: CharacterSet.whitespaces) == "" {
+				// Regular list of monthly transactions
+				let components = app.currentDateComponents
+				Gateway.shared.getTransactions(forYear:components.year, month: components.month) {[weak self] message in
+					if let t = message.transactions {
+						self?.transactions = t
+						DispatchQueue.main.async {
+							if self != nil && self!.savedSortDescriptors != nil {
+								self!.tableView.sortDescriptors = self!.savedSortDescriptors!
+								self!.savedSortDescriptors = nil
+							}
+							else {
+								self?.tableView.reloadData()
+							}
+						}
+					}
+				}
+			}
+			else {
+				// Search results
+				Gateway.shared.getSearchResults(searchString!) {[weak self] message in
+					if let t = message.transactions {
+						self?.transactions = t
+						DispatchQueue.main.async{
+							if self?.savedSortDescriptors == nil {
+								// This is the first search. We are going to save the sorting
+								// so that when we stop searching, we can revert it back.
+								self?.savedSortDescriptors = self?.tableView.sortDescriptors
+							}
+							self?.tableView.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+							//self?.tableView.reloadData()
+						}
 					}
 				}
 			}
@@ -93,6 +127,7 @@ extension TransListViewController: NSTableViewDataSource {
 		// Array of NSSortDescriptor. The most recent column clicked on is first.
 		//print("sortDescriptorsDidChange")
 		guard let sortDescriptor = tableView.sortDescriptors.first else {
+			tableView.reloadData()
 			return
 		}
 		switch sortDescriptor.key {
@@ -138,11 +173,15 @@ extension TransListViewController: NSTableViewDelegate {
 		static let Date = "DateCellID"
 		static let Description = "DescriptionCellID"
 	}
-
+	
 	func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
 		var image: NSImage?
 		var text: String = ""
 		var cellIdentifier: String = ""
+		
+		if row >= transactions.count {
+			return nil
+		}
 		
 		let dateFormatter = DateFormatter()
 		dateFormatter.dateStyle = .long

@@ -44,7 +44,6 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 			}
 			else {
 				spinner.stopAnimation(self)
-				// TODO: Request info for today's date
 			}
 		}
 	}
@@ -212,13 +211,21 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		}
 	}
 
+	private var transactionListViewController: TransListViewController? {
+		for vc in tabViewController!.childViewControllers {
+			if let tlvc = vc as? TransListViewController {
+				return tlvc
+			}
+		}
+		return nil
+	}
 	func searchFieldDidStartSearching(_ sender: NSSearchField) {
-		// TODO
-		print("Starting to search for \(sender.stringValue)")
+		tabViewController?.selectedTabViewItemIndex = 1 // Transaction list
+		transactionListViewController?.searchString = sender.stringValue
 	}
 	
 	func searchFieldDidEndSearching(_ sender: NSSearchField) {
-		// TODO
+		transactionListViewController?.searchString = nil
 	}
 	
 	@IBAction func changeDate(_ sender: NSDatePicker) {
