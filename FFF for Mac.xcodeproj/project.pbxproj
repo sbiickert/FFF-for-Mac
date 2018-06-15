@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */; };
 		B81C7AF820CAD72F007C6D69 /* EditTransactionWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */; };
+		B81F74B820D428BB008288A6 /* CheckerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74B720D428BB008288A6 /* CheckerViewController.swift */; };
+		B81F74BA20D429A5008288A6 /* BankTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74B920D429A5008288A6 /* BankTransaction.swift */; };
+		B81F74BC20D429BF008288A6 /* TransactionMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BB20D429BF008288A6 /* TransactionMatch.swift */; };
+		B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BD20D4546A008288A6 /* CheckerDragView.swift */; };
+		B81F74C020D467FA008288A6 /* CSwiftV.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BF20D467FA008288A6 /* CSwiftV.swift */; };
 		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
 		B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */; };
 		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
@@ -36,6 +41,11 @@
 /* Begin PBXFileReference section */
 		B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTransactionWindowController.swift; sourceTree = "<group>"; };
 		B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditTransactionWindowController.xib; sourceTree = "<group>"; };
+		B81F74B720D428BB008288A6 /* CheckerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerViewController.swift; sourceTree = "<group>"; };
+		B81F74B920D429A5008288A6 /* BankTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankTransaction.swift; sourceTree = "<group>"; };
+		B81F74BB20D429BF008288A6 /* TransactionMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionMatch.swift; sourceTree = "<group>"; };
+		B81F74BD20D4546A008288A6 /* CheckerDragView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerDragView.swift; sourceTree = "<group>"; };
+		B81F74BF20D467FA008288A6 /* CSwiftV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSwiftV.swift; sourceTree = "<group>"; };
 		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 		B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFFViewController.swift; sourceTree = "<group>"; };
 		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
@@ -88,6 +98,7 @@
 				F4449C42203B3D0200A0A64E /* LoginWindowController.xib */,
 				B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */,
 				B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */,
+				B81F74B720D428BB008288A6 /* CheckerViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -98,6 +109,7 @@
 				F4449C3F203A19D300A0A64E /* DetailTableCellView.swift */,
 				F46219CF20432BEA006E08B9 /* DayView.swift */,
 				B8F37FAE20BEEE8400AFE471 /* Grid.swift */,
+				B81F74BD20D4546A008288A6 /* CheckerDragView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -128,6 +140,7 @@
 				F4467F052033E1710058D0D8 /* Entities */,
 				F4467F042033E15B0058D0D8 /* REST Gateway */,
 				F4467F0E2033E1A40058D0D8 /* Notifications.swift */,
+				B81F74BF20D467FA008288A6 /* CSwiftV.swift */,
 				F4467EDC2033DB690058D0D8 /* Assets.xcassets */,
 				F4B69A802040DB26008AEF0E /* Supporting Files */,
 			);
@@ -150,6 +163,8 @@
 			children = (
 				F4467F062033E17D0058D0D8 /* Transaction.swift */,
 				F4467F072033E17D0058D0D8 /* TransactionType.swift */,
+				B81F74B920D429A5008288A6 /* BankTransaction.swift */,
+				B81F74BB20D429BF008288A6 /* TransactionMatch.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -242,17 +257,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */,
+				B81F74BC20D429BF008288A6 /* TransactionMatch.swift in Sources */,
 				F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */,
 				F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */,
 				F4467F102033E4710058D0D8 /* Balance.swift in Sources */,
 				B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */,
 				F4467F112033E4710058D0D8 /* Category.swift in Sources */,
+				B81F74BA20D429A5008288A6 /* BankTransaction.swift in Sources */,
 				F4467F122033E4710058D0D8 /* Gateway.swift in Sources */,
+				B81F74B820D428BB008288A6 /* CheckerViewController.swift in Sources */,
 				F4467F132033E4710058D0D8 /* Message.swift in Sources */,
 				F4449C3A2038B2DE00A0A64E /* CalendarViewController.swift in Sources */,
 				F4467F0F2033E1A70058D0D8 /* Notifications.swift in Sources */,
 				F4467F092033E17D0058D0D8 /* TransactionType.swift in Sources */,
 				F4467ED92033DB690058D0D8 /* AppDelegate.swift in Sources */,
+				B81F74C020D467FA008288A6 /* CSwiftV.swift in Sources */,
 				F4449C40203A19D300A0A64E /* DetailTableCellView.swift in Sources */,
 				F4728C36203E40FD0085C04F /* TransListViewController.swift in Sources */,
 				F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */,
@@ -260,6 +279,7 @@
 				F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */,
 				B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */,
 				F4449C43203B3D0200A0A64E /* LoginWindowController.swift in Sources */,
+				B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */,
 				B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

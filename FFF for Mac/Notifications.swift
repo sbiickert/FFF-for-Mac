@@ -21,4 +21,6 @@ enum Notifications: String {
 	case LogoutResponse = "fff_logout_response"
 	
 	case ShowEditForm = "fff_show_edit_form"
+	
+	case OpenBankFile = "fff_open_bank_file"
 }

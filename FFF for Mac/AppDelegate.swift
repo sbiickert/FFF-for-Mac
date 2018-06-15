@@ -42,6 +42,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 	}
 
+	func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+		print("Opening file \(filename)")
+		NotificationCenter.default.post(name: NSNotification.Name(Notifications.OpenBankFile.rawValue),
+										object: self,
+										userInfo: ["filename": filename])
+		return true
+	}
+	
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		let defaults = UserDefaults.standard
 		let storedUrl = defaults.string(forKey: DefaultsKey.ServerUrl.rawValue)

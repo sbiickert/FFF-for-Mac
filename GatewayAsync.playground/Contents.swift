@@ -1,12 +1,11 @@
 import UIKit
 
-let searchString = "created transaction 20295"
-let createdTransactionIDRegEx = "\\d+"
-do {
-	let regex = try NSRegularExpression(pattern: createdTransactionIDRegEx, options: NSRegularExpression.Options.caseInsensitive)
-	let results = regex.matches(in: searchString, range: NSRange(searchString.startIndex..., in: searchString))
-	
-	let matches = results.map {
-		String(searchString[Range($0.range, in: searchString)!])
-	}
-}
+let dateStr = "2/28/2018"
+let dateFormatter = DateFormatter()
+dateFormatter.dateFormat = "MM/dd/yyyy"
+
+let date = dateFormatter.date(from: dateStr)
+
+var temp:String?
+print("hi there \(String(describing: temp))")
+
