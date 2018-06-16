@@ -105,10 +105,7 @@ extension CategoryViewController: NSOutlineViewDataSource {
 	}
 	
 	func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
-		if item is Category {
-			return true
-		}
-		return false
+		return item is Category
 	}
 }
 

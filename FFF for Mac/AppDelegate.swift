@@ -12,12 +12,13 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
 	static let appVersion = "1.0.0"
 	
-	let unitsYMD: Set<Calendar.Component> = [.month, .year, .day]
+	static let unitsYMD: Set<Calendar.Component> = [.month, .year, .day]
+	static let unitsYM: Set<Calendar.Component> = [.month, .year]
 
 	var currentDate = Date() {
 		didSet {
-			let oldComponents = Calendar.current.dateComponents(unitsYMD, from: oldValue)
-			let newComponents = Calendar.current.dateComponents(unitsYMD, from: currentDate)
+			let oldComponents = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: oldValue)
+			let newComponents = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: currentDate)
 
 			if oldComponents.year! == newComponents.year! && oldComponents.month! == newComponents.month! {
 				NotificationCenter.default.post(name: NSNotification.Name(Notifications.CurrentDayChanged.rawValue), object: self)
@@ -29,13 +30,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 	var currentDateComponents: (year:Int, month:Int, day:Int) {
 		get {
-			let components = Calendar.current.dateComponents(unitsYMD, from: currentDate)
+			let components = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: currentDate)
 			return (year:components.year!, month:components.month!, day:components.day!)
 		}
 	}
 	
 	func setDayOfMonth(_ day:Int) {
-		var components = Calendar.current.dateComponents(unitsYMD, from: currentDate)
+		var components = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: currentDate)
 		components.setValue(day, for: .day)
 		if let newDate = Calendar.current.date(from: components) {
 			currentDate = newDate

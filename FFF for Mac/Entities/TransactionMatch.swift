@@ -17,9 +17,23 @@ enum MatchType: Float {
 	case none = 0.0
 	case partial = 0.5
 	case complete = 1.0  // Float values are just to support sorting
+	
+	static func stringValue(_ value: MatchType) -> String {
+		switch value {
+		case .none:
+			return "❗️ None"
+		case .partial:
+			return "❓ Partial"
+		case .complete:
+			return "✔️ Complete"
+		}
+	}
 }
 
 class TransactionMatch {
+	private static let minScore:Float = 0.2
+	private static let maxPossibleCount = 10
+	
 	var bankTransaction: BankTransaction!
 	var matchedTransaction:Transaction?
 	var possibleMatches = [MatchScore]()
@@ -39,12 +53,30 @@ class TransactionMatch {
 	}
 	
 	func addTransaction(_ t:Transaction) {
+		if matchType == .complete {
+			return
+		}
 		let score = bankTransaction.getMatchScore(with: t)
-		if score > 0.0 {
+		if score > TransactionMatch.minScore {
 			possibleMatches.append(MatchScore(score: score, transaction: t))
 		}
 		possibleMatches.sort { lhs, rhs in
-			return lhs.score < rhs.score
+			return lhs.score > rhs.score
+		}
+		if score == 1.0 {
+			designateTransactionAsMatch(at: 0)
+		}
+		if possibleMatches.count > TransactionMatch.maxPossibleCount {
+			possibleMatches.remove(at: possibleMatches.count-1)
+		}
+	}
+	
+	func removeFromPossibles(_ transaction:Transaction) {
+		for (index, ms) in possibleMatches.enumerated() {
+			if ms.transaction.id == transaction.id {
+				possibleMatches.remove(at: index)
+				break
+			}
 		}
 	}
 	
