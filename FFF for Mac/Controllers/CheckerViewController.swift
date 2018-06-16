@@ -14,6 +14,15 @@ class CheckerViewController: FFFViewController {
 	@IBOutlet weak var outlineView: NSOutlineView!
 	@IBOutlet weak var outlineScrollView: NSScrollView!
 	
+	@IBOutlet weak var alignButton: NSButton!
+	@IBOutlet weak var createButton: NSButton!
+	
+	@IBAction func alignTransaction(_ sender: Any) {
+	}
+	
+	@IBAction func createTransaction(_ sender: Any) {
+	}
+	
 	var bankTransactions = [BankTransaction]() {
 		didSet {
 			transactions.removeAll()
@@ -218,6 +227,29 @@ extension CheckerViewController: NSOutlineViewDelegate {
 			textField.stringValue = text
 		}
 		return view
+	}
+	
+	func outlineViewSelectionDidChange(_ notification: Notification) {
+		var isAlignEnabled = false
+		var isCreateEnabled = false
+		
+		let item = outlineView.item(atRow: outlineView.selectedRow)
+		
+		// Determine if the selected item is a match score with < 100%
+		if let ms = item as? MatchScore {
+			isAlignEnabled = ms.score < 1.0
+			isCreateEnabled = ms.score < 1.0
+		}
+		// Or if this is a TransactionMatch that is .partial or .none
+		if let tm = item as? TransactionMatch {
+			isCreateEnabled = tm.matchType != .complete
+			if outlineView.isItemExpanded(item) == false {
+				outlineView.expandItem(item)
+			}
+		}
+		
+		alignButton.isEnabled = isAlignEnabled
+		createButton.isEnabled = isCreateEnabled
 	}
 }
 
