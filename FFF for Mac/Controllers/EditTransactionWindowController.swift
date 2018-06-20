@@ -123,6 +123,10 @@ class EditTransactionWindowController: NSWindowController {
 	
 	
 	@IBAction func ok(_ sender: Any) {
+		self.window?.makeFirstResponder(nil)
+		if transaction?.transactionType == nil {
+			transactionTypeSelected(self.transactionTypePopUp)
+		}
 		self.window?.sheetParent?.endSheet(self.window!)
 	}
 	@IBAction func delete(_ sender: Any) {

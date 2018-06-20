@@ -82,7 +82,7 @@ struct Token {
 }
 
 class Gateway: NSObject, URLSessionDelegate {
-	private static let debugURL:String? = nil // "http://localhost/FFF/services/web"  // set to nil to ignore
+	private static let debugURL:String? = "http://localhost/FFF/services/web"  // set to nil to ignore
 	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web/app.php"
 	static let shared = Gateway()
 	
@@ -279,9 +279,14 @@ class Gateway: NSObject, URLSessionDelegate {
 			let success = (info[ResponseKey.Success.rawValue] as! NSNumber).boolValue
 			if (success) {
 				let message = info[ResponseKey.Message.rawValue] as! Message
-				if message.code == 201 {
-					// A transaction was created. Fetch it and return it.
-					self.getTransaction(withID: message.createdTransactionID!, callback: callback)
+				if message.didModifyTransaction {
+					NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.DataUpdated.rawValue),
+													object: self,
+													userInfo: info as [NSObject: AnyObject])
+					if message.code == 201 {
+						// A transaction was created. Fetch it and return it.
+						self.getTransaction(withID: message.createdTransactionID!, callback: callback)
+					}
 				}
 				else {
 					callback(message)

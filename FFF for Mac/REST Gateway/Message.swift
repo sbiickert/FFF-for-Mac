@@ -43,21 +43,63 @@ class Message: NSObject {
         }
     }
 	
-	private let createdTransactionIDRegEx = try! NSRegularExpression(pattern: "\\d+", options: .caseInsensitive)
+	private let transactionIDRegEx = try! NSRegularExpression(pattern: "\\d+", options: .caseInsensitive)
+	
+	private let createdPrefix = "created transaction"
 	var createdTransactionID: Int? {
 		get {
 			if let searchString = content[ResponseKey.Message.rawValue] as? String {
-				let results = createdTransactionIDRegEx.matches(in: searchString, range: NSRange(searchString.startIndex..., in: searchString))
-			
-				let matches = results.map { String(searchString[Range($0.range, in: searchString)!]) }
-				if let idString = matches.first {
-					return Int(idString)
+				if searchString.starts(with: createdPrefix) {
+					let results = transactionIDRegEx.matches(in: searchString, range: NSRange(searchString.startIndex..., in: searchString))
+					
+					let matches = results.map { String(searchString[Range($0.range, in: searchString)!]) }
+					if let idString = matches.first {
+						return Int(idString)
+					}
 				}
 			}
 			return nil
 		}
 	}
-    
+	
+	private let updatedPrefix = "updated transaction"
+	var updatedTransactionID: Int? {
+		get {
+			if let searchString = content[ResponseKey.Message.rawValue] as? String {
+				if searchString.starts(with: updatedPrefix) {
+					let results = transactionIDRegEx.matches(in: searchString, range: NSRange(searchString.startIndex..., in: searchString))
+					
+					let matches = results.map { String(searchString[Range($0.range, in: searchString)!]) }
+					if let idString = matches.first {
+						return Int(idString)
+					}
+				}
+			}
+			return nil
+		}
+	}
+	
+	private let deletedPrefix = "deleted transaction"
+	var deletedTransactionID: Int? {
+		get {
+			if let searchString = content[ResponseKey.Message.rawValue] as? String {
+				if searchString.starts(with: deletedPrefix) {
+					let results = transactionIDRegEx.matches(in: searchString, range: NSRange(searchString.startIndex..., in: searchString))
+					
+					let matches = results.map { String(searchString[Range($0.range, in: searchString)!]) }
+					if let idString = matches.first {
+						return Int(idString)
+					}
+				}
+			}
+			return nil
+		}
+	}
+	
+	var didModifyTransaction: Bool {
+		return createdTransactionID != nil || updatedTransactionID != nil || deletedTransactionID != nil
+	}
+
     var transaction: Transaction? {
         get {
 			if let tDict = content[ResponseKey.Message.rawValue] as? NSDictionary {

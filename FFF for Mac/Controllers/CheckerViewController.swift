@@ -16,17 +16,74 @@ class CheckerViewController: FFFViewController {
 	
 	@IBOutlet weak var alignButton: NSButton!
 	@IBOutlet weak var createButton: NSButton!
+	@IBOutlet weak var doneButton: NSButton!
 	
 	@IBAction func alignTransaction(_ sender: Any) {
+		// Take selected item (MatchScore) and apply the date and amount of the bank transaction to the transaction
+		let item = outlineView.item(atRow: outlineView.selectedRow)
+		if let ms = item as? MatchScore {
+			var t = ms.transaction
+			if let tm = outlineView.parent(forItem: item) as? TransactionMatch {
+				let bt = tm.bankTransaction!
+				t.amount = abs(bt.amount)
+				t.date = bt.date
+				Gateway.shared.updateTransaction(transaction: t) { [weak self] message in
+					// Replace the transaction in the stored list and refresh check
+					// At the moment, this is redundant because any data update refreshes the whole list
+//					if let seq = self?.transactions.enumerated() {
+//						for (index, storedTransaction) in seq {
+//							if t.id == storedTransaction.id {
+//								self?.transactions.remove(at: index)
+//								self?.transactions.append(t)
+//								self?.check()
+//								break
+//							}
+//						}
+//					}
+				}
+			}
+		}
 	}
 	
 	@IBAction func createTransaction(_ sender: Any) {
+		let item = outlineView.item(atRow: outlineView.selectedRow)
+		
+		var bt: BankTransaction?
+		if let tm = item as? TransactionMatch {
+			bt = tm.bankTransaction
+		}
+		else if let _ = item as? MatchScore {
+			if let tm = outlineView.parent(forItem: item) as? TransactionMatch {
+				bt = tm.bankTransaction
+			}
+		}
+
+		if bt != nil {
+			var t = Transaction()
+			let isExpense = bt!.amount < 0
+			t.amount = abs(bt!.amount)
+			if isExpense {
+				t.transactionType = TransactionType.transactionTypesForExpense().first
+			}
+			else {
+				t.transactionType = TransactionType.transactionTypesForIncome().first
+			}
+			t.date = bt!.date
+			t.description = bt!.description
+			NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+											object: self,
+											userInfo: ["t": t])
+		}
+	}
+	
+	@IBAction func done(_ sender: Any) {
+		self.bankTransactions = [BankTransaction]()
 	}
 	
 	var bankTransactions = [BankTransaction]() {
 		didSet {
 			transactions.removeAll()
-			matches.removeAll()
+			matches = [TransactionMatch]()
 
 			// Sort by date
 			bankTransactions.sort {lhs, rhs in
@@ -78,6 +135,7 @@ class CheckerViewController: FFFViewController {
 			}
 		}
 		
+		self.transactions.removeAll()
 		for ym in timeWindow {
 			Gateway.shared.getTransactions(forYear: ym.year, month: ym.month) {message in
 				if let transactions = message.transactions {
@@ -85,6 +143,13 @@ class CheckerViewController: FFFViewController {
 					self.check()
 				}
 			}
+		}
+	}
+	
+	override func dataUpdated(_ notification: Notification) {
+		// If we are checking data, reload the transactions
+		if bankTransactions.count > 0 {
+			loadTransactionsForBankTransactions()
 		}
 	}
 	
