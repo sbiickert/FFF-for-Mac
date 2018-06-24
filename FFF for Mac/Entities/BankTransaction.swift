@@ -10,6 +10,7 @@ import Foundation
 
 struct BankTransaction {
 	static let unitsD:Set<Calendar.Component> = [.day]
+	static let noEval = ["Transfer", "PAYMENT - THANK YOU / PAIEMENT - MERCI", "INTEREST PAYMENT", "WWW TFR", "WWW PMT", "BR TO BR", "LOAN PROCEEDS"]
 	
 	let id:Int
 	let date: Date
@@ -28,6 +29,14 @@ struct BankTransaction {
 		return "\(desc1) - \(desc2!)"
 	}
 	
+	var ignorable: Bool {
+		for str in BankTransaction.noEval {
+			if description.starts(with: str) {
+				return true
+			}
+		}
+		return false
+	}
 
 	func getMatchScore(with t:Transaction) -> Float {
 		let interval = Calendar.current.dateComponents(BankTransaction.unitsD, from: date, to: t.date)

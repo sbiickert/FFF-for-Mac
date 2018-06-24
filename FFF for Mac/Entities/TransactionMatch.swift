@@ -57,7 +57,7 @@ class TransactionMatch {
 			return
 		}
 		let score = bankTransaction.getMatchScore(with: t)
-		if score > TransactionMatch.minScore {
+		if score > TransactionMatch.minScore && transactionInPossibles(t) == false {
 			possibleMatches.append(MatchScore(score: score, transaction: t))
 		}
 		possibleMatches.sort { lhs, rhs in
@@ -69,6 +69,15 @@ class TransactionMatch {
 		if possibleMatches.count > TransactionMatch.maxPossibleCount {
 			possibleMatches.remove(at: possibleMatches.count-1)
 		}
+	}
+	
+	private func transactionInPossibles(_ t: Transaction) -> Bool {
+		for possible in possibleMatches {
+			if possible.transaction.id == t.id {
+				return true
+			}
+		}
+		return false
 	}
 	
 	func removeFromPossibles(_ transaction:Transaction) {

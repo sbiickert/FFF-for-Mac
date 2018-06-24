@@ -13,11 +13,13 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	private let SearchToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Search")
 	private let DateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Date")
 	private let AddToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Add")
+	private let BalanceToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Balance")
 
 	@IBOutlet var spinner: NSProgressIndicator!
 	@IBOutlet var datePicker: NSDatePicker!
 	@IBOutlet var searchField: NSSearchField!
 	@IBOutlet var addButton: NSButton!
+	@IBOutlet var monthBalance: MonthBalanceView!
 	
 	private var tabViewController: NSTabViewController?
 	
@@ -62,6 +64,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 											   object: nil)
 
 		NotificationCenter.default.addObserver(self,
+											   selector: #selector(logoutNotificationReceived(_:)),
+											   name: NSNotification.Name(rawValue: Notifications.LogoutResponse.rawValue),
+											   object: nil)
+
+		NotificationCenter.default.addObserver(self,
 											   selector: #selector(dateChangeNotificationReceived(_:)),
 											   name: NSNotification.Name(rawValue: Notifications.CurrentMonthChanged.rawValue),
 											   object: nil)
@@ -69,6 +76,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(transactionEditRequest(_:)),
 											   name: NSNotification.Name(rawValue: Notifications.ShowEditForm.rawValue),
+											   object: nil)
+
+		NotificationCenter.default.addObserver(self,
+											   selector: #selector(dataUpdated(_:)),
+											   name: NSNotification.Name(rawValue: Notifications.DataUpdated.rawValue),
 											   object: nil)
 
 		datePicker.dateValue = currentDate
@@ -125,6 +137,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		else if (itemIdentifier == AddToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: AddToolbarItemID, label: "Add Transaction", paletteLabel: "Add", toolTip: "Create a new transaction", target: self, itemContent: self.addButton, action: nil)!
 		}
+		else if (itemIdentifier == BalanceToolbarItemID) {
+			toolbarItem = customToolbarItem(itemForItemIdentifier: BalanceToolbarItemID, label: "Balance", paletteLabel: "Balance", toolTip: "Monthly balance", target: self, itemContent: self.monthBalance, action: nil)!
+		}
 		else if (itemIdentifier == NSToolbarItem.Identifier.flexibleSpace) {
 			toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 		}
@@ -133,11 +148,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 	
 	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [DateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID]
+		return [DateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, BalanceToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID]
 	}
 	
 	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID, AddToolbarItemID]
+		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID, AddToolbarItemID, BalanceToolbarItemID]
 	}
 	
 	func windowDidBecomeMain(_ notification: Notification) {
@@ -165,13 +180,52 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	@objc func loginNotificationReceived(_ notification: Notification) {
 		// Ignore unless the login form is showing: it's a refetch of the token.
 		isTokenRequestInProgress = false
+		dateChangeNotificationReceived(notification)
 	}
 	
-	@objc func dateChangeNotificationReceived(_ note: NSNotification) {
+	@objc func logoutNotificationReceived(_ notification: Notification) {
+		updateBalanceView(with: nil)
+	}
+
+	@objc func dateChangeNotificationReceived(_ note: Notification) {
 		datePicker.dateValue = currentDate
-		window?.title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
+		DispatchQueue.main.async {
+			self.window?.title = "Fantastic Fiduciary Friend - " + self.titleDateFormatter.string(from: self.app.currentDate)
+		}
+		Gateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
+										 month: app.currentDateComponents.month)
+		{ [weak self] message in
+			if let balance = message.balanceSummary {
+				DispatchQueue.main.async {
+					self?.updateBalanceView(with: balance)
+				}
+			}
+		}
 	}
 	
+	@objc func dataUpdated(_ notification: Notification) {
+		Gateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
+										 month: app.currentDateComponents.month)
+		{ [weak self] message in
+			DispatchQueue.main.async {
+				self?.updateBalanceView(with: message.balanceSummary)
+			}
+		}
+	}
+	
+	private func updateBalanceView(with balanceSummary: BalanceSummary?) {
+		if let bs = balanceSummary {
+			let month = app.currentDateComponents.month
+			let balanceForCurrentMonth = bs.monthBalances[month]!
+			monthBalance.income = balanceForCurrentMonth.income.floatValue
+			monthBalance.expense = balanceForCurrentMonth.expense.floatValue
+		}
+		else {
+			monthBalance.income = 0.0
+			monthBalance.expense = 0.0
+		}
+	}
+
 	@objc func transactionEditRequest(_ note: NSNotification) {
 		if let info = note.userInfo as? Dictionary<String, Transaction> {
 			let transaction = info.first?.value

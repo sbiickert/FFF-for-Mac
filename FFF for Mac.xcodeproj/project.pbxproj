@@ -15,6 +15,7 @@
 		B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BD20D4546A008288A6 /* CheckerDragView.swift */; };
 		B81F74C020D467FA008288A6 /* CSwiftV.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BF20D467FA008288A6 /* CSwiftV.swift */; };
 		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
+		B8A7984F20DB03B700E38848 /* MonthBalanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */; };
 		B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */; };
 		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
 		F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C302038B11200A0A64E /* MainWindowController.swift */; };
@@ -47,6 +48,7 @@
 		B81F74BD20D4546A008288A6 /* CheckerDragView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerDragView.swift; sourceTree = "<group>"; };
 		B81F74BF20D467FA008288A6 /* CSwiftV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSwiftV.swift; sourceTree = "<group>"; };
 		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
+		B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthBalanceView.swift; sourceTree = "<group>"; };
 		B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFFViewController.swift; sourceTree = "<group>"; };
 		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		F4449C302038B11200A0A64E /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				F46219CF20432BEA006E08B9 /* DayView.swift */,
 				B8F37FAE20BEEE8400AFE471 /* Grid.swift */,
 				B81F74BD20D4546A008288A6 /* CheckerDragView.swift */,
+				B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -280,6 +283,7 @@
 				B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */,
 				F4449C43203B3D0200A0A64E /* LoginWindowController.swift in Sources */,
 				B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */,
+				B8A7984F20DB03B700E38848 /* MonthBalanceView.swift in Sources */,
 				B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

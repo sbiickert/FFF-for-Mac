@@ -82,7 +82,7 @@ struct Token {
 }
 
 class Gateway: NSObject, URLSessionDelegate {
-	private static let debugURL:String? = "http://localhost/FFF/services/web"  // set to nil to ignore
+	private static let debugURL:String? = nil // "http://localhost/FFF/services/web"  // set to nil to ignore
 	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web/app.php"
 	static let shared = Gateway()
 	

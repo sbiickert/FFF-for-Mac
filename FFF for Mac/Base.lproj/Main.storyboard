@@ -448,6 +448,7 @@
                     <connections>
                         <outlet property="addButton" destination="Y9m-i8-pqm" id="oLI-Tx-3Qx"/>
                         <outlet property="datePicker" destination="0Xz-CZ-42A" id="LhV-jI-jai"/>
+                        <outlet property="monthBalance" destination="2Gm-K0-zmg" id="dAo-vH-Gkp"/>
                         <outlet property="searchField" destination="8WN-Wf-KRZ" id="cst-lh-UyV"/>
                         <outlet property="spinner" destination="RJE-il-iJ1" id="tF1-Df-rd5"/>
                         <segue destination="UwP-2K-P9c" kind="relationship" relationship="window.shadowedContentViewController" id="XNi-rt-cFr"/>
@@ -470,6 +471,71 @@
                         <action selector="changeDate:" target="B8D-0N-5wS" id="hiR-B0-bbQ"/>
                     </connections>
                 </datePicker>
+                <customView id="2Gm-K0-zmg" customClass="MonthBalanceView" customModule="FFF_for_Mac">
+                    <rect key="frame" x="0.0" y="0.0" width="200" height="60"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <subviews>
+                        <stackView distribution="fill" orientation="vertical" alignment="centerX" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NFH-KE-bez">
+                            <rect key="frame" x="57" y="9" width="86" height="42"/>
+                            <subviews>
+                                <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AjN-AY-Yw1">
+                                    <rect key="frame" x="0.0" y="25" width="86" height="17"/>
+                                    <subviews>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="KOy-Cg-r4E">
+                                            <rect key="frame" x="-2" y="0.0" width="43" height="17"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="$0.00" id="waz-bW-CH5">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="systemGreenColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pY5-Jx-Efg">
+                                            <rect key="frame" x="45" y="0.0" width="43" height="17"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="$0.00" id="gej-Sd-ClR">
+                                                <font key="font" metaFont="systemBold"/>
+                                                <color key="textColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                    </subviews>
+                                    <visibilityPriorities>
+                                        <integer value="1000"/>
+                                        <integer value="1000"/>
+                                    </visibilityPriorities>
+                                    <customSpacing>
+                                        <real value="3.4028234663852886e+38"/>
+                                        <real value="3.4028234663852886e+38"/>
+                                    </customSpacing>
+                                </stackView>
+                                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="X8A-cF-RTE">
+                                    <rect key="frame" x="23" y="0.0" width="40" height="17"/>
+                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="$0.00" id="qaP-yG-9pz">
+                                        <font key="font" metaFont="system"/>
+                                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                    </textFieldCell>
+                                </textField>
+                            </subviews>
+                            <visibilityPriorities>
+                                <integer value="1000"/>
+                                <integer value="1000"/>
+                            </visibilityPriorities>
+                            <customSpacing>
+                                <real value="3.4028234663852886e+38"/>
+                                <real value="3.4028234663852886e+38"/>
+                            </customSpacing>
+                        </stackView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="NFH-KE-bez" firstAttribute="centerX" secondItem="2Gm-K0-zmg" secondAttribute="centerX" id="Mjh-MA-eZh"/>
+                        <constraint firstItem="NFH-KE-bez" firstAttribute="centerY" secondItem="2Gm-K0-zmg" secondAttribute="centerY" id="muK-eC-hm7"/>
+                    </constraints>
+                    <connections>
+                        <outlet property="balanceLabel" destination="X8A-cF-RTE" id="9cz-Xt-0Z4"/>
+                        <outlet property="expenseLabel" destination="pY5-Jx-Efg" id="KjV-vB-oUx"/>
+                        <outlet property="incomeLabel" destination="KOy-Cg-r4E" id="7rD-SM-cqm"/>
+                    </connections>
+                </customView>
                 <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" id="RJE-il-iJ1" userLabel="MainSpinner">
                     <rect key="frame" x="0.0" y="0.0" width="16" height="16"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -631,7 +697,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="AmountCellID" id="EXT-dV-pj6">
-                                                            <rect key="frame" x="145" y="1" width="96" height="17"/>
+                                                            <rect key="frame" x="144.5" y="1" width="96" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wkd-Lx-ZUv">
@@ -664,7 +730,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="TransactionTypeCellID" id="irg-LD-WVe">
-                                                            <rect key="frame" x="244" y="1" width="134" height="17"/>
+                                                            <rect key="frame" x="243.5" y="1" width="134" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="j7r-yG-z8q">
@@ -697,7 +763,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="DescriptionCellID" id="s10-Bs-tc6">
-                                                            <rect key="frame" x="381" y="1" width="292" height="17"/>
+                                                            <rect key="frame" x="380.5" y="1" width="292" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vPD-f1-Cjx">

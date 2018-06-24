@@ -17,7 +17,28 @@ class CheckerViewController: FFFViewController {
 	@IBOutlet weak var alignButton: NSButton!
 	@IBOutlet weak var createButton: NSButton!
 	@IBOutlet weak var doneButton: NSButton!
-	
+		
+	var bankTransactions = [BankTransaction]() {
+		didSet {
+			transactions.removeAll()
+			matches = [TransactionMatch]()
+			
+			// Sort by date
+			bankTransactions.sort {lhs, rhs in
+				return lhs.date < rhs.date
+			}
+			
+			self.loadTransactionsForBankTransactions()
+			outlineScrollView.isHidden = (bankTransactions.count == 0)
+		}
+	}
+	private(set) var transactions = [Transaction]()
+	private(set) var matches = [TransactionMatch]() {
+		didSet {
+			outlineView.reloadData()
+		}
+	}
+
 	@IBAction func alignTransaction(_ sender: Any) {
 		// Take selected item (MatchScore) and apply the date and amount of the bank transaction to the transaction
 		let item = outlineView.item(atRow: outlineView.selectedRow)
@@ -27,7 +48,7 @@ class CheckerViewController: FFFViewController {
 				let bt = tm.bankTransaction!
 				t.amount = abs(bt.amount)
 				t.date = bt.date
-				Gateway.shared.updateTransaction(transaction: t) { [weak self] message in
+				Gateway.shared.updateTransaction(transaction: t) {  message in  //[weak self]
 					// Replace the transaction in the stored list and refresh check
 					// At the moment, this is redundant because any data update refreshes the whole list
 //					if let seq = self?.transactions.enumerated() {
@@ -80,27 +101,6 @@ class CheckerViewController: FFFViewController {
 		self.bankTransactions = [BankTransaction]()
 	}
 	
-	var bankTransactions = [BankTransaction]() {
-		didSet {
-			transactions.removeAll()
-			matches = [TransactionMatch]()
-
-			// Sort by date
-			bankTransactions.sort {lhs, rhs in
-				return lhs.date < rhs.date
-			}
-			
-			self.loadTransactionsForBankTransactions()
-		}
-	}
-	private(set) var transactions = [Transaction]()
-	private(set) var matches = [TransactionMatch]() {
-		didSet {
-			outlineScrollView.isHidden = (matches.count == 0)
-			outlineView.reloadData()
-		}
-	}
-	
 	override func viewDidLoad() {
         super.viewDidLoad()
 		
@@ -126,30 +126,35 @@ class CheckerViewController: FFFViewController {
 	}
 	
 	private func loadTransactionsForBankTransactions() {
-		// Need to get all FFF transactions covering bank records
-		var timeWindow = [(year:Int, month:Int)]()
-		for bt in bankTransactions {
-			let ym = getYM(from: bt.date)
-			if timeWindow.count == 0 || timeWindow.last! != ym {
-				timeWindow.append(ym)
-			}
-		}
-		
+		// Clear old data
 		self.transactions.removeAll()
-		for ym in timeWindow {
-			Gateway.shared.getTransactions(forYear: ym.year, month: ym.month) {message in
-				if let transactions = message.transactions {
-					self.transactions.append(contentsOf: transactions)
-					self.check()
+		self.matches = [TransactionMatch]()
+		
+		// Need to get all FFF transactions covering bank records
+		if bankTransactions.count > 0 {
+			var timeWindow = [(year:Int, month:Int)]()
+			for bt in bankTransactions {
+				let ym = getYM(from: bt.date)
+				if timeWindow.count == 0 || timeWindow.last! != ym {
+					timeWindow.append(ym)
+				}
+			}
+			
+			for ym in timeWindow {
+				Gateway.shared.getTransactions(forYear: ym.year, month: ym.month) {message in
+					if var received = message.transactions {
+						received.append(contentsOf: self.transactions)
+						self.transactions = received
+						self.check()
+					}
 				}
 			}
 		}
 	}
 	
 	override func dataUpdated(_ notification: Notification) {
-		// If we are checking data, reload the transactions
-		if bankTransactions.count > 0 {
-			loadTransactionsForBankTransactions()
+		DispatchQueue.main.async {
+			self.loadTransactionsForBankTransactions()
 		}
 	}
 	
@@ -176,6 +181,10 @@ class CheckerViewController: FFFViewController {
 			if tm.matchType != .none {
 				mList.append(tm)
 			}
+		}
+		// Sort by status
+		mList.sort {lhs, rhs in
+			return lhs.matchType.rawValue < rhs.matchType.rawValue
 		}
 		DispatchQueue.main.async { [weak self] in
 			// Set matches, will update outlineview
@@ -335,7 +344,9 @@ extension CheckerViewController: CheckerDragViewDelegate {
 										 desc1: row["Description 1"]!,
 										 desc2: row["Description 2"],
 										 amount: Float(row["CAD$"]!)!)
-				bankTransactions.append(bt)
+				if bt.ignorable == false {
+					bankTransactions.append(bt)
+				}
 			}
 		}
 		catch {
