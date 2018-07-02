@@ -14,11 +14,11 @@ class CategoryViewController: FFFViewController {
 	private var categorySummary: CategorySummary?
 	
 	private func requestSummary() {
-		if Gateway.shared.isLoggedIn {
+		if CachingGateway.shared.isLoggedIn {
 			let components = app.currentDateComponents
-			Gateway.shared.getCategorySummary(forYear: components.year, month: components.month) {[weak self] message in
+			CachingGateway.shared.getCategorySummary(forYear: components.year, month: components.month) {[weak self] message in
 				if var cs = message.categorySummary {
-					Gateway.shared.getTransactions(forYear: components.year, month: components.month) { [weak self] message in
+					CachingGateway.shared.getTransactions(forYear: components.year, month: components.month) { [weak self] message in
 						if let transactions = message.transactions {
 							cs.assignTransactions(transactions)
 							self?.categorySummary = cs

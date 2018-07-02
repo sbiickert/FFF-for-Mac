@@ -202,7 +202,7 @@ class CalendarViewController: FFFViewController {
 
 	func requestSummaryForMonth(_ date: Date) {
 		let components = app.currentDateComponents
-		Gateway.shared.getBalanceSummary(forYear: components.year, month: components.month) {message in
+		CachingGateway.shared.getBalanceSummary(forYear: components.year, month: components.month) {message in
 			self.monthBalance = message.balanceSummary
 			DispatchQueue.main.async {
 				self.updateView(forceUpdate: true)

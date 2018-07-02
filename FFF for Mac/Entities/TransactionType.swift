@@ -47,7 +47,7 @@ enum Icons {
 	static let utilities = "💡"
 }
 
-struct TransactionType {
+struct TransactionType: Equatable {
 	var code: Int
 	var description: String
 	var isExpense: Bool

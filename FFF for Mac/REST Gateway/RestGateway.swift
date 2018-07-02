@@ -59,36 +59,15 @@ enum ResponseKey: String {
 	case BalanceSummary = "summary"
 }
 
-enum DateArgOption: String {
-	case Year = "Y"
-	case YearMonth = "YM"
-	case YearMonthDay = "YMD"
-}
 
-struct Token {
-	static let lifespanInSeconds = 300
-	
-	public init(token: String) {
-		tokenString = token
-		expires = Calendar.current.date(byAdding: .second, value: Token.lifespanInSeconds, to: Date())
-	}
-	
-	let tokenString: String
-	let expires: Date!
-	
-	var isExpired: Bool {
-		return expires < Date()
-	}
-}
-
-class Gateway: NSObject, URLSessionDelegate {
+class RestGateway: NSObject, Gateway, URLSessionDelegate {
 	private static let debugURL:String? = nil // "http://localhost/FFF/services/web"  // set to nil to ignore
 	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web/app.php"
-	static let shared = Gateway()
+	static let shared = RestGateway()
 	
 	var userName: String!
 	var fullName: String?
-	
+
 	private(set) var url: String!
 	private var password: String!
 	private var session: URLSession?
@@ -96,21 +75,25 @@ class Gateway: NSObject, URLSessionDelegate {
 	
 	private override init() {
 		super.init()
-		if Gateway.debugURL != nil {
-			self.url = Gateway.debugURL!
+		if RestGateway.debugURL != nil {
+			self.url = RestGateway.debugURL!
 		}
 		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
 			self.url = defaultsUrl
 		}
 		else {
-			self.url = Gateway.defaultURL
+			self.url = RestGateway.defaultURL
 		}
 		let config = URLSessionConfiguration.default
 		session = Foundation.URLSession(configuration: config, delegate: self, delegateQueue: nil)
 		
-		let (u, p) = Gateway.getStoredCredentials()
+		let (u, p) = RestGateway.getStoredCredentials()
 		self.userName = String(describing: u)
 		self.password = String(describing: p)
+	}
+	
+	var isDebugging: Bool {
+		return RestGateway.debugURL != nil
 	}
 	
 	// MARK: Public API
@@ -279,14 +262,9 @@ class Gateway: NSObject, URLSessionDelegate {
 			let success = (info[ResponseKey.Success.rawValue] as! NSNumber).boolValue
 			if (success) {
 				let message = info[ResponseKey.Message.rawValue] as! Message
-				if message.didModifyTransaction {
-					NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.DataUpdated.rawValue),
-													object: self,
-													userInfo: info as [NSObject: AnyObject])
-					if message.code == 201 {
-						// A transaction was created. Fetch it and return it.
-						self.getTransaction(withID: message.createdTransactionID!, callback: callback)
-					}
+				if message.code == 201 {
+					// A transaction was created. Fetch it and return it.
+					self.getTransaction(withID: message.createdTransactionID!, callback: callback)
 				}
 				else {
 					callback(message)
@@ -297,7 +275,7 @@ class Gateway: NSObject, URLSessionDelegate {
 	
 	private func retrieveToken() {
 		// Get the latest, just in case they've been updated
-		let (u, p) = Gateway.getStoredCredentials()
+		let (u, p) = RestGateway.getStoredCredentials()
 		self.userName = String(u!)
 		self.password = String(p!)
 		

@@ -85,10 +85,18 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 
 		datePicker.dateValue = currentDate
 		titleDateFormatter.dateStyle = .long
-		window?.title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
+		updateWindowTitle()
 		
 		tabViewController = window?.contentViewController as? NSTabViewController
     }
+	
+	private func updateWindowTitle() {
+		var title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
+		if RestGateway.shared.isDebugging {
+			title = "DEBUGGING " + title
+		}
+		window?.title = title
+	}
 	
 	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?) -> NSToolbarItem? {
 		
@@ -157,7 +165,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	func windowDidBecomeMain(_ notification: Notification) {
 		// Check for valid user credentials
-		if Gateway.shared.isLoggedIn == false {
+		if CachingGateway.shared.isLoggedIn == false {
 			// Present modal sheet
 			let loginWindowController = LoginWindowController(windowNibName: NSNib.Name("LoginWindowController"))
 			window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
@@ -166,10 +174,10 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 					// Store form values in defaults
 					let u = loginWindowController.usernameTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
 					let p = loginWindowController.passwordTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
-					Gateway.setStoredCredentials(u, password: p)
+					RestGateway.setStoredCredentials(u, password: p)
 
 					// Send off the request to the Gateway to log in
-					Gateway.shared.login()
+					CachingGateway.shared.login()
 					self.isTokenRequestInProgress = true
 				} // Quit is .abort
 				loginWindowController.window?.close()
@@ -190,9 +198,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	@objc func dateChangeNotificationReceived(_ note: Notification) {
 		datePicker.dateValue = currentDate
 		DispatchQueue.main.async {
-			self.window?.title = "Fantastic Fiduciary Friend - " + self.titleDateFormatter.string(from: self.app.currentDate)
+			self.updateWindowTitle()
 		}
-		Gateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
+		CachingGateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
 										 month: app.currentDateComponents.month)
 		{ [weak self] message in
 			if let balance = message.balanceSummary {
@@ -204,7 +212,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 	
 	@objc func dataUpdated(_ notification: Notification) {
-		Gateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
+		CachingGateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
 										 month: app.currentDateComponents.month)
 		{ [weak self] message in
 			DispatchQueue.main.async {
@@ -243,11 +251,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 				if let t = editWindowController.transaction {
 					switch editWindowController.result {
 					case .Create:
-						Gateway.shared.createTransaction(transaction: t, callback: self.editCallback)
+						CachingGateway.shared.createTransaction(transaction: t, callback: self.editCallback)
 					case .Update:
-						Gateway.shared.updateTransaction(transaction: t, callback: self.editCallback)
+						CachingGateway.shared.updateTransaction(transaction: t, callback: self.editCallback)
 					case .Delete:
-						Gateway.shared.deleteTransaction(transaction: t, callback: self.editCallback)
+						CachingGateway.shared.deleteTransaction(transaction: t, callback: self.editCallback)
 					}
 				}
 			} // Cancel is .abort

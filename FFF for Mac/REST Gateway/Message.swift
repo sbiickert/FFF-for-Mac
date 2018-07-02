@@ -24,14 +24,18 @@ class Message: NSObject {
 			self.isError = true
 			content = errorInfo as! NSDictionary
 		}
-		else // if (messageInfo != nil)
+		else if (messageInfo != nil)
 		{
 			self.isError = false;
 			content = messageInfo as! NSDictionary
 		}
+		else {
+			self.isError = true
+			content = NSDictionary()
+		}
 		
-		self.url = self.content[ResponseKey.Url.rawValue] as! String
-		self.code = content[ResponseKey.Code.rawValue] as! Int
+		self.url = self.content[ResponseKey.Url.rawValue] as? String ?? ""
+		self.code = content[ResponseKey.Code.rawValue] as? Int ?? 500
 	}
     
     var errorInfo: NSDictionary? {
@@ -102,7 +106,7 @@ class Message: NSObject {
 
     var transaction: Transaction? {
         get {
-			if let tDict = content[ResponseKey.Message.rawValue] as? NSDictionary {
+			if let tDict = content[ResponseKey.Transaction.rawValue] as? NSDictionary {
             	return Transaction(dictionary: tDict)
 			}
 			return nil
@@ -168,4 +172,30 @@ class Message: NSObject {
 			return nil
         }
     }
+}
+
+class TransactionMessage: Message {
+	private var _transaction: Transaction
+	
+	override var transaction: Transaction? {
+		return _transaction
+	}
+	
+	init(_ transaction: Transaction) {
+		self._transaction = transaction
+		super.init(dictionary: NSDictionary())
+	}
+}
+
+class TransactionsMessage: Message {
+	private var _transactions: [Transaction]
+	
+	override var transactions: [Transaction]? {
+		return self._transactions
+	}
+	
+	init(_ transactions: [Transaction]) {
+		self._transactions = transactions
+		super.init(dictionary: NSDictionary())
+	}
 }

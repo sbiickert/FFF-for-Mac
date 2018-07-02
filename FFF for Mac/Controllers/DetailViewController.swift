@@ -15,9 +15,9 @@ class DetailViewController: FFFViewController {
 	private var transactions = [Transaction]()
 	
 	private func requestTransactions() {
-		if Gateway.shared.isLoggedIn {
+		if CachingGateway.shared.isLoggedIn {
 			let components = app.currentDateComponents
-			Gateway.shared.getTransactions(forYear:components.year, month: components.month, day: components.day) {[weak self] message in
+			CachingGateway.shared.getTransactions(forYear:components.year, month: components.month, day: components.day) {[weak self] message in
 				if let t = message.transactions {
 					self?.transactions = t
 					DispatchQueue.main.async{

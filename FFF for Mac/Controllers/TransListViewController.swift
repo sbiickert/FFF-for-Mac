@@ -22,11 +22,11 @@ class TransListViewController: FFFViewController {
 	private var savedSortDescriptors: [NSSortDescriptor]?
 	
 	private func requestTransactions() {
-		if Gateway.shared.isLoggedIn {
+		if CachingGateway.shared.isLoggedIn {
 			if searchString == nil || searchString!.trimmingCharacters(in: CharacterSet.whitespaces) == "" {
 				// Regular list of monthly transactions
 				let components = app.currentDateComponents
-				Gateway.shared.getTransactions(forYear:components.year, month: components.month) {[weak self] message in
+				CachingGateway.shared.getTransactions(forYear:components.year, month: components.month) {[weak self] message in
 					if let t = message.transactions {
 						self?.transactions = t
 						DispatchQueue.main.async {
@@ -43,7 +43,7 @@ class TransListViewController: FFFViewController {
 			}
 			else {
 				// Search results
-				Gateway.shared.getSearchResults(searchString!) {[weak self] message in
+				CachingGateway.shared.getSearchResults(searchString!) {[weak self] message in
 					if let t = message.transactions {
 						self?.transactions = t
 						DispatchQueue.main.async{

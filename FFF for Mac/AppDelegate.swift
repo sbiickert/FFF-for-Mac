@@ -55,11 +55,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		let defaults = UserDefaults.standard
 		let storedUrl = defaults.string(forKey: DefaultsKey.ServerUrl.rawValue)
 		if storedUrl == nil {
-			defaults.set(Gateway.shared.url, forKey: DefaultsKey.ServerUrl.rawValue)
+			defaults.set(RestGateway.shared.url, forKey: DefaultsKey.ServerUrl.rawValue)
 		}
 		
 		// Update the list of transaction types
-		Gateway.shared.getTransactionTypes() { message in
+		CachingGateway.shared.getTransactionTypes() { message in
 			// Store in NSUserDefaults
 			let eTypes = message.content[ResponseKey.ExpenseTypes.rawValue]
 			let iTypes = message.content[ResponseKey.IncomeTypes.rawValue]

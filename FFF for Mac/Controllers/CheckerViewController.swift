@@ -48,7 +48,7 @@ class CheckerViewController: FFFViewController {
 				let bt = tm.bankTransaction!
 				t.amount = abs(bt.amount)
 				t.date = bt.date
-				Gateway.shared.updateTransaction(transaction: t) {  message in  //[weak self]
+				CachingGateway.shared.updateTransaction(transaction: t) {  message in  //[weak self]
 					// Replace the transaction in the stored list and refresh check
 					// At the moment, this is redundant because any data update refreshes the whole list
 //					if let seq = self?.transactions.enumerated() {
@@ -141,7 +141,7 @@ class CheckerViewController: FFFViewController {
 			}
 			
 			for ym in timeWindow {
-				Gateway.shared.getTransactions(forYear: ym.year, month: ym.month) {message in
+				CachingGateway.shared.getTransactions(forYear: ym.year, month: ym.month) {message in
 					if var received = message.transactions {
 						received.append(contentsOf: self.transactions)
 						self.transactions = received
