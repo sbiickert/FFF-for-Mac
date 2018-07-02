@@ -298,10 +298,16 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		showEditForm(for: nil)
 	}
 	
+	@IBAction func refreshMenuItemSelected(_ sender: Any) {
+		CachingGateway.shared.clearCache()
+		let currentDate = app.currentDate
+		app.currentDate = Calendar.current.date(byAdding: .second, value: 1, to: currentDate)!
+	}
+	
 	@IBAction func todayMenuItemSelected(_ sender: Any) {
 		app.currentDate = Date()
 	}
-	
+
 	@IBAction func showCalendarMenuItemSelected(_ sender: Any) {
 		tabViewController?.selectedTabViewItemIndex = 0
 	}

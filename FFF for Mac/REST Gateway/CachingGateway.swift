@@ -147,6 +147,7 @@ class CachingGateway: Gateway {
 					// DO NOT append to loadedMonths. We've not loaded all transactions
 					// loadedMonths.append(key)
 				}
+				callback(message)
 			}
 		}
 	}

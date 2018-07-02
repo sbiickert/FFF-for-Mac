@@ -71,6 +71,11 @@
                                                 <action selector="openDocument:" target="Ady-hI-5gd" id="bVn-NM-KNZ"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Refresh" keyEquivalent="r" id="MhP-MC-JfY">
+                                            <connections>
+                                                <action selector="refreshMenuItemSelected:" target="Ady-hI-5gd" id="QgZ-0D-MOO"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                             <connections>
