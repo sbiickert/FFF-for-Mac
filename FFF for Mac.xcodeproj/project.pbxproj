@@ -17,6 +17,7 @@
 		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
 		B8A3487220E6E3480063E1E2 /* GatewayUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A3487120E6E3480063E1E2 /* GatewayUtil.swift */; };
 		B8A7984F20DB03B700E38848 /* MonthBalanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */; };
+		B8D0EB5220EA709C004CE2D9 /* DateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D0EB5120EA709C004CE2D9 /* DateView.swift */; };
 		B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */; };
 		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
 		B8FB419A20E69F3A004942B9 /* CachingGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FB419920E69F3A004942B9 /* CachingGateway.swift */; };
@@ -52,6 +53,7 @@
 		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 		B8A3487120E6E3480063E1E2 /* GatewayUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayUtil.swift; sourceTree = "<group>"; };
 		B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthBalanceView.swift; sourceTree = "<group>"; };
+		B8D0EB5120EA709C004CE2D9 /* DateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateView.swift; sourceTree = "<group>"; };
 		B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFFViewController.swift; sourceTree = "<group>"; };
 		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		B8FB419920E69F3A004942B9 /* CachingGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachingGateway.swift; sourceTree = "<group>"; };
@@ -117,6 +119,7 @@
 				B8F37FAE20BEEE8400AFE471 /* Grid.swift */,
 				B81F74BD20D4546A008288A6 /* CheckerDragView.swift */,
 				B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */,
+				B8D0EB5120EA709C004CE2D9 /* DateView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				F4467F112033E4710058D0D8 /* Category.swift in Sources */,
 				B81F74BA20D429A5008288A6 /* BankTransaction.swift in Sources */,
 				F4467F122033E4710058D0D8 /* RestGateway.swift in Sources */,
+				B8D0EB5220EA709C004CE2D9 /* DateView.swift in Sources */,
 				B81F74B820D428BB008288A6 /* CheckerViewController.swift in Sources */,
 				F4467F132033E4710058D0D8 /* Message.swift in Sources */,
 				F4449C3A2038B2DE00A0A64E /* CalendarViewController.swift in Sources */,

@@ -340,6 +340,16 @@
                                                 <action selector="todayMenuItemSelected:" target="Ady-hI-5gd" id="57B-MQ-Bck"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Next Month" keyEquivalent="" id="EXv-lT-0nL">
+                                            <connections>
+                                                <action selector="nextMonthMenuItemSelected:" target="Ady-hI-5gd" id="UJL-Eh-pkW"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Previous Month" keyEquivalent="" id="eiG-rC-eAk">
+                                            <connections>
+                                                <action selector="prevMonthMenuItemSelected:" target="Ady-hI-5gd" id="Edk-yI-q9o"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="SrS-vK-KIr"/>
                                         <menuItem title="Calendar" keyEquivalent="1" toolTip="Show Calendar View" id="S3F-hq-4Af">
                                             <connections>
@@ -452,6 +462,7 @@
                     </window>
                     <connections>
                         <outlet property="addButton" destination="Y9m-i8-pqm" id="oLI-Tx-3Qx"/>
+                        <outlet property="customDatePicker" destination="rVJ-7f-yXL" id="FbV-uE-LJH"/>
                         <outlet property="datePicker" destination="0Xz-CZ-42A" id="LhV-jI-jai"/>
                         <outlet property="monthBalance" destination="2Gm-K0-zmg" id="dAo-vH-Gkp"/>
                         <outlet property="searchField" destination="8WN-Wf-KRZ" id="cst-lh-UyV"/>
@@ -460,6 +471,124 @@
                     </connections>
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <customView id="rVJ-7f-yXL" customClass="DateView" customModule="FFF_for_Mac">
+                    <rect key="frame" x="0.0" y="0.0" width="159" height="60"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <subviews>
+                        <stackView distribution="fill" orientation="vertical" alignment="centerX" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" ambiguous="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gDi-U9-r4X">
+                            <rect key="frame" x="0.0" y="-4" width="159" height="64"/>
+                            <subviews>
+                                <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6S5-NO-rsq">
+                                    <rect key="frame" x="24" y="32" width="112" height="32"/>
+                                    <subviews>
+                                        <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QHb-hu-awC">
+                                            <rect key="frame" x="0.0" y="0.0" width="23" height="32"/>
+                                            <buttonCell key="cell" type="bevel" title="◀️" bezelStyle="rounded" alignment="center" imageScaling="proportionallyDown" inset="2" id="RGA-JU-OPr">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="prevMonth:" target="rVJ-7f-yXL" id="0PF-Zb-Vkm"/>
+                                            </connections>
+                                        </button>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="zb0-jU-sst">
+                                            <rect key="frame" x="29" y="8" width="54" height="17"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="7e0-9y-7Cn">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="79s-4A-hjV">
+                                            <rect key="frame" x="89" y="0.0" width="23" height="32"/>
+                                            <buttonCell key="cell" type="bevel" title="▶️" bezelStyle="rounded" alignment="center" imageScaling="proportionallyDown" inset="2" id="aBP-ZC-XNd">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="nextMonth:" target="rVJ-7f-yXL" id="URF-Od-Pf0"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                    <visibilityPriorities>
+                                        <integer value="1000"/>
+                                        <integer value="1000"/>
+                                        <integer value="1000"/>
+                                    </visibilityPriorities>
+                                    <customSpacing>
+                                        <real value="3.4028234663852886e+38"/>
+                                        <real value="3.4028234663852886e+38"/>
+                                        <real value="3.4028234663852886e+38"/>
+                                    </customSpacing>
+                                </stackView>
+                                <stackView distribution="fill" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="93T-ha-Y55">
+                                    <rect key="frame" x="24" y="0.0" width="112" height="32"/>
+                                    <subviews>
+                                        <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="deH-uB-3wo">
+                                            <rect key="frame" x="0.0" y="0.0" width="23" height="32"/>
+                                            <buttonCell key="cell" type="bevel" title="◀️" bezelStyle="rounded" alignment="center" imageScaling="proportionallyDown" inset="2" id="0JZ-i5-Nzo">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="prevYear:" target="rVJ-7f-yXL" id="3P5-lW-WVa"/>
+                                            </connections>
+                                        </button>
+                                        <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BAR-yy-n5w">
+                                            <rect key="frame" x="29" y="8" width="54" height="17"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="kDh-2q-j1T">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="K1R-dT-y49">
+                                            <rect key="frame" x="89" y="0.0" width="23" height="32"/>
+                                            <buttonCell key="cell" type="bevel" title="▶️" bezelStyle="rounded" alignment="center" imageScaling="proportionallyDown" inset="2" id="eEA-TI-ZrL">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="nextYear:" target="rVJ-7f-yXL" id="Rp9-vq-Nlq"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                    <visibilityPriorities>
+                                        <integer value="1000"/>
+                                        <integer value="1000"/>
+                                        <integer value="1000"/>
+                                    </visibilityPriorities>
+                                    <customSpacing>
+                                        <real value="3.4028234663852886e+38"/>
+                                        <real value="3.4028234663852886e+38"/>
+                                        <real value="3.4028234663852886e+38"/>
+                                    </customSpacing>
+                                </stackView>
+                            </subviews>
+                            <visibilityPriorities>
+                                <integer value="1000"/>
+                                <integer value="1000"/>
+                            </visibilityPriorities>
+                            <customSpacing>
+                                <real value="3.4028234663852886e+38"/>
+                                <real value="3.4028234663852886e+38"/>
+                            </customSpacing>
+                        </stackView>
+                    </subviews>
+                    <constraints>
+                        <constraint firstItem="gDi-U9-r4X" firstAttribute="leading" secondItem="rVJ-7f-yXL" secondAttribute="leading" id="3YP-BW-vhW"/>
+                        <constraint firstAttribute="trailing" secondItem="gDi-U9-r4X" secondAttribute="trailing" id="bwe-bM-RZr"/>
+                    </constraints>
+                    <connections>
+                        <action selector="changeDateCustom:" target="B8D-0N-5wS" id="nro-M4-tyb"/>
+                        <outlet property="monthLabel" destination="zb0-jU-sst" id="qVU-lB-Thz"/>
+                        <outlet property="nextMonthButton" destination="79s-4A-hjV" id="X3q-VS-O7P"/>
+                        <outlet property="nextYearButton" destination="K1R-dT-y49" id="cj9-q1-iR3"/>
+                        <outlet property="prevMonthButton" destination="QHb-hu-awC" id="OcT-m1-EL1"/>
+                        <outlet property="prevYearButton" destination="deH-uB-3wo" id="yQC-35-Chs"/>
+                        <outlet property="yearLabel" destination="BAR-yy-n5w" id="JU8-Pw-EwE"/>
+                    </connections>
+                </customView>
                 <datePicker verticalHuggingPriority="750" id="0Xz-CZ-42A">
                     <rect key="frame" x="0.0" y="0.0" width="110" height="31"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>

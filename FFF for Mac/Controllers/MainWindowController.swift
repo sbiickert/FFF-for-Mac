@@ -12,12 +12,14 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	private let SpinnerToolbarItemID = NSToolbarItem.Identifier(rawValue: "Spinner")
 	private let SearchToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Search")
 	private let DateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Date")
+	private let CustomDateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "CustomDate")
 	private let AddToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Add")
 	private let BalanceToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Balance")
 
 	@IBOutlet var spinner: NSProgressIndicator!
 	@IBOutlet var datePicker: NSDatePicker!
 	@IBOutlet var searchField: NSSearchField!
+	@IBOutlet var customDatePicker: DateView!
 	@IBOutlet var addButton: NSButton!
 	@IBOutlet var monthBalance: MonthBalanceView!
 	
@@ -142,6 +144,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		else if (itemIdentifier == DateToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: DateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.datePicker, action: nil)!
 		}
+		else if (itemIdentifier == CustomDateToolbarItemID) {
+			toolbarItem = customToolbarItem(itemForItemIdentifier: CustomDateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.customDatePicker, action: nil)!
+		}
 		else if (itemIdentifier == AddToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: AddToolbarItemID, label: "Add Transaction", paletteLabel: "Add", toolTip: "Create a new transaction", target: self, itemContent: self.addButton, action: nil)!
 		}
@@ -156,11 +161,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 	
 	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [DateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, BalanceToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID]
+		return [CustomDateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, BalanceToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID]
 	}
 	
 	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID, AddToolbarItemID, BalanceToolbarItemID]
+		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID, AddToolbarItemID, BalanceToolbarItemID, CustomDateToolbarItemID]
 	}
 	
 	func windowDidBecomeMain(_ notification: Notification) {
@@ -199,6 +204,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		datePicker.dateValue = currentDate
 		DispatchQueue.main.async {
 			self.updateWindowTitle()
+			self.customDatePicker.date = self.app.currentDate
 		}
 		CachingGateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
 										 month: app.currentDateComponents.month)
@@ -293,6 +299,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	@IBAction func changeDate(_ sender: NSDatePicker) {
 		currentDate = datePicker.dateValue
 	}
+	@IBAction func changeDateCustom(_ sender: DateView) {
+		currentDate = customDatePicker.date
+	}
 	
 	@IBAction func addTransaction(_ sender: NSButton) {
 		showEditForm(for: nil)
@@ -306,6 +315,14 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	@IBAction func todayMenuItemSelected(_ sender: Any) {
 		app.currentDate = Date()
+	}
+	
+	@IBAction func nextMonthMenuItemSelected(_ sender: Any) {
+		app.currentDate = Calendar.current.date(byAdding: .month, value: 1, to: app.currentDate)!
+	}
+	
+	@IBAction func prevMonthMenuItemSelected(_ sender: Any) {
+		app.currentDate = Calendar.current.date(byAdding: .month, value: -1, to: app.currentDate)!
 	}
 
 	@IBAction func showCalendarMenuItemSelected(_ sender: Any) {
