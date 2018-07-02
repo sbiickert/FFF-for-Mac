@@ -202,7 +202,7 @@ extension TransListViewController: NSTableViewDelegate {
 		}
 		else if tableColumn == tableView.tableColumns[2] {
 			text = t.transactionType!.emoji + " " + t.transactionType!.description
-			image = t.transactionType!.icon
+//			image = t.transactionType!.icon
 			cellIdentifier = CellID.TransactionType
 		}
 		else if tableColumn == tableView.tableColumns[3] {

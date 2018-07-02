@@ -135,7 +135,7 @@ extension CategoryViewController: NSOutlineViewDelegate {
 			if tableColumn == outlineView.tableColumns[0] {
 				let emoji = TransactionType.transactionType(forCode: cat.transactionTypeID)?.emoji ?? "💥"
 				text = emoji + " " + cat.transactionTypeName
-				image = TransactionType.transactionType(forCode: cat.transactionTypeID)?.icon
+//				image = TransactionType.transactionType(forCode: cat.transactionTypeID)?.icon
 				cellIdentifier = CellID.TransactionType
 			}
 			else if tableColumn == outlineView.tableColumns[1] {
