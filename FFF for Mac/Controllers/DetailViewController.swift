@@ -12,6 +12,12 @@ class DetailViewController: FFFViewController {
 	
 	@IBOutlet weak var tableView: NSTableView!
 	
+	override func clearSelection() {
+		if tableView != nil {
+			tableView.deselectAll(self)
+		}
+		super.clearSelection()
+	}
 	private var transactions = [Transaction]()
 	
 	private func requestTransactions() {
@@ -95,5 +101,16 @@ extension DetailViewController: NSTableViewDelegate {
 			return cell
 		}
 		return nil
+	}
+	
+	func tableViewSelectionDidChange(_ notification: Notification) {
+		if tableView.selectedRow >= 0 {
+			let t = transactions[tableView.selectedRow]
+			app.selectedTransaction = t
+		}
+		else {
+			// No row selected
+			app.selectedTransaction = nil
+		}
 	}
 }

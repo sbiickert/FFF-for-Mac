@@ -14,6 +14,7 @@
 		B81F74BC20D429BF008288A6 /* TransactionMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BB20D429BF008288A6 /* TransactionMatch.swift */; };
 		B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BD20D4546A008288A6 /* CheckerDragView.swift */; };
 		B81F74C020D467FA008288A6 /* CSwiftV.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BF20D467FA008288A6 /* CSwiftV.swift */; };
+		B84EE35C20EE793B007C931C /* MainTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B84EE35B20EE793B007C931C /* MainTabViewController.swift */; };
 		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
 		B8A3487220E6E3480063E1E2 /* GatewayUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A3487120E6E3480063E1E2 /* GatewayUtil.swift */; };
 		B8A7984F20DB03B700E38848 /* MonthBalanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */; };
@@ -22,7 +23,7 @@
 		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
 		B8FB419A20E69F3A004942B9 /* CachingGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FB419920E69F3A004942B9 /* CachingGateway.swift */; };
 		F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C302038B11200A0A64E /* MainWindowController.swift */; };
-		F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C342038B1E600A0A64E /* MainSplitViewController.swift */; };
+		F4449C352038B1E600A0A64E /* MainSplitViewContainerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C342038B1E600A0A64E /* MainSplitViewContainerController.swift */; };
 		F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C362038B29C00A0A64E /* DetailViewController.swift */; };
 		F4449C3A2038B2DE00A0A64E /* CalendarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C382038B2DE00A0A64E /* CalendarViewController.swift */; };
 		F4449C40203A19D300A0A64E /* DetailTableCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C3F203A19D300A0A64E /* DetailTableCellView.swift */; };
@@ -50,6 +51,7 @@
 		B81F74BB20D429BF008288A6 /* TransactionMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionMatch.swift; sourceTree = "<group>"; };
 		B81F74BD20D4546A008288A6 /* CheckerDragView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerDragView.swift; sourceTree = "<group>"; };
 		B81F74BF20D467FA008288A6 /* CSwiftV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSwiftV.swift; sourceTree = "<group>"; };
+		B84EE35B20EE793B007C931C /* MainTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabViewController.swift; sourceTree = "<group>"; };
 		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
 		B8A3487120E6E3480063E1E2 /* GatewayUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayUtil.swift; sourceTree = "<group>"; };
 		B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthBalanceView.swift; sourceTree = "<group>"; };
@@ -58,7 +60,7 @@
 		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
 		B8FB419920E69F3A004942B9 /* CachingGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachingGateway.swift; sourceTree = "<group>"; };
 		F4449C302038B11200A0A64E /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
-		F4449C342038B1E600A0A64E /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
+		F4449C342038B1E600A0A64E /* MainSplitViewContainerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewContainerController.swift; sourceTree = "<group>"; };
 		F4449C362038B29C00A0A64E /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		F4449C382038B2DE00A0A64E /* CalendarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewController.swift; sourceTree = "<group>"; };
 		F4449C3F203A19D300A0A64E /* DetailTableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTableCellView.swift; sourceTree = "<group>"; };
@@ -96,7 +98,8 @@
 			isa = PBXGroup;
 			children = (
 				F4449C302038B11200A0A64E /* MainWindowController.swift */,
-				F4449C342038B1E600A0A64E /* MainSplitViewController.swift */,
+				B84EE35B20EE793B007C931C /* MainTabViewController.swift */,
+				F4449C342038B1E600A0A64E /* MainSplitViewContainerController.swift */,
 				B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */,
 				F4449C382038B2DE00A0A64E /* CalendarViewController.swift */,
 				F4449C362038B29C00A0A64E /* DetailViewController.swift */,
@@ -271,8 +274,9 @@
 				B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */,
 				B81F74BC20D429BF008288A6 /* TransactionMatch.swift in Sources */,
 				F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */,
-				F4449C352038B1E600A0A64E /* MainSplitViewController.swift in Sources */,
+				F4449C352038B1E600A0A64E /* MainSplitViewContainerController.swift in Sources */,
 				F4467F102033E4710058D0D8 /* Balance.swift in Sources */,
+				B84EE35C20EE793B007C931C /* MainTabViewController.swift in Sources */,
 				B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */,
 				F4467F112033E4710058D0D8 /* Category.swift in Sources */,
 				B81F74BA20D429A5008288A6 /* BankTransaction.swift in Sources */,

@@ -11,6 +11,13 @@ import Cocoa
 class TransListViewController: FFFViewController {
 	@IBOutlet weak var tableView: NSTableView!
 	
+	override func clearSelection() {
+		if tableView != nil {
+			tableView.deselectAll(self)
+		}
+		super.clearSelection()
+	}
+	
 	var searchString: String? {
 		didSet {
 			print("TransListViewController searchString set to \(String(describing: searchString))")
@@ -175,7 +182,7 @@ extension TransListViewController: NSTableViewDelegate {
 	}
 	
 	func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-		var image: NSImage?
+		let image: NSImage? = nil
 		var text: String = ""
 		var cellIdentifier: String = ""
 		
@@ -219,4 +226,14 @@ extension TransListViewController: NSTableViewDelegate {
 		return nil
 	}
 
+	func tableViewSelectionDidChange(_ notification: Notification) {
+		if tableView.selectedRow >= 0 {
+			let t = transactions[tableView.selectedRow]
+			app.selectedTransaction = t
+		}
+		else {
+			// No row selected
+			app.selectedTransaction = nil
+		}
+	}
 }

@@ -100,6 +100,14 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		window?.title = title
 	}
 	
+	override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+		var isValid = true //super.validateMenuItem(menuItem)
+		if menuItem == app.duplicateMenuItem {
+			isValid = app.selectedTransaction != nil
+		}
+		return isValid
+	}
+
 	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?) -> NSToolbarItem? {
 		
 		let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
@@ -171,23 +179,27 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	func windowDidBecomeMain(_ notification: Notification) {
 		// Check for valid user credentials
 		if CachingGateway.shared.isLoggedIn == false {
-			// Present modal sheet
-			let loginWindowController = LoginWindowController(windowNibName: NSNib.Name("LoginWindowController"))
-			window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
-				if responseCode == .stop {
-					// User pressed OK. Submit credentials. Dismiss sheet if successful.
-					// Store form values in defaults
-					let u = loginWindowController.usernameTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
-					let p = loginWindowController.passwordTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
-					RestGateway.setStoredCredentials(u, password: p)
-
-					// Send off the request to the Gateway to log in
-					CachingGateway.shared.login()
-					self.isTokenRequestInProgress = true
-				} // Quit is .abort
-				loginWindowController.window?.close()
-			})
+			presentLoginSheet()
 		}
+	}
+	
+	private func presentLoginSheet() {
+		// Present modal sheet
+		let loginWindowController = LoginWindowController(windowNibName: NSNib.Name("LoginWindowController"))
+		window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
+			if responseCode == .stop {
+				// User pressed OK. Submit credentials. Dismiss sheet if successful.
+				// Store form values in defaults
+				let u = loginWindowController.usernameTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
+				let p = loginWindowController.passwordTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
+				RestGateway.setStoredCredentials(u, password: p)
+				
+				// Send off the request to the Gateway to log in
+				CachingGateway.shared.login()
+				self.isTokenRequestInProgress = true
+			} // Quit is .abort
+			loginWindowController.window?.close()
+		})
 	}
 	
 	@objc func loginNotificationReceived(_ notification: Notification) {
@@ -198,6 +210,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	@objc func logoutNotificationReceived(_ notification: Notification) {
 		updateBalanceView(with: nil)
+		presentLoginSheet()
 	}
 
 	@objc func dateChangeNotificationReceived(_ note: Notification) {
@@ -305,6 +318,19 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	@IBAction func addTransaction(_ sender: NSButton) {
 		showEditForm(for: nil)
+	}
+	
+	@IBAction func duplicateTransaction(_ sender: Any) {
+		if var duplicateTransaction = app.selectedTransaction {
+			// Copy on Write makes the clone
+			duplicateTransaction.id = -1
+			duplicateTransaction.isNew = true
+			showEditForm(for: duplicateTransaction)
+		}
+	}
+	
+	@IBAction func logoutMenuItemSelected(_ sender: Any) {
+		CachingGateway.shared.logout()
 	}
 	
 	@IBAction func refreshMenuItemSelected(_ sender: Any) {

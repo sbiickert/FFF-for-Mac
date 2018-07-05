@@ -10,10 +10,9 @@ import Cocoa
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-	static let appVersion = "1.0.0"
-	
 	static let unitsYMD: Set<Calendar.Component> = [.month, .year, .day]
 	static let unitsYM: Set<Calendar.Component> = [.month, .year]
+	@IBOutlet var duplicateMenuItem: NSMenuItem!
 
 	var currentDate = Date() {
 		didSet {
@@ -42,6 +41,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			currentDate = newDate
 		}
 	}
+	
+	var selectedTransaction: Transaction?
 
 	func application(_ sender: NSApplication, openFile filename: String) -> Bool {
 		print("Opening file \(filename)")

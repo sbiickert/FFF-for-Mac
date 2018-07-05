@@ -109,6 +109,7 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 	func logout() {
 		self.fullName = nil;
 		self.token = nil;
+		self.postLogoutNotification()
 	}
 	
 	func getTransaction(withID id:Int, callback: @escaping (Message) -> Void) {
@@ -390,10 +391,10 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 										userInfo: info as [NSObject: AnyObject])
 	}
 	
-	func postLogoutNotification(_ info: NSDictionary) {
+	func postLogoutNotification() {
 		NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.LogoutResponse.rawValue),
 										object: self,
-										userInfo: info as [NSObject: AnyObject])
+										userInfo: nil)
 	}
 	
 	// MARK: Secure storage of credentials

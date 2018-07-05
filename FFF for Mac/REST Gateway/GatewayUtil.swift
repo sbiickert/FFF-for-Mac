@@ -15,7 +15,7 @@ enum DateArgOption: String {
 }
 
 struct Token {
-	static let lifespanInSeconds = 300
+	static let lifespanInSeconds = 3000
 	
 	public init(token: String) {
 		tokenString = token

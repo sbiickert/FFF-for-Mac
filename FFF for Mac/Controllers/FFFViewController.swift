@@ -35,6 +35,8 @@ class FFFViewController: NSViewController {
 		}
 		return nil
 	}
+	
+	func clearSelection() {}
 
     override func viewDidLoad() {
         super.viewDidLoad()

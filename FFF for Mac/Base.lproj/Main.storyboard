@@ -61,11 +61,6 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="File" id="bib-Uj-vzu">
                                     <items>
-                                        <menuItem title="New" keyEquivalent="n" id="Was-JA-tGl">
-                                            <connections>
-                                                <action selector="newDocument:" target="Ady-hI-5gd" id="4Si-XN-c54"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem title="Open…" hidden="YES" keyEquivalent="o" id="IAo-SY-fd9">
                                             <connections>
                                                 <action selector="openDocument:" target="Ady-hI-5gd" id="bVn-NM-KNZ"/>
@@ -77,6 +72,11 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
+                                        <menuItem title="Log Out" keyEquivalent="l" id="qcE-0O-U2S">
+                                            <connections>
+                                                <action selector="logoutMenuItemSelected:" target="Ady-hI-5gd" id="5Fb-GF-FoM"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                             <connections>
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
@@ -116,6 +116,17 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Edit" id="W48-6f-4Dl">
                                     <items>
+                                        <menuItem title="Create Transaction" keyEquivalent="t" id="i14-V2-OuM">
+                                            <connections>
+                                                <action selector="addTransaction:" target="Ady-hI-5gd" id="dRm-5C-rax"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Duplicate" enabled="NO" keyEquivalent="d" id="7dP-qo-q0I">
+                                            <connections>
+                                                <action selector="duplicateTransaction:" target="Ady-hI-5gd" id="Sb8-hf-ZEU"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="het-5c-RfV"/>
                                         <menuItem title="Undo" keyEquivalent="z" id="dRJ-4n-Yzg">
                                             <connections>
                                                 <action selector="undo:" target="Ady-hI-5gd" id="M6e-cu-g7V"/>
@@ -430,7 +441,11 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="FFF_for_Mac" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="FFF_for_Mac" customModuleProvider="target">
+                    <connections>
+                        <outlet property="duplicateMenuItem" destination="7dP-qo-q0I" id="OND-fn-sWu"/>
+                    </connections>
+                </customObject>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -701,10 +716,10 @@
             </objects>
             <point key="canvasLocation" x="205" y="194"/>
         </scene>
-        <!--Tab View Controller-->
+        <!--Main Tab View Controller-->
         <scene sceneID="W0B-5J-HFZ">
             <objects>
-                <tabViewController selectedTabViewItemIndex="0" id="UwP-2K-P9c" sceneMemberID="viewController">
+                <tabViewController selectedTabViewItemIndex="0" id="UwP-2K-P9c" customClass="MainTabViewController" customModule="FFF_for_Mac" customModuleProvider="target" sceneMemberID="viewController">
                     <tabViewItems>
                         <tabViewItem label="Calendar" identifier="" image="calendar_16" id="Fbr-uN-V6e"/>
                         <tabViewItem label="Transactions" identifier="" image="report_24" id="HDG-9c-yVw"/>
@@ -731,10 +746,10 @@
             </objects>
             <point key="canvasLocation" x="664" y="746"/>
         </scene>
-        <!--View Controller-->
+        <!--Main Split View Container Controller-->
         <scene sceneID="Pqd-yg-7CK">
             <objects>
-                <viewController id="MNO-eb-1vz" sceneMemberID="viewController">
+                <viewController id="MNO-eb-1vz" customClass="MainSplitViewContainerController" customModule="FFF_for_Mac" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="2EU-C0-iKC">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -950,10 +965,10 @@
             </objects>
             <point key="canvasLocation" x="1510" y="227"/>
         </scene>
-        <!--Main Split View Controller-->
+        <!--Split View Controller-->
         <scene sceneID="gwX-rK-dgk">
             <objects>
-                <splitViewController id="vDT-Gz-SUW" customClass="MainSplitViewController" customModule="FFF_for_Mac" customModuleProvider="target" sceneMemberID="viewController">
+                <splitViewController id="vDT-Gz-SUW" sceneMemberID="viewController">
                     <splitViewItems>
                         <splitViewItem id="AES-2u-y6v"/>
                         <splitViewItem id="UzQ-gA-SXt"/>

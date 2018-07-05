@@ -13,6 +13,13 @@ class CategoryViewController: FFFViewController {
 	
 	private var categorySummary: CategorySummary?
 	
+	override func clearSelection() {
+		if outlineView != nil {
+			outlineView.deselectAll(self)
+		}
+		super.clearSelection()
+	}
+	
 	private func requestSummary() {
 		if CachingGateway.shared.isLoggedIn {
 			let components = app.currentDateComponents
@@ -119,7 +126,7 @@ extension CategoryViewController: NSOutlineViewDelegate {
 
 	func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
 		var view: NSTableCellView?
-		var image: NSImage?
+		let image: NSImage? = nil
 		var text: String = ""
 		var cellIdentifier: String = ""
 
@@ -181,5 +188,10 @@ extension CategoryViewController: NSOutlineViewDelegate {
 		}
 
 		return view
+	}
+	
+	func outlineViewSelectionDidChange(_ notification: Notification) {
+		let t = outlineView.item(atRow: outlineView.selectedRow) as? Transaction
+		app.selectedTransaction = t
 	}
 }
