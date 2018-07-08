@@ -71,6 +71,7 @@ class CachingGateway: Gateway {
 	}
 	
 	func createTransaction(transaction: Transaction, callback: @escaping (Message) -> Void) {
+		saveRecentTransaction(transaction)
 		RestGateway.shared.createTransaction(transaction: transaction) {message in
 			if let t = message.transaction {
 				self.transactions[t.id] = t
@@ -83,6 +84,7 @@ class CachingGateway: Gateway {
 	}
 	
 	func updateTransaction(transaction: Transaction, callback: @escaping (Message) -> Void) {
+		saveRecentTransaction(transaction)
 		RestGateway.shared.updateTransaction(transaction: transaction) {firstmessage in
 			if let updatedID = firstmessage.updatedTransactionID {
 				RestGateway.shared.getTransaction(withID: updatedID) { secondmessage in
@@ -211,5 +213,52 @@ class CachingGateway: Gateway {
 		RestGateway.shared.getCategorySummary(forYear: year, month: month, callback: callback)
 	}
 	
+	private static let max_recent_count = 10
 	
+	private func saveRecentTransaction(_ transaction: Transaction) {
+		var t = transaction
+		t.id = -1 // We don't want to save the id of the transaction
+		
+		// If this transaction is already in the list, remove it
+		var recents = recentTransactions
+		for (index, recentT) in recents.enumerated() {
+			if t.equalForTemplate(with: recentT) {
+				recents.remove(at: index)
+				break
+			}
+		}
+		
+		// Put at the first spot in the list
+		recents.insert(t, at: 0)
+		
+		// If we have more than the max, then trim the list
+		while recents.count > CachingGateway.max_recent_count {
+			recents.removeLast()
+		}
+		
+		// Store in UserDefaults
+		let content = NSMutableArray()
+		for transaction in recents {
+			content.add(transaction.dictionary)
+		}
+		UserDefaults.standard.set(content, forKey: DefaultsKey.RecentTransactions.rawValue)
+	}
+	
+	var recentTransactions: [Transaction] {
+		get {
+			var recents = [Transaction]()
+			
+			// Retrieve from UserDefaults
+			if let listOfDictionaries = UserDefaults.standard.array(forKey: DefaultsKey.RecentTransactions.rawValue) {
+				for info in listOfDictionaries {
+					if let dict = info as? NSDictionary {
+						let transaction = Transaction(dictionary: dict)
+						recents.append(transaction)
+					}
+				}
+			}
+			
+			return recents
+		}
+	}
 }

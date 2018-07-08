@@ -29,7 +29,7 @@ class TransactionWrapper :NSObject {
 	}
 }
 
-struct Transaction {
+struct Transaction: Equatable {
 	static var currencyFormatter: NumberFormatter = {
 		var formatter = NumberFormatter()
 		formatter.formatterBehavior = NumberFormatter.Behavior.behavior10_4
@@ -80,4 +80,21 @@ struct Transaction {
 		}
 	}
 	
+	var dictionary: NSDictionary {
+		let dict = NSMutableDictionary()
+		
+		dict[TransactionKey.ID.rawValue] = String(self.id)
+		dict[TransactionKey.Amount.rawValue] = String(self.amount)
+		dict[TransactionKey.TransactionType.rawValue] = self.transactionType?.dictionary
+		dict[TransactionKey.Description.rawValue] = self.description
+		dict[TransactionKey.Date.rawValue] = DataFormatter.fffDateStringFromDate(self.date)
+		
+		return dict
+	}
+	
+	func equalForTemplate(with other:Transaction) -> Bool {
+		return self.amount == other.amount &&
+			self.description == other.description &&
+			self.transactionType == other.transactionType
+	}
 }

@@ -10,6 +10,14 @@ import Cocoa
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
+	static var appVersion:String {
+		if let dict = Bundle.main.infoDictionary {
+			let nsObject = dict["CFBundleShortVersionString"] as AnyObject
+			return nsObject as! String
+		}
+		return "Error"
+	}
+
 	static let unitsYMD: Set<Calendar.Component> = [.month, .year, .day]
 	static let unitsYM: Set<Calendar.Component> = [.month, .year]
 	@IBOutlet var duplicateMenuItem: NSMenuItem!

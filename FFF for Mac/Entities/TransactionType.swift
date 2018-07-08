@@ -31,7 +31,19 @@ struct TransactionType: Equatable {
 		}
 		else { isExpense = false }
 	}
+	
+	
+	var dictionary: NSDictionary {
+		let dict = NSMutableDictionary()
 		
+		dict[TransactionTypeKey.ID.rawValue] = String(self.code)
+		dict[TransactionTypeKey.Name.rawValue] = self.description
+		dict[TransactionTypeKey.Category.rawValue] = self.isExpense ? "EXPENSE" : "INCOME"
+		dict[TransactionTypeKey.Symbol.rawValue] = self.emoji
+		
+		return dict
+	}
+
 	static func transactionType(forCode code: Int) -> TransactionType? {
 		let allTransactionTypes = transactionTypes
 		

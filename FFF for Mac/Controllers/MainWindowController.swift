@@ -350,6 +350,14 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	@IBAction func prevMonthMenuItemSelected(_ sender: Any) {
 		app.currentDate = Calendar.current.date(byAdding: .month, value: -1, to: app.currentDate)!
 	}
+	
+	@IBAction func nextYearMenuItemSelected(_ sender: Any) {
+		app.currentDate = Calendar.current.date(byAdding: .year, value: 1, to: app.currentDate)!
+	}
+	
+	@IBAction func prevYearMenuItemSelected(_ sender: Any) {
+		app.currentDate = Calendar.current.date(byAdding: .year, value: -1, to: app.currentDate)!
+	}
 
 	@IBAction func showCalendarMenuItemSelected(_ sender: Any) {
 		tabViewController?.selectedTabViewItemIndex = 0

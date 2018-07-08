@@ -20,11 +20,8 @@ enum DefaultsKey: String {
 	case IncomeTypes = "income_types_key"
 	case ExpenseTypes = "expense_types_key"
 	case ServerUrl = "server_url_preference"
-	//	case ServerTokenLifespan = "server_token_lifespan_preference"
-	//	case UserName = "user_name_preference"
-	//	case Password = "password_preference"
-	//case FastCode = "fast_code_preference" // Switching to TouchID LocalAuthentication
 	case SuccessfulLogin = "user_name_password_are_valid_preference"
+	case RecentTransactions = "recent_transactions"
 }
 
 enum RestResource: String {
@@ -385,13 +382,13 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 		return dict
 	}
 	
-	func postLoginNotification(_ info: NSDictionary) {
+	private func postLoginNotification(_ info: NSDictionary) {
 		NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.LoginResponse.rawValue),
 										object: self,
 										userInfo: info as [NSObject: AnyObject])
 	}
 	
-	func postLogoutNotification() {
+	private func postLogoutNotification() {
 		NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.LogoutResponse.rawValue),
 										object: self,
 										userInfo: nil)

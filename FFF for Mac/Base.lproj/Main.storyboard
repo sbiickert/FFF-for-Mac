@@ -356,9 +356,21 @@
                                                 <action selector="nextMonthMenuItemSelected:" target="Ady-hI-5gd" id="UJL-Eh-pkW"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Next Year" alternate="YES" keyEquivalent="" id="2df-T8-vRH">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="nextYearMenuItemSelected:" target="Ady-hI-5gd" id="AAQ-Aw-3jd"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Previous Month" keyEquivalent="" id="eiG-rC-eAk">
                                             <connections>
                                                 <action selector="prevMonthMenuItemSelected:" target="Ady-hI-5gd" id="Edk-yI-q9o"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Previous Year" alternate="YES" keyEquivalent="" id="uMF-Um-LLa">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="prevYearMenuItemSelected:" target="Ady-hI-5gd" id="YzV-Z7-3St"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="SrS-vK-KIr"/>
