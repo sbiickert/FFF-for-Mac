@@ -153,7 +153,16 @@ class CachingGateway: Gateway {
 			}
 		}
 	}
-
+	
+	func getCachedTransactions(forYear year: Int, month: Int, day: Int, callback: @escaping (Message) -> Void) {
+		let key = "\(year)-\(month)"
+		if loadedMonths.contains(key) {
+			let transactions = self.getCachedTransactions(forYear: year, month: month, day: day)
+			let tMessage = TransactionsMessage(transactions)
+			callback(tMessage)
+		}
+	}
+	
 	func getTransactions(forYear year: Int, month: Int, day: Int, limitedTo tt: TransactionType?, callback: @escaping (Message) -> Void) {
 		let key = "\(year)-\(month)"
 		if loadedMonths.contains(key) {

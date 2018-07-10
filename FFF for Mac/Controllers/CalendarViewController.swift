@@ -125,11 +125,21 @@ class CalendarViewController: FFFViewController {
 					else {
 						dayView.backgroundColor = Values.normalBackgroundColor
 					}
+					dayView.removeAllTransactionTypes()
 					if let bal = monthBalance {
 						if dayOfMonth < bal.dayBalances.count {
 							if let dayBal = bal.dayBalances[dayOfMonth] {
 								dayView.expenseAmount = dayBal.expense.doubleValue
 								dayView.incomeAmount = dayBal.income.doubleValue
+								CachingGateway.shared.getCachedTransactions(forYear: components.year,
+																			month: components.month,
+																			day: dayOfMonth) { message in
+									if let transactions = message.transactions {
+										for t in transactions {
+											dayView.addTransactionType(t.transactionType)
+										}
+									}
+								}
 							}
 						}
 					}
@@ -178,7 +188,7 @@ class CalendarViewController: FFFViewController {
 	// MARK: Notifications
 	
 	override func loginNotificationReceived(_ notification: Notification) {
-		requestSummaryForMonth(currentDate)
+		requestDataForMonth(currentDate)
 	}
 	
 	override func logoutNotificationReceived(_ notification: Notification) {
@@ -189,7 +199,7 @@ class CalendarViewController: FFFViewController {
 	}
 
 	override func currentDateChanged(_ notification: Notification) {
-		requestSummaryForMonth(app.currentDate)
+		requestDataForMonth(app.currentDate)
 	}
 
 	override func currentDayChanged(_ notification: Notification) {
@@ -197,13 +207,18 @@ class CalendarViewController: FFFViewController {
 	}
 
 	override func dataUpdated(_ notification: Notification) {
-		requestSummaryForMonth(app.currentDate)
+		requestDataForMonth(app.currentDate)
 	}
 
-	func requestSummaryForMonth(_ date: Date) {
+	func requestDataForMonth(_ date: Date) {
 		let components = app.currentDateComponents
 		CachingGateway.shared.getBalanceSummary(forYear: components.year, month: components.month) {message in
 			self.monthBalance = message.balanceSummary
+			DispatchQueue.main.async {
+				self.updateView(forceUpdate: true)
+			}
+		}
+		CachingGateway.shared.getTransactions(forYear: components.year, month: components.month) {message in
 			DispatchQueue.main.async {
 				self.updateView(forceUpdate: true)
 			}

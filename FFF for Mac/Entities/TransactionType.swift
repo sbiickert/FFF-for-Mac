@@ -15,7 +15,7 @@ enum TransactionTypeKey: String {
 	case Symbol = "symbol"
 }
 
-struct TransactionType: Equatable {
+struct TransactionType: Equatable, Hashable {
 	var code: Int
 	var description: String
 	var emoji: String

@@ -10,6 +10,18 @@ import Cocoa
 
 class DayView: NSView {
 
+	private var transactionTypes = Set<TransactionType>()
+	
+	func addTransactionType(_ type: TransactionType?) {
+		if type != nil {
+			transactionTypes.insert(type!)
+		}
+	}
+	
+	func removeAllTransactionTypes() {
+		transactionTypes.removeAll()
+	}
+	
 	override init(frame frameRect: NSRect) {
 		super.init(frame: frameRect)
 	}
@@ -94,6 +106,19 @@ class DayView: NSView {
 			return nameTextAttributes
 		}
 	}
+	
+	var emojiTextAttributes: Dictionary<NSAttributedStringKey, NSObject> {
+		get {
+			let paragraphStyle = NSMutableParagraphStyle()
+			paragraphStyle.lineBreakMode = .byCharWrapping
+			paragraphStyle.alignment = .left
+			let nameTextAttributes = [
+				NSAttributedStringKey.font:NSFont.systemFont(ofSize: 11),
+				NSAttributedStringKey.foregroundColor: NSColor.textColor,
+				NSAttributedStringKey.paragraphStyle: paragraphStyle]
+			return nameTextAttributes
+		}
+	}
 
     override func draw(_ dirtyRect: NSRect) {
 		if isHidden || dayOfMonth < 1 {
@@ -121,15 +146,27 @@ class DayView: NSView {
 		let currFormatter = NumberFormatter()
 		currFormatter.numberStyle = .currency
 
+		let eAttrString = NSAttributedString(string: currFormatter.string(from: expenseNumber) ?? "", attributes: expenseAmountTextAttributes)
+		insetRect.origin.y -= offsetY
+		offsetY = eAttrString.size().height
 		if expenseAmount > 0 {
-			insetRect.origin.y -= offsetY
-			let attrString = NSAttributedString(string: currFormatter.string(from: expenseNumber) ?? "", attributes: expenseAmountTextAttributes)
-			attrString.draw(in: insetRect)
-			offsetY = attrString.size().height
+			eAttrString.draw(in: insetRect)
 		}
+		
+		let iAttrString = NSAttributedString(string: currFormatter.string(from: incomeNumber) ?? "", attributes: incomeAmountTextAttributes)
+		insetRect.origin.y -= offsetY
+		offsetY = iAttrString.size().height
 		if incomeAmount > 0 {
-			insetRect.origin.y -= offsetY
-			let attrString = NSAttributedString(string: currFormatter.string(from: incomeNumber) ?? "", attributes: incomeAmountTextAttributes)
+			iAttrString.draw(in: insetRect)
+		}
+		
+		if transactionTypes.count > 0 {
+			insetRect.origin.y -= offsetY + 8 // 8 is padding
+			var ttString = ""
+			for tt in transactionTypes {
+				ttString += tt.emoji
+			}
+			let attrString = NSAttributedString(string: ttString, attributes: emojiTextAttributes)
 			attrString.draw(in: insetRect)
 		}
 	}

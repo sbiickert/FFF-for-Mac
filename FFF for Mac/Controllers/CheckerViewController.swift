@@ -38,6 +38,22 @@ class CheckerViewController: FFFViewController {
 			outlineView.reloadData()
 		}
 	}
+	
+	@objc func doubleAction(_ outlineView:NSOutlineView) {
+		let item = outlineView.item(atRow: outlineView.clickedRow)
+		if (item as? MatchScore) != nil {
+			alignTransaction(self)
+		}
+		if (item as? TransactionMatch) != nil {
+			// Expand/collapse
+			if outlineView.isItemExpanded(item) == false {
+				outlineView.expandItem(item)
+			}
+			else {
+				outlineView.collapseItem(item)
+			}
+		}
+	}
 
 	@IBAction func alignTransaction(_ sender: Any) {
 		// Take selected item (MatchScore) and apply the date and amount of the bank transaction to the transaction
@@ -106,6 +122,7 @@ class CheckerViewController: FFFViewController {
 		
 		outlineView.delegate = self
 		outlineView.dataSource = self
+		outlineView.doubleAction = #selector(doubleAction(_:))
 		
 		if let cdv = view as? CheckerDragView {
 			cdv.delegate = self
@@ -317,9 +334,6 @@ extension CheckerViewController: NSOutlineViewDelegate {
 		// Or if this is a TransactionMatch that is .partial or .none
 		if let tm = item as? TransactionMatch {
 			isCreateEnabled = tm.matchType != .complete
-			if outlineView.isItemExpanded(item) == false {
-				outlineView.expandItem(item)
-			}
 		}
 		
 		alignButton.isEnabled = isAlignEnabled
