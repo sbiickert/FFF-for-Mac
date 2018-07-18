@@ -263,18 +263,37 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	private func showEditForm(for transaction:Transaction?) {
 		// Present modal sheet
 		let editWindowController = EditTransactionWindowController(windowNibName: NSNib.Name("EditTransactionWindowController"))
-		editWindowController.transaction = transaction
+		editWindowController.setTransaction(transaction)
 		window?.beginSheet(editWindowController.window!, completionHandler: { responseCode in
 			if responseCode == .stop {
-				// User pressed OK or Delete. Submit update/insert/delete.
-				if let t = editWindowController.transaction {
-					switch editWindowController.result {
-					case .Create:
-						CachingGateway.shared.createTransaction(transaction: t, callback: self.editCallback)
-					case .Update:
-						CachingGateway.shared.updateTransaction(transaction: t, callback: self.editCallback)
-					case .Delete:
-						CachingGateway.shared.deleteTransaction(transaction: t, callback: self.editCallback)
+				/*
+				User pressed OK or Delete. Submit update/insert/delete.
+				If Delete: .deletedTransactions.first will be .transaction.
+				Otherwise: transaction.isNew -> create
+				Loop through all transactions in seriesTransactions
+				Loop through all transactions in deletedTransactions
+				*/
+				if let transaction = editWindowController.transaction {
+					if editWindowController.isDelete == false {
+						if transaction.isNew {
+							CachingGateway.shared.createTransaction(transaction: transaction, callback: self.editCallback)
+						}
+						else {
+							CachingGateway.shared.updateTransaction(transaction: transaction, callback: self.editCallback)
+						}
+						for seriesT in editWindowController.seriesTransactions {
+							if seriesT.isNew {
+								CachingGateway.shared.createTransaction(transaction: seriesT, callback: self.editCallback)
+							}
+							else if seriesT.modificationStatus == .dirty {
+								CachingGateway.shared.updateTransaction(transaction: seriesT, callback: self.editCallback)
+							}
+						}
+					}
+					for deletedT in editWindowController.deletedTransactions {
+						if deletedT.isNew == false {
+							CachingGateway.shared.deleteTransaction(transaction: deletedT, callback: self.editCallback)
+						}
 					}
 				}
 			} // Cancel is .abort
@@ -287,9 +306,10 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		if message.isError {
 			print(message)
 		}
-		else {
-			NotificationCenter.default.post(name: NSNotification.Name(Notifications.DataUpdated.rawValue), object: nil)
-		}
+		// Not needed: the CachingGateway sends this notification
+//		else {
+//			NotificationCenter.default.post(name: NSNotification.Name(Notifications.DataUpdated.rawValue), object: nil)
+//		}
 	}
 
 	private var transactionListViewController: TransListViewController? {

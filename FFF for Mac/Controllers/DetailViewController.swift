@@ -97,10 +97,18 @@ extension DetailViewController: NSTableViewDelegate {
 			cell.amountLabel.stringValue = currFormatter.string(from: NSNumber(value: t.amount))!
 			cell.descriptionLabel.stringValue = t.description ?? ""
 			cell.iconLabel.stringValue = (t.transactionType?.emoji)!
-			cell.transactionTypeNameLabel.stringValue = t.transactionType?.description ?? ""
+			cell.transactionTypeNameLabel.stringValue = self.transactionTypeLabel(for: t)
 			return cell
 		}
 		return nil
+	}
+	
+	private func transactionTypeLabel(for transaction:Transaction) -> String {
+		var label = transaction.transactionType?.description ?? ""
+		if transaction.seriesID != nil {
+			label = Transaction.seriesTag + " " + label
+		}
+		return label
 	}
 	
 	func tableViewSelectionDidChange(_ notification: Notification) {

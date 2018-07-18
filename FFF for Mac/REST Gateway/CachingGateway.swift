@@ -108,6 +108,9 @@ class CachingGateway: Gateway {
 		RestGateway.shared.deleteTransaction(withID: id) { message in
 			if message.code == 200 {
 				self.transactions.removeValue(forKey: id)
+				NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.DataUpdated.rawValue),
+												object: self,
+												userInfo: nil)
 			}
 			callback(message)
 		}
@@ -205,7 +208,11 @@ class CachingGateway: Gateway {
 		}
 		return transactionsToReturn
 	}
-
+	
+	func getTransactionSeries(withID id:String, callback: @escaping (Message) -> Void) {
+		RestGateway.shared.getTransactionSeries(withID: id, callback: callback)
+	}
+	
 	func getSearchResults(_ query: String, callback: @escaping (Message) -> Void) {
 		RestGateway.shared.getSearchResults(query, callback: callback)
 	}

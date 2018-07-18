@@ -28,6 +28,7 @@ enum RestResource: String {
 	// For making resource requests
 	case BalanceResource = "balance"
 	case SearchResource = "search"
+	case SeriesResource = "series"
 	case SummaryResource = "summary"
 	case TokenResource = "token"
 	case TransactionResource = "transaction"
@@ -58,7 +59,7 @@ enum ResponseKey: String {
 
 
 class RestGateway: NSObject, Gateway, URLSessionDelegate {
-	private static let debugURL:String? = nil // "http://localhost/FFF/services/web"  // set to nil to ignore
+	private static let debugURL:String? = "http://localhost/FFF/services/web"  // set to nil to ignore
 	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web/app.php"
 	static let shared = RestGateway()
 	
@@ -202,6 +203,18 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 		self.makeRequest(request: request, callback: callback)
 	}
 	
+	func getTransactionSeries(withID id:String, callback: @escaping (Message) -> Void) {
+		// url/series/seriesID/json?token=
+		let fullUrl = String(format: "%@/%@/%@/json?token=%@",
+							 self.url,
+							 RestResource.SeriesResource.rawValue,
+							 id,
+							 self.token!.tokenString)
+		print("Getting transactions in series: \(fullUrl)");
+		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
+		self.makeRequest(request: request, callback: callback)
+	}
+	
 	func getSearchResults(_ query:String ,
 							callback: @escaping (Message) -> Void) {
 		// url/search/json?token=&q=
@@ -311,6 +324,7 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 		let content = ["tt": String(format: "%d", arguments: [transaction.transactionType!.code]),
 					   "amount": String(format: "%.2f", arguments: [transaction.amount]),
 					   "description": transaction.description,
+					   "seriesid": transaction.seriesID,
 					   "y": String(format: "%d", arguments: [components.year!]),
 					   "m": String(format: "%d", arguments: [components.month!]),
 					   "d": String(format: "%d", arguments: [components.day!])]
@@ -361,6 +375,8 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 				catch {
 					
 					print("Malformed JSON requesting token: \(error)");
+					let responseString = String(data: data!, encoding: String.Encoding.utf8)
+					print(responseString!)
 					info = [ResponseKey.Success.rawValue: NSNumber(value: false),
 							ResponseKey.Error.rawValue: error as AnyObject,
 							ResponseKey.Sender.rawValue: self];

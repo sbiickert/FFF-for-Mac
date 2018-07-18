@@ -15,6 +15,7 @@ enum TransactionKey: String {
 	case Description = "description"
 	case User = "user"
 	case Date = "transactionDate"
+	case SeriesID = "series"
 }
 
 enum ModificationStatus {
@@ -37,11 +38,24 @@ struct Transaction: Equatable {
 		return formatter
 	}()
 	
+	static func createSeriesID() -> String {
+		return UUID().uuidString
+	}
+	
+	static let seriesTag = "➿"
+	
 	var id: Int = 0
 	var amount: Float = 0.0
 	var transactionType: TransactionType?
 	var description: String?
 	var date: Date = Date()
+	var seriesID: String? {
+		didSet {
+			if seriesID != nil && seriesID!.isEmpty {
+				seriesID = nil
+			}
+		}
+	}
 	var modificationStatus: ModificationStatus = .clean
 	var isNew: Bool = true
 	
@@ -73,6 +87,10 @@ struct Transaction: Equatable {
 			let dateString = dict[TransactionKey.Date.rawValue] as! String
 			self.date = DataFormatter.dateFromFFFDateString(dateString)!
 			self.description = dict[TransactionKey.Description.rawValue] as? String
+			self.seriesID = dict[TransactionKey.SeriesID.rawValue] as? String
+			if self.seriesID != nil && self.seriesID!.isEmpty {
+				self.seriesID = nil
+			}
 			self.isNew = false
 			
 			let tempTTDict = dict[TransactionKey.TransactionType.rawValue] as! NSDictionary
@@ -88,6 +106,7 @@ struct Transaction: Equatable {
 		dict[TransactionKey.TransactionType.rawValue] = self.transactionType?.dictionary
 		dict[TransactionKey.Description.rawValue] = self.description
 		dict[TransactionKey.Date.rawValue] = DataFormatter.fffDateStringFromDate(self.date)
+		dict[TransactionKey.SeriesID.rawValue] = self.seriesID
 		
 		return dict
 	}

@@ -45,6 +45,7 @@ protocol Gateway {
 	func updateTransaction(transaction: Transaction, callback: @escaping (Message) -> Void)
 	func deleteTransaction(transaction: Transaction, callback: @escaping (Message) -> Void)
 	func deleteTransaction(withID id:Int, callback: @escaping (Message) -> Void)
+	func getTransactionSeries(withID id:String, callback: @escaping (Message) -> Void)
 	func getTransactions(forYear year:Int, month:Int, callback: @escaping (Message) -> Void)
 	func getTransactions(forYear year:Int, month:Int, day:Int,
 						 callback: @escaping (Message) -> Void)
