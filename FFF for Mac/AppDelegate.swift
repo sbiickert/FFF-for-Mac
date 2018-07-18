@@ -21,7 +21,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	static let unitsYMD: Set<Calendar.Component> = [.month, .year, .day]
 	static let unitsYM: Set<Calendar.Component> = [.month, .year]
 	@IBOutlet var duplicateMenuItem: NSMenuItem!
-
+	@IBOutlet weak var deleteMenuItem: NSMenuItem!
+	
 	var currentDate = Date() {
 		didSet {
 			let oldComponents = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: oldValue)

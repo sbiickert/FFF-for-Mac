@@ -118,6 +118,14 @@ class EditTransactionWindowController: NSWindowController {
 		self.deletedTransactions.append(contentsOf: self.seriesTransactions)
 		self.seriesTransactions.removeAll()
 		self.seriesTransactions.append(contentsOf: self.generateSeries())
+		if self.seriesTransactions.count == 0 {
+			if var t = transaction {
+				t.seriesID = nil
+				t.modificationStatus = .dirty
+				transaction = t
+				updateUI()
+			}
+		}
 	}
 	
 	private func generateSeries() -> [Transaction] {

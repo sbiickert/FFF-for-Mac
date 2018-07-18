@@ -126,6 +126,15 @@
                                                 <action selector="duplicateTransaction:" target="Ady-hI-5gd" id="Sb8-hf-ZEU"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Delete" enabled="NO" id="1qt-wU-nCi">
+                                            <string key="keyEquivalent" base64-UTF8="YES">
+CA
+</string>
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="deleteTransaction:" target="Ady-hI-5gd" id="Snw-3x-mHw"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="het-5c-RfV"/>
                                         <menuItem title="Undo" keyEquivalent="z" id="dRJ-4n-Yzg">
                                             <connections>
@@ -455,6 +464,7 @@
                 </application>
                 <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="FFF_for_Mac" customModuleProvider="target">
                     <connections>
+                        <outlet property="deleteMenuItem" destination="1qt-wU-nCi" id="WHb-vv-hhY"/>
                         <outlet property="duplicateMenuItem" destination="7dP-qo-q0I" id="OND-fn-sWu"/>
                     </connections>
                 </customObject>

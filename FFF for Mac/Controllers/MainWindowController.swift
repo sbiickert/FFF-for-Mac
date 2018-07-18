@@ -105,6 +105,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		if menuItem == app.duplicateMenuItem {
 			isValid = app.selectedTransaction != nil
 		}
+		if menuItem == app.deleteMenuItem {
+			isValid = app.selectedTransaction != nil && app.selectedTransaction!.seriesID == nil
+		}
 		return isValid
 	}
 
@@ -346,6 +349,14 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 			duplicateTransaction.id = -1
 			duplicateTransaction.isNew = true
 			showEditForm(for: duplicateTransaction)
+		}
+	}
+	
+	@IBAction func deleteTransaction(_ sender: Any) {
+		if let selected = app.selectedTransaction {
+			CachingGateway.shared.deleteTransaction(transaction: selected) { message in
+				// Don't have to do anything else
+			}
 		}
 	}
 	
