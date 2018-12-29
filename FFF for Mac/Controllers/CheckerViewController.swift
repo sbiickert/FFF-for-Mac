@@ -262,6 +262,8 @@ extension CheckerViewController: NSOutlineViewDelegate {
 		var view: NSTableCellView?
 		var text: String = ""
 		var cellIdentifier: String = ""
+		
+		var textColor = NSColor.controlTextColor
 
 		let dateFormatter = DateFormatter()
 		dateFormatter.dateStyle = .long
@@ -281,6 +283,9 @@ extension CheckerViewController: NSOutlineViewDelegate {
 			else if tableColumn == outlineView.tableColumns[1] {
 				cellIdentifier = CellID.Amount
 				text = currFormatter.string(from: NSNumber(value: tm.bankTransaction.amount))!
+				if tm.bankTransaction.amount > 0 {
+					textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+				}
 			}
 			else if tableColumn == outlineView.tableColumns[2] {
 				cellIdentifier = CellID.TransactionType
@@ -299,11 +304,17 @@ extension CheckerViewController: NSOutlineViewDelegate {
 			else if tableColumn == outlineView.tableColumns[1] {
 				cellIdentifier = CellID.Amount
 				text = currFormatter.string(from: NSNumber(value: ms.transaction.amount))!
+				if ms.transaction.transactionType?.isExpense == false {
+					textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+				}
 			}
 			else if tableColumn == outlineView.tableColumns[2] {
 				cellIdentifier = CellID.TransactionType
 				let emoji = ms.transaction.transactionType?.emoji ?? "💥"
 				text = emoji + " " + (ms.transaction.transactionType?.description ?? "")
+				if ms.transaction.transactionType?.isExpense == false {
+					textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+				}
 			}
 			else if tableColumn == outlineView.tableColumns[3] {
 				cellIdentifier = CellID.Description
@@ -316,6 +327,7 @@ extension CheckerViewController: NSOutlineViewDelegate {
 		view = outlineView.makeView(withIdentifier: id, owner: self) as? NSTableCellView
 		if let textField = view?.textField {
 			textField.stringValue = text
+			textField.textColor = textColor
 		}
 		return view
 	}

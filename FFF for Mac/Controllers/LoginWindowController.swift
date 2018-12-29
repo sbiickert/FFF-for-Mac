@@ -30,7 +30,7 @@ class LoginWindowController: NSWindowController {
 		NSApp.terminate(self)
 	}
 	
-	override func controlTextDidChange(_ obj: Notification) {
+	func controlTextDidChange(_ obj: Notification) {
 		enableOKButton()
 	}
 	

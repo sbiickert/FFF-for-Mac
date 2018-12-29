@@ -184,6 +184,7 @@ extension TransListViewController: NSTableViewDelegate {
 	func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
 		let image: NSImage? = nil
 		var text: String = ""
+		var textColor = NSColor.controlTextColor
 		var cellIdentifier: String = ""
 		
 		if row >= transactions.count {
@@ -205,11 +206,17 @@ extension TransListViewController: NSTableViewDelegate {
 		}
 		else if tableColumn == tableView.tableColumns[1] {
 			text = currFormatter.string(from: NSNumber(value: t.amount))!
+			if t.transactionType?.isExpense == false {
+				textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+			}
 			cellIdentifier = CellID.Amount
 		}
 		else if tableColumn == tableView.tableColumns[2] {
 			text = t.transactionType!.emoji + " " + t.transactionType!.description
 //			image = t.transactionType!.icon
+			if t.transactionType?.isExpense == false {
+				textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+			}
 			cellIdentifier = CellID.TransactionType
 		}
 		else if tableColumn == tableView.tableColumns[3] {
@@ -220,6 +227,7 @@ extension TransListViewController: NSTableViewDelegate {
 		let id = NSUserInterfaceItemIdentifier(cellIdentifier)
 		if let cell = tableView.makeView(withIdentifier: id, owner: nil) as? NSTableCellView {
 			cell.textField?.stringValue = text
+			cell.textField?.textColor = textColor
 			cell.imageView?.image = image ?? nil
 			return cell
 		}

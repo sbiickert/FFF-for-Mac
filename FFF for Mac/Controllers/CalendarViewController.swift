@@ -11,8 +11,7 @@ import Cocoa
 class CalendarViewController: FFFViewController {
 	struct Values {
 		static let insets = 8
-		static let normalBackgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
-		static let selectedBackgroundColor = #colorLiteral(red: 0.9951301731, green: 1, blue: 0.7860673396, alpha: 1)
+		static let selectedBackgroundColorName = "currentDayBackgroundColor"
 	}
 	
 	@IBOutlet weak var calendarView: NSView!
@@ -120,10 +119,10 @@ class CalendarViewController: FFFViewController {
 				if dayOfMonth >= 1 && dayOfMonth <= numberOfDaysInCurrentMonth {
 					dayView.dayOfMonth = dayOfMonth
 					if dayOfMonth == components.day {
-						dayView.backgroundColor = Values.selectedBackgroundColor
+						dayView.backgroundColor = NSColor(named: NSColor.Name("currentDayBackgroundColor")) ?? NSColor.purple
 					}
 					else {
-						dayView.backgroundColor = Values.normalBackgroundColor
+						dayView.backgroundColor = NSColor.controlBackgroundColor
 					}
 					dayView.removeAllTransactionTypes()
 					if let bal = monthBalance {

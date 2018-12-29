@@ -90,14 +90,21 @@ extension DetailViewController: NSTableViewDelegate {
 		let id = NSUserInterfaceItemIdentifier(cellIdentifier)
 		let t = transactions[row]
 		
+		var textColor = NSColor.controlTextColor
+		if t.transactionType?.isExpense == false {
+			textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+		}
+
 		let currFormatter = NumberFormatter()
 		currFormatter.numberStyle = .currency
 
 		if let cell = tableView.makeView(withIdentifier: id, owner: nil) as? DetailTableCellView {
 			cell.amountLabel.stringValue = currFormatter.string(from: NSNumber(value: t.amount))!
+			cell.amountLabel.textColor = textColor
 			cell.descriptionLabel.stringValue = t.description ?? ""
 			cell.iconLabel.stringValue = (t.transactionType?.emoji)!
 			cell.transactionTypeNameLabel.stringValue = self.transactionTypeLabel(for: t)
+			cell.transactionTypeNameLabel.textColor = textColor
 			return cell
 		}
 		return nil

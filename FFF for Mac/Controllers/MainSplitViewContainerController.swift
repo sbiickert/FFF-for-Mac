@@ -11,7 +11,7 @@ import Cocoa
 class MainSplitViewContainerController: FFFViewController {
 
 	override func clearSelection() {
-		for child in childViewControllers {
+		for child in children {
 			if let svc = child as? NSSplitViewController {
 				for svi in svc.splitViewItems {
 					if let fffController = svi.viewController as? FFFViewController {

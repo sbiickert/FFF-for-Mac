@@ -69,53 +69,55 @@ class DayView: NSView {
 		didSet { setNeedsDisplay(self.bounds) }
 	}
 	
-	var dayOfMonthTextAttributes: Dictionary<NSAttributedStringKey, NSObject> {
+	var dayOfMonthTextAttributes: Dictionary<NSAttributedString.Key, NSObject> {
 		get {
 			let paragraphStyle = NSMutableParagraphStyle()
 			paragraphStyle.lineBreakMode = .byTruncatingTail
 			paragraphStyle.alignment = .left
 			let nameTextAttributes = [
-				NSAttributedStringKey.font:NSFont.boldSystemFont(ofSize: 12),
-				NSAttributedStringKey.paragraphStyle: paragraphStyle]
+				NSAttributedString.Key.font:NSFont.boldSystemFont(ofSize: 12),
+				NSAttributedString.Key.foregroundColor: NSColor.controlTextColor,
+				NSAttributedString.Key.paragraphStyle: paragraphStyle]
 			return nameTextAttributes
 		}
 	}
 	
-	var incomeAmountTextAttributes: Dictionary<NSAttributedStringKey, NSObject> {
+	var incomeAmountTextAttributes: Dictionary<NSAttributedString.Key, NSObject> {
 		get {
 			let paragraphStyle = NSMutableParagraphStyle()
 			paragraphStyle.lineBreakMode = .byTruncatingTail
 			paragraphStyle.alignment = .right
 			let nameTextAttributes = [
-				NSAttributedStringKey.font:NSFont.systemFont(ofSize: 11),
-				NSAttributedStringKey.foregroundColor: NSColor.black,
-				NSAttributedStringKey.paragraphStyle: paragraphStyle]
+				NSAttributedString.Key.font:NSFont.systemFont(ofSize: 11),
+				NSAttributedString.Key.foregroundColor: NSColor.controlTextColor,
+				NSAttributedString.Key.paragraphStyle: paragraphStyle]
 			return nameTextAttributes
 		}
 	}
 	
-	var expenseAmountTextAttributes: Dictionary<NSAttributedStringKey, NSObject> {
+	var expenseAmountTextAttributes: Dictionary<NSAttributedString.Key, NSObject> {
 		get {
+			let expenseTextColor = NSColor(named: NSColor.Name("expenseTextColor")) ?? NSColor.purple
 			let paragraphStyle = NSMutableParagraphStyle()
 			paragraphStyle.lineBreakMode = .byTruncatingTail
 			paragraphStyle.alignment = .right
 			let nameTextAttributes = [
-				NSAttributedStringKey.font:NSFont.systemFont(ofSize: 11),
-				NSAttributedStringKey.foregroundColor: NSColor.red,
-				NSAttributedStringKey.paragraphStyle: paragraphStyle]
+				NSAttributedString.Key.font:NSFont.systemFont(ofSize: 11),
+				NSAttributedString.Key.foregroundColor: expenseTextColor,
+				NSAttributedString.Key.paragraphStyle: paragraphStyle]
 			return nameTextAttributes
 		}
 	}
 	
-	var emojiTextAttributes: Dictionary<NSAttributedStringKey, NSObject> {
+	var emojiTextAttributes: Dictionary<NSAttributedString.Key, NSObject> {
 		get {
 			let paragraphStyle = NSMutableParagraphStyle()
 			paragraphStyle.lineBreakMode = .byCharWrapping
 			paragraphStyle.alignment = .left
 			let nameTextAttributes = [
-				NSAttributedStringKey.font:NSFont.systemFont(ofSize: 11),
-				NSAttributedStringKey.foregroundColor: NSColor.textColor,
-				NSAttributedStringKey.paragraphStyle: paragraphStyle]
+				NSAttributedString.Key.font:NSFont.systemFont(ofSize: 11),
+				NSAttributedString.Key.foregroundColor: NSColor.textColor,
+				NSAttributedString.Key.paragraphStyle: paragraphStyle]
 			return nameTextAttributes
 		}
 	}

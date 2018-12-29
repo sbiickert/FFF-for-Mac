@@ -56,7 +56,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		
 		// Automatic saving/restoring of window state
 		shouldCascadeWindows = false
-		window?.setFrameAutosaveName(NSWindow.FrameAutosaveName("FFF Main Window"))
+		window?.setFrameAutosaveName("FFF Main Window")
 		
         super.windowDidLoad()
 
@@ -100,7 +100,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		window?.title = title
 	}
 	
-	override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+	func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
 		var isValid = true //super.validateMenuItem(menuItem)
 		if menuItem == app.duplicateMenuItem {
 			isValid = app.selectedTransaction != nil
@@ -111,7 +111,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		return isValid
 	}
 
-	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?) -> NSToolbarItem? {
+	func customToolbarItem(itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, label: String, paletteLabel: String, toolTip: String, target: AnyObject, itemContent: AnyObject, action: Selector?, minSize: NSSize?=nil) -> NSToolbarItem? {
 		
 		let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 		
@@ -132,6 +132,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		}
 		else {
 			assertionFailure("Invalid itemContent: object")
+		}
+		if let size = minSize {
+			toolbarItem.minSize = size
 		}
 		return toolbarItem
 	}
@@ -159,7 +162,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 			toolbarItem = customToolbarItem(itemForItemIdentifier: CustomDateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.customDatePicker, action: nil)!
 		}
 		else if (itemIdentifier == AddToolbarItemID) {
-			toolbarItem = customToolbarItem(itemForItemIdentifier: AddToolbarItemID, label: "Add Transaction", paletteLabel: "Add", toolTip: "Create a new transaction", target: self, itemContent: self.addButton, action: nil)!
+			toolbarItem = customToolbarItem(itemForItemIdentifier: AddToolbarItemID, label: "Add Transaction", paletteLabel: "Add", toolTip: "Create a new transaction", target: self, itemContent: self.addButton, action: nil, minSize: NSSize(width: 64, height: 64))!
 		}
 		else if (itemIdentifier == BalanceToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: BalanceToolbarItemID, label: "Balance", paletteLabel: "Balance", toolTip: "Monthly balance", target: self, itemContent: self.monthBalance, action: nil)!
@@ -188,7 +191,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	private func presentLoginSheet() {
 		// Present modal sheet
-		let loginWindowController = LoginWindowController(windowNibName: NSNib.Name("LoginWindowController"))
+		let loginWindowController = LoginWindowController(windowNibName: "LoginWindowController")
 		window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
 			if responseCode == .stop {
 				// User pressed OK. Submit credentials. Dismiss sheet if successful.
@@ -265,7 +268,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	
 	private func showEditForm(for transaction:Transaction?) {
 		// Present modal sheet
-		let editWindowController = EditTransactionWindowController(windowNibName: NSNib.Name("EditTransactionWindowController"))
+		let editWindowController = EditTransactionWindowController(windowNibName: "EditTransactionWindowController")
 		editWindowController.setTransaction(transaction)
 		window?.beginSheet(editWindowController.window!, completionHandler: { responseCode in
 			if responseCode == .stop {
@@ -316,7 +319,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 
 	private var transactionListViewController: TransListViewController? {
-		for vc in tabViewController!.childViewControllers {
+		for vc in tabViewController!.children {
 			if let tlvc = vc as? TransListViewController {
 				return tlvc
 			}

@@ -52,7 +52,7 @@ kMDItemContentTypeTree = (
 	private func shouldAllowDrag(_ draggingInfo: NSDraggingInfo) -> Bool {
 		var canAccept = false
 		
-		let pasteboard = draggingInfo.draggingPasteboard()
+		let pasteboard = draggingInfo.draggingPasteboard
 		if pasteboard.canReadObject(forClasses: [NSURL.self], options: filteringOptions) {
 			canAccept = true
 		}
@@ -74,7 +74,7 @@ kMDItemContentTypeTree = (
 
 	override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
 		isReceivingDrag = false
-		let pasteboard = sender.draggingPasteboard()
+		let pasteboard = sender.draggingPasteboard
 		if let urls = pasteboard.readObjects(forClasses: [NSURL.self], options:filteringOptions) as? [URL], urls.count > 0 {
 			return delegate?.openCSV(urls.first!) ?? false
 		}

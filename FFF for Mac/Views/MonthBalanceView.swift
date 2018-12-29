@@ -42,7 +42,9 @@ class MonthBalanceView: NSView {
 			currFormatter.numberStyle = .currency
 			
 			incomeLabel.stringValue = currFormatter.string(from: incomeNumber) ?? ""
+			incomeLabel.textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
 			expenseLabel.stringValue = currFormatter.string(from: expenseNumber) ?? ""
+			expenseLabel.textColor = NSColor(named: NSColor.Name("expenseTextColor")) ?? NSColor.purple
 			balanceLabel.stringValue = currFormatter.string(from: balanceNumber) ?? ""
 		}
 	}

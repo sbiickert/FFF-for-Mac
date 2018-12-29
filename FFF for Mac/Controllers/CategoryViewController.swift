@@ -144,6 +144,7 @@ extension CategoryViewController: NSOutlineViewDelegate {
 				text = emoji + " " + cat.transactionTypeName
 //				image = TransactionType.transactionType(forCode: cat.transactionTypeID)?.icon
 				cellIdentifier = CellID.TransactionType
+				tagAsIncome = cat.isExpense == false
 			}
 			else if tableColumn == outlineView.tableColumns[1] {
 				text = currFormatter.string(from: NSNumber(value: cat.amount))!
@@ -177,7 +178,7 @@ extension CategoryViewController: NSOutlineViewDelegate {
 		if let textField = view?.textField {
 			textField.stringValue = text
 			if tagAsIncome {
-				textField.textColor = NSColor.blue
+				textField.textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
 			}
 			else {
 				textField.textColor = NSColor.textColor
