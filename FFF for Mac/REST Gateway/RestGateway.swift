@@ -59,8 +59,11 @@ enum ResponseKey: String {
 
 
 class RestGateway: NSObject, Gateway, URLSessionDelegate {
-	private static let debugURL:String? = nil // "http://localhost/FFF/services/web"  // set to nil to ignore
-	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web/app.php"
+	// Symfony "http://localhost:8000"
+	// MAMP    "http://localhost:8888/FFF4/services/web/app.php"
+	// Linode  "https://biickert.ca/FFF4/services/web"
+	private static let debugURL:String? = nil//"http://localhost:8888/FFF4/services/web/app.php"  // set to nil to ignore
+	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web"
 	static let shared = RestGateway()
 	
 	var userName: String!
@@ -76,9 +79,10 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 		if RestGateway.debugURL != nil {
 			self.url = RestGateway.debugURL!
 		}
-		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
-			self.url = defaultsUrl
-		}
+		// At the moment, no way to edit Preferences, so this causes old URL to stay forever
+//		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
+//			self.url = defaultsUrl
+//		}
 		else {
 			self.url = RestGateway.defaultURL
 		}
@@ -425,7 +429,7 @@ class RestGateway: NSObject, Gateway, URLSessionDelegate {
 		let keychainQuery = NSDictionary(
 			objects: [kSecClassGenericPasswordValue,
 					  key,
-					  kCFBooleanTrue,
+					  kCFBooleanTrue!,
 					  kSecMatchLimitOneValue],
 			forKeys: [kSecClassValue, kSecAttrServiceValue, kSecReturnDataValue, kSecMatchLimitValue]);
 		var dataTypeRef: AnyObject?

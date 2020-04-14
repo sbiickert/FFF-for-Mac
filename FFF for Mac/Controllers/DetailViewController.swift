@@ -71,10 +71,12 @@ class DetailViewController: FFFViewController {
     }
 	
 	@objc func doubleAction(_ tableView:NSTableView) {
-		let t = transactions[tableView.clickedRow]
-		NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
-										object: self,
-										userInfo: ["t": t])
+		if transactions.indices.contains(tableView.clickedRow) {
+			let t = transactions[tableView.clickedRow]
+			NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+											object: self,
+											userInfo: ["t": t])
+		}
 	}
 }
 
