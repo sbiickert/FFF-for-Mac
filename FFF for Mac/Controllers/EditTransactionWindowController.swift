@@ -8,32 +8,35 @@
 
 import Cocoa
 
-class EditTransactionWindowController: NSWindowController {
+class EditTransactionWindowController: NSWindowController, NSTextFieldDelegate {
 	
-	func setTransaction(_ t:Transaction?) {
-		self.transaction = t
-		// Only want to fetch series when called externally.
-		fetchSeries()
+	func setTransactionSeries(_ series:TransactionSeries) {
+		self.transactionSeries = series
+		if transactionSeries.needToLoadSeriesTransactions {
+			transactionSeries.loadExistingSeriesTransactions { [weak self] success in
+				DispatchQueue.main.async {
+					self?.updateUI()
+					self?.discloseSeries(self?.transactionSeries.isSeries ?? false ? .on : .off)
+				}
+			}
+		}
+		updateUI()
 	}
 	
-	private(set) var transaction:Transaction? {
+	private(set) var transactionSeries:TransactionSeries! {
 		didSet {
-			if transaction == nil {
-				transaction = Transaction()
-				transaction!.date = (NSApplication.shared.delegate as! AppDelegate).currentDate
-			}
-			updateUI()
+//			DispatchQueue.main.async {
+//				self.updateUI()
+//			}
 		}
 	}
 	
-	var seriesTransactions = [Transaction]() {
-		didSet {
-			DispatchQueue.main.async {
-				self.seriesTableView.reloadData()
-			}
+	var transactionSeriesIsNormal: Bool {
+		if let _ = transactionSeries as? IncomeExpenseTransactionSeries {
+			return false
 		}
+		return true  // nil will return true
 	}
-	var deletedTransactions = [Transaction]()
 
 	@IBOutlet weak var expenseCheckbox: NSButton!
 	@IBOutlet weak var datePicker: NSDatePicker!
@@ -43,22 +46,38 @@ class EditTransactionWindowController: NSWindowController {
 	@IBOutlet weak var deleteButton: NSButton!
 	@IBOutlet weak var cancelButton: NSButton!
 	@IBOutlet weak var okButton: NSButton!
+	@IBOutlet weak var disclosureButton: NSButton!
 	
 	@IBAction func disclosureClick(_ sender: NSButton) {
-		if sender.state == .on {
-			transactionSeriesStackView.isHidden = false
-			resizeWindow(size: WindowSize.large)
-		}
-		else if sender.state == .off {
-			resizeWindow(size: WindowSize.small)
-			transactionSeriesStackView.isHidden = true
-		}
+		discloseSeries(sender.state)
 	}
 	@IBOutlet weak var disclosureTriangle: NSButton!
 	@IBOutlet weak var transactionSeriesStackView: NSStackView!
+	@IBOutlet weak var repeatPopupStackView: NSStackView!
 	@IBOutlet weak var repeatPopup: NSPopUpButton!
+	@IBOutlet weak var untilPopupStackView: NSStackView!
 	@IBOutlet weak var untilPopup: NSPopUpButton!
 	@IBOutlet weak var seriesTableView: NSTableView!
+	
+	private func discloseSeries(_ disclosureState:NSControl.StateValue) {
+		if disclosureButton.state != disclosureState {
+			disclosureButton.state = disclosureState
+		}
+		if disclosureButton.state == .on {
+			transactionSeriesStackView.isHidden = false
+			repeatPopupStackView.isHidden = false
+			untilPopupStackView.isHidden = false
+			seriesTableView.isHidden = false
+			resizeWindow(size: WindowSize.large)
+		}
+		else {
+			repeatPopupStackView.isHidden = true
+			untilPopupStackView.isHidden = true
+			seriesTableView.isHidden = true
+			transactionSeriesStackView.isHidden = true
+			resizeWindow(size: WindowSize.small)
+		}
+	}
 	
 	private struct WindowSize {
 		static let small = CGSize(width: 480, height: 206)
@@ -72,129 +91,65 @@ class EditTransactionWindowController: NSWindowController {
 		}
 	}
 	
-	
-	
 	override func windowDidLoad() {
         super.windowDidLoad()
 		seriesTableView.delegate = self
 		seriesTableView.dataSource = self
-		transactionSeriesStackView.isHidden = true
+		disclosureButton.state = .off
 		updateUI()
 		initSeriesRepeatPopupList()
 		initSeriesRepeatUntilPopupList()
-		resizeWindow(size: WindowSize.small)
+		discloseSeries(.off)
+		descriptionTextField.delegate = self
+		//amountTextField.delegate = self
     }
 	
-	private func fetchSeries() {
-		if let t = transaction {
-			if t.seriesID != nil {
-				
-				CachingGateway.shared.getTransactionSeries(withID: t.seriesID!) { [weak self] message in
-					if var series = message.transactions {
-						// We only want the parts of the series in the future
-						series = series.filter { $0.date > t.date }
-						series.sort {
-							return $0.date < $1.date
-						}
-						self?.seriesTransactions = series
-						if series.count > 0 {
-							DispatchQueue.main.async {
-								// It would be nice to "figure out" what the repeat is. For now, "unspecified"
-								self?.repeatPopup.selectItem(at: RepeatPopupIndex.unspecified.rawValue)
-								self?.untilPopup.selectItem(at: RepeatUntilPopupIndex.noEnd.rawValue)
-								// Disclose the series
-								self?.disclosureTriangle.state = .on
-								self?.disclosureClick(self!.disclosureTriangle)
-							}
-						}
-					}
-				}
-				
-			}
-		}
-	}
 	
-	private func replaceSeries() {
-		self.deletedTransactions.append(contentsOf: self.seriesTransactions)
-		self.seriesTransactions.removeAll()
-		self.seriesTransactions.append(contentsOf: self.generateSeries())
-		if self.seriesTransactions.count == 0 {
-			if var t = transaction {
-				t.seriesID = nil
-				t.modificationStatus = .dirty
-				transaction = t
-				updateUI()
+	func controlTextDidChange(_ obj: Notification) {
+		if transactionSeries != nil {
+			transactionSeries!.description = descriptionTextField.stringValue
+			if transactionSeries!.isSeries {
+				seriesTableView.reloadData()
 			}
 		}
-	}
-	
-	private func generateSeries() -> [Transaction] {
-		var series = [Transaction]()
-		if isRepeatWellDefined == false {
-			return series
-		}
-		
-		if var t = transaction {
-			let repeatType = RepeatPopupIndex(rawValue: repeatPopup.indexOfSelectedItem)!
-			let endDate = self.repeatEndDate(for: t.date)
-			let seriesDates = self.repeatDates(for: t.date, withFrequency: repeatType, endingOn: endDate)
-			var seriesID = Transaction.createSeriesID()
-			if t.seriesID != nil {
-				seriesID = t.seriesID!
-			}
-			t.seriesID = seriesID
-			for seriesDate in seriesDates {
-				var seriesT = t 			// Copy on write means
-				seriesT.date = seriesDate	// we will have a clone
-				seriesT.id = 0
-				seriesT.isNew = true
-				seriesT.seriesID = seriesID
-				series.append(seriesT)
-			}
-			transaction = t // Because we modified it. Copy on write.
-		}
-		
-		return series
 	}
 	
 	private func updateUI() {
-		if okButton != nil {
-			if let t = transaction {
-				if t.transactionType == nil || t.transactionType!.isExpense {
-					expenseCheckbox.state = .on
-				}
-				else {
-					expenseCheckbox.state = .off
-				}
-				datePicker.dateValue = t.date
-				amountTextField.stringValue = String(t.amount)
-				descriptionTextField.stringValue = t.description ?? ""
-				
-				seriesTableView.reloadData()
-				
-				deleteButton.isEnabled = (t.isNew == false)
-				okButton.isEnabled = isOKEnabled
+		guard let _ = okButton else { return }
+		if let ts = transactionSeries{
+			if ts.transactionType.isExpense {
+				expenseCheckbox.state = .on
 			}
-			initTranactionTypePopupList()
+			else {
+				expenseCheckbox.state = .off
+			}
+			datePicker.dateValue = ts.date
+			amountTextField.stringValue = ts.amountString
+			descriptionTextField.stringValue = ts.description
+			
+			let repeatInfo = ts.repeatInfo
+			repeatPopup.selectItem(withTitle: repeatInfo.type.rawValue)
+			untilPopup.selectItem(withTitle: repeatInfo.duration.rawValue)
+			
+			seriesTableView.reloadData()
+			
+			deleteButton.isEnabled = (ts.templateTransaction?.isNew == false)
+			okButton.isEnabled = isOKEnabled
 		}
+		initTransactionTypePopupList()
 	}
 	
 	private var isOKEnabled: Bool {
-		if transaction?.modificationStatus == .dirty || deletedTransactions.count > 0 {
-			return true
-		}
-		for t in seriesTransactions {
-			if t.modificationStatus == .dirty || t.isNew {
-				return true
-			}
+		if let ts = transactionSeries {
+			return ts.isValid
 		}
 		return false
 	}
 	
-	private func initTranactionTypePopupList() {
+	private func initTransactionTypePopupList() {
 		var types = TransactionType.transactionTypesForIncome()
-		if let t = transaction {
-			if t.transactionType == nil || t.transactionType!.isExpense  {
+		if let ts = transactionSeries {
+			if ts.transactionType.isExpense  {
 				types = TransactionType.transactionTypesForExpense()
 			}
 		}
@@ -203,39 +158,34 @@ class EditTransactionWindowController: NSWindowController {
 		}
 		transactionTypePopUp.removeAllItems()
 		for transactionType in types {
-			transactionTypePopUp.addItem(withTitle: transactionType.emoji + " " + transactionType.description)
+			transactionTypePopUp.addItem(withTitle: transactionType.symbol + " " + transactionType.name)
 			let item = transactionTypePopUp.lastItem!
-			item.tag = transactionType.code
+			item.tag = transactionType.id
 			//item.image = transactionType.icon  // Too big!
-			if let t = transaction, let tt = t.transactionType {
-				if tt.code == transactionType.code {
+			if let ts = transactionSeries {
+				if ts.transactionType.id == transactionType.id {
 					transactionTypePopUp.select(item)
 				}
 			}
 		}
 	}
-	
-	private enum RepeatPopupIndex: Int {
-		case noRepeat = 0
-		case unspecified = 1
-		case daily = 2
-		case weekly = 3
-		case biweekly = 4
-		case monthly = 5
-	}
+
 	private func initSeriesRepeatPopupList() {
-		// Currently configured in IB
+		// Overwrite IB configuration with contents of enum
+		repeatPopup.removeAllItems()
+		for rt in RepeatType.allCases {
+			repeatPopup.addItem(withTitle: rt.rawValue)
+		}
+		repeatPopup.selectItem(at: 0)
 	}
 	
-	private enum RepeatUntilPopupIndex: Int {
-		case noEnd = 0
-		case month = 1
-		case threeMonths = 2
-		case sixMonths = 3
-		case yearEnd = 4
-	}
 	private func initSeriesRepeatUntilPopupList() {
-		// Currently configured in IB
+		// Overwrite IB configuration with contents of enum
+		untilPopup.removeAllItems()
+		for rd in RepeatDuration.allCases {
+			untilPopup.addItem(withTitle: rd.rawValue)
+		}
+		untilPopup.selectItem(at: 0)
 	}
 
 	// MARK: User interactions
@@ -243,183 +193,73 @@ class EditTransactionWindowController: NSWindowController {
 		let isExpense = sender.state == .on
 		var defaultTT: TransactionType!
 		if isExpense {
-			defaultTT = TransactionType.transactionTypesForExpense().first
+			defaultTT = TransactionType.defaultExpense
 		}
 		else {
-			defaultTT = TransactionType.transactionTypesForIncome().first
+			defaultTT = TransactionType.defaultIncome
 		}
 		
-		transaction?.transactionType = defaultTT
-		transaction?.modificationStatus = .dirty
-		
-		var alteredSeries = [Transaction]()
-		for var seriesT in seriesTransactions {
-			seriesT.transactionType = defaultTT
-			seriesT.modificationStatus = .dirty
-			alteredSeries.append(seriesT)
-		}
-		seriesTransactions = alteredSeries
-		
+		transactionSeries?.transactionType = defaultTT
 		updateUI()
 	}
 	
 	@IBAction func transactionDateChanged(_ sender: NSDatePicker) {
-		transaction?.date = datePicker.dateValue
-		
-		if isRepeatWellDefined {
-			// Remove old series and apply new.
-			replaceSeries()
+		transactionSeries?.date = datePicker.dateValue
+		if transactionSeries.isSeries {
+			transactionSeries.generateTransactionsInSeries()
 		}
 		updateUI()
 	}
 	
 	@IBAction func transactionTypeSelected(_ sender: NSPopUpButton) {
-		let tt = TransactionType.transactionType(forCode: sender.selectedItem?.tag ?? 0)
-		transaction?.transactionType = tt
-		transaction?.modificationStatus = .dirty
-		
-		var alteredSeries = [Transaction]()
-		for var seriesT in seriesTransactions {
-			seriesT.transactionType = tt
-			seriesT.modificationStatus = .dirty
-			alteredSeries.append(seriesT)
-		}
-		seriesTransactions = alteredSeries
-
+		let tt = TransactionType.transactionType(forCode: sender.selectedItem?.tag ?? 0) ??
+			(self.expenseCheckbox.state == .on ? TransactionType.defaultExpense : TransactionType.defaultIncome)
+		transactionSeries?.transactionType = tt
 		updateUI()
 	}
+	
 	@IBAction func amountChanged(_ sender: NSTextField) {
-		let amt = sender.floatValue
-		transaction?.amount = amt
-		transaction?.modificationStatus = .dirty
-		
-		var alteredSeries = [Transaction]()
-		for var seriesT in seriesTransactions {
-			seriesT.amount = amt
-			seriesT.modificationStatus = .dirty
-			alteredSeries.append(seriesT)
-		}
-		seriesTransactions = alteredSeries
-
+		transactionSeries?.amountString = sender.stringValue.replacingOccurrences(of: "$", with: "")
 		updateUI()
 	}
+	
 	@IBAction func descriptionChanged(_ sender: NSTextField) {
-		transaction?.description = sender.stringValue
-		transaction?.modificationStatus = .dirty
-		
-		var alteredSeries = [Transaction]()
-		for var seriesT in seriesTransactions {
-			seriesT.description = sender.stringValue
-			seriesT.modificationStatus = .dirty
-			alteredSeries.append(seriesT)
-		}
-		seriesTransactions = alteredSeries
-		
+		transactionSeries?.description = sender.stringValue
 		updateUI()
 	}
 	
 	@IBAction func repeatPatternSelected(_ sender: NSPopUpButton) {
-		if isRepeatWellDefined {
-			replaceSeries()
+		if repeatPopup.indexOfSelectedItem == 0 {
+			untilPopup.selectItem(at: 0)
 		}
-		else if repeatPopup.indexOfSelectedItem == RepeatPopupIndex.noRepeat.rawValue {
-			// Remove the series
-			replaceSeries()
-		}
+		setTransactionSeriesRepeatInfo()
 		updateUI()
 	}
 	
 	@IBAction func repeatUntilSelected(_ sender: NSPopUpButton) {
-		if isRepeatWellDefined {
-			replaceSeries()
-		}
+		setTransactionSeriesRepeatInfo()
 		updateUI()
 	}
 	
-	private var isRepeatWellDefined: Bool {
-		let repeatIndex = repeatPopup.indexOfSelectedItem
-		let untilIndex = untilPopup.indexOfSelectedItem
+	private func setTransactionSeriesRepeatInfo() {
+		let selectedRepeatTypeIndex = repeatPopup.indexOfSelectedItem
+		let rt = RepeatType(rawValue: repeatPopup.itemTitle(at: selectedRepeatTypeIndex)) ?? RepeatType.No
 		
-		let knownPattern = repeatIndex != RepeatPopupIndex.noRepeat.rawValue && repeatIndex != RepeatPopupIndex.unspecified.rawValue
-		return knownPattern && untilIndex != RepeatUntilPopupIndex.noEnd.rawValue
+		let selectedRepeatUntilIndex = untilPopup.indexOfSelectedItem
+		let rd = RepeatDuration(rawValue: untilPopup.itemTitle(at: selectedRepeatUntilIndex)) ?? RepeatDuration.None
+		
+		transactionSeries.repeatInfo = RepeatInfo(type: rt, duration: rd)
+		transactionSeries.generateTransactionsInSeries()
 	}
-	
-	private func repeatEndDate(for date:Date) -> Date {
-		var endDate:Date!
-		let until = RepeatUntilPopupIndex(rawValue: untilPopup.indexOfSelectedItem)!
-		switch until {
-		case .noEnd:
-			return date
-		case .month:
-			endDate = Calendar.current.date(byAdding: .month, value: 1, to: date)!
-		case .threeMonths:
-			endDate = Calendar.current.date(byAdding: .month, value: 3, to: date)!
-		case .sixMonths:
-			endDate = Calendar.current.date(byAdding: .month, value: 6, to: date)!
-		case .yearEnd:
-			let dateComponents = Calendar.current.dateComponents(AppDelegate.unitsYM, from: date)
-			let monthsToFollowingJanuary = 13 - dateComponents.month! // e.g. 13 - (may05) = 8 -> May + 8 months = next Jan
-			endDate = Calendar.current.date(byAdding: .month, value: monthsToFollowingJanuary, to: date)!
-		}
-		// Find the last day of the month by going to the first, then subtracting one day
-		var components = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: endDate)
-		components.day = 1
-		endDate = Calendar.current.date(from: components)!
-		endDate = Calendar.current.date(byAdding: .day, value: -1, to: endDate)
-		return endDate
-	}
-
-	private func repeatDates(for date:Date, withFrequency freq: RepeatPopupIndex, endingOn endDate:Date) -> [Date] {
-		var dates = [Date]()
-		
-		var component:Calendar.Component = .month
-		var offset = 1
-		
-		switch freq {
-		case .daily:
-			component = .day
-		case .weekly:
-			component = .weekOfYear
-		case .biweekly:
-			component = .weekOfYear
-			offset = 2
-		case .monthly:
-			component = .month
-		default:
-			return dates
-		}
-		
-		var seriesDate = Calendar.current.date(byAdding: component, value: offset, to: date)!
-		while seriesDate <= endDate {
-			dates.append(seriesDate)
-			seriesDate = Calendar.current.date(byAdding: component, value: offset, to: seriesDate)!
-		}
-		return dates
-	}
-	
 	
 	@IBAction func ok(_ sender: Any) {
 		self.window?.makeFirstResponder(nil)
-		if transaction?.transactionType == nil {
-			transactionTypeSelected(self.transactionTypePopUp)
-		}
 		self.window?.sheetParent?.endSheet(self.window!)
 	}
-	
-	var isDelete: Bool {
-		if transaction != nil && deletedTransactions.count > 0 {
-			if transaction! == deletedTransactions.first! {
-				return true
-			}
-		}
-		return false
-	}
+
 	@IBAction func delete(_ sender: Any) {
 		// Will want to confirm if this involves a series
-		if transaction != nil {
-			deletedTransactions.insert(transaction!, at: 0)
-		}
-		deletedTransactions.append(contentsOf: seriesTransactions)
+		transactionSeries.prepareForDeletion()
 		self.window?.sheetParent?.endSheet(self.window!)
 	}
 	
@@ -433,7 +273,7 @@ extension EditTransactionWindowController: NSTableViewDelegate {
 		var text: String = ""
 		var cellIdentifier: String = ""
 		
-		if row >= seriesTransactions.count {
+		if row >= transactionSeries.transactions.count {
 			return nil
 		}
 
@@ -444,14 +284,18 @@ extension EditTransactionWindowController: NSTableViewDelegate {
 		let currFormatter = NumberFormatter()
 		currFormatter.numberStyle = .currency
 		
-		let t = seriesTransactions[row]
+		let t = transactionSeries.transactions[row]
 		
 		if tableColumn == tableView.tableColumns[0] {
+			text = t.isLocked ? FFFTransaction.lockedSymbol : t.transactionType.symbol
+			cellIdentifier = "SeriesSymbolCell"
+		}
+		else if tableColumn == tableView.tableColumns[1] {
 			text = dateFormatter.string(from: t.date)
 			cellIdentifier = "SeriesDateCell"
 		}
-		else if tableColumn == tableView.tableColumns[1] {
-			text = currFormatter.string(from: NSNumber(value: t.amount))! + " " + (t.description ?? "")
+		else if tableColumn == tableView.tableColumns[2] {
+			text = currFormatter.string(from: NSNumber(value: t.amount))! + " " + (t.description)
 			cellIdentifier = "SeriesTextCell"
 		}
 
@@ -471,6 +315,6 @@ extension EditTransactionWindowController: NSTableViewDelegate {
 
 extension EditTransactionWindowController: NSTableViewDataSource {
 	func numberOfRows(in tableView: NSTableView) -> Int {
-		return seriesTransactions.count
+		return transactionSeries.transactions.count
 	}
 }

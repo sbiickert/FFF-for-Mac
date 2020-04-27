@@ -7,11 +7,14 @@
 //
 
 import Cocoa
+import Combine
 
 class CategoryViewController: FFFViewController {
 	@IBOutlet weak var outlineView: NSOutlineView!
 	
-	private var categorySummary: CategorySummary?
+	private var treeData = Dictionary<Category, [FFFTransaction]>()
+	private var categories = [Category]()
+	private var storage = Set<AnyCancellable>()
 	
 	override func clearSelection() {
 		if outlineView != nil {
@@ -20,43 +23,14 @@ class CategoryViewController: FFFViewController {
 		super.clearSelection()
 	}
 	
-	private func requestSummary() {
-		if CachingGateway.shared.isLoggedIn {
-			let components = app.currentDateComponents
-			CachingGateway.shared.getCategorySummary(forYear: components.year, month: components.month) {[weak self] message in
-				if var cs = message.categorySummary {
-					CachingGateway.shared.getTransactions(forYear: components.year, month: components.month) { [weak self] message in
-						if let transactions = message.transactions {
-							cs.assignTransactions(transactions)
-							self?.categorySummary = cs
-							DispatchQueue.main.async{
-								self?.outlineView.reloadData()
-							}
-						}
-					}
-				}
-			}
+	private func makeTreeData(summary cs: CategorySummary, transactions: [FFFTransaction]) {
+		self.treeData.removeAll()
+		for cat in cs.categories {
+			treeData[cat] = transactions.filter { $0.transactionType.id == cat.tt }
 		}
+		self.categories = cs.categories.sorted { $0.ttName < $1.ttName }
 	}
 	
-	// MARK: Notifications
-	override func loginNotificationReceived(_ note: Notification) {
-		self.requestSummary()
-	}
-	
-	override func logoutNotificationReceived(_ note: Notification) {
-		self.categorySummary = nil
-		outlineView.reloadData()
-	}
-	
-	override func currentDateChanged(_ notification: Notification) {
-		self.requestSummary()
-	}
-	
-	override func dataUpdated(_ notification: Notification) {
-		self.requestSummary()
-	}
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
@@ -66,12 +40,25 @@ class CategoryViewController: FFFViewController {
 		// Double-click to edit
 		outlineView.target = self
 		outlineView.doubleAction = #selector(doubleAction(_:))
+		
+		let p1 = NotificationCenter.default.publisher(for: .stateChange_MonthlyTransactions)
+			.compactMap { $0.userInfo?["value"] as? [FFFTransaction] }
+		
+		let p2 = NotificationCenter.default.publisher(for: .stateChange_MonthlyCategories)
+			.compactMap { $0.userInfo?["value"] as? CategorySummary }
+
+		Publishers.Zip(p1, p2)
+			.receive(on: DispatchQueue.main)
+			.sink { transactions, cs in
+				self.makeTreeData(summary: cs, transactions: transactions)
+				self.outlineView.reloadData()
+		}.store(in: &self.storage)
 	}
 	
 	@objc func doubleAction(_ outlineView:NSOutlineView) {
 		let item = outlineView.item(atRow: outlineView.clickedRow)
-		if let t = item as? Transaction {
-			NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+		if let t = item as? FFFTransaction {
+			NotificationCenter.default.post(name: .showEditForm,
 											object: self,
 											userInfo: ["t": t])
 		}
@@ -86,28 +73,25 @@ class CategoryViewController: FFFViewController {
 extension CategoryViewController: NSOutlineViewDataSource {
 	func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
 		var n = 0
-		if let sum = categorySummary {
-			if item == nil {
-				n = sum.expenses.count + sum.income.count
-			}
-			else if let cat = item as? Category {
-				n = cat.transactions.count
-			}
+		if item == nil {
+			// How many root nodes?
+			n = categories.count
+		}
+		else if let cat = item as? Category {
+			// How many transactions in category?
+			n = treeData[cat]?.count ?? 0
 		}
 		return n
 	}
 	
 	func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
-		let sum = categorySummary!
 		if let cat = item as? Category {
-			return cat.transactions[index]
+			// Transaction row
+			return treeData[cat]![index]
 		}
 		else {
-			// This is a child of root (nil)
-			if index >= sum.expenses.count {
-				return sum.income[index - sum.expenses.count]
-			}
-			return sum.expenses[index]
+			// This is a child of root (nil) -> Category row
+			return categories[index]
 		}
 	}
 	
@@ -140,8 +124,8 @@ extension CategoryViewController: NSOutlineViewDelegate {
 		
 		if let cat = item as? Category {
 			if tableColumn == outlineView.tableColumns[0] {
-				let emoji = TransactionType.transactionType(forCode: cat.transactionTypeID)?.emoji ?? "💥"
-				text = emoji + " " + cat.transactionTypeName
+				let emoji = TransactionType.transactionType(forCode: cat.tt)?.symbol ?? "💥"
+				text = emoji + " " + cat.ttName
 //				image = TransactionType.transactionType(forCode: cat.transactionTypeID)?.icon
 				cellIdentifier = CellID.TransactionType
 				tagAsIncome = cat.isExpense == false
@@ -156,15 +140,15 @@ extension CategoryViewController: NSOutlineViewDelegate {
 				cellIdentifier = CellID.Percent
 			}
 		}
-		else if let t = item as? Transaction {
+		else if let t = item as? FFFTransaction {
 			if tableColumn == outlineView.tableColumns[0] {
-				text = t.description ?? ""
+				text = t.description
 				cellIdentifier = CellID.TransactionType
 			}
 			else if tableColumn == outlineView.tableColumns[1] {
 				text = currFormatter.string(from: NSNumber(value: t.amount))!
 				cellIdentifier = CellID.Amount
-				tagAsIncome = t.transactionType!.isExpense == false
+				tagAsIncome = t.transactionType.isExpense == false
 			}
 			else if tableColumn == outlineView.tableColumns[2] {
 				text = ""
@@ -192,7 +176,7 @@ extension CategoryViewController: NSOutlineViewDelegate {
 	}
 	
 	func outlineViewSelectionDidChange(_ notification: Notification) {
-		let t = outlineView.item(atRow: outlineView.selectedRow) as? Transaction
+		let t = outlineView.item(atRow: outlineView.selectedRow) as? FFFTransaction
 		app.selectedTransaction = t
 	}
 }

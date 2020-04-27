@@ -7,21 +7,38 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B803A9DD24574F86002860F3 /* DateViewImproved.swift in Sources */ = {isa = PBXBuildFile; fileRef = B803A9DC24574F86002860F3 /* DateViewImproved.swift */; };
+		B80CEF822455CF520085CD7F /* StringMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80CEF7D2455CF520085CD7F /* StringMatcher.swift */; };
+		B80CEF832455CF520085CD7F /* LevenshteinDistance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80CEF7E2455CF520085CD7F /* LevenshteinDistance.swift */; };
+		B80CEF842455CF520085CD7F /* CommonSubstrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80CEF7F2455CF520085CD7F /* CommonSubstrings.swift */; };
+		B80CEF852455CF520085CD7F /* String_Fuzzywuzzy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80CEF802455CF520085CD7F /* String_Fuzzywuzzy.swift */; };
+		B80CEF862455CF520085CD7F /* StringProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B80CEF812455CF520085CD7F /* StringProcessor.swift */; };
 		B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */; };
 		B81C7AF820CAD72F007C6D69 /* EditTransactionWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */; };
 		B81F74B820D428BB008288A6 /* CheckerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74B720D428BB008288A6 /* CheckerViewController.swift */; };
-		B81F74BA20D429A5008288A6 /* BankTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74B920D429A5008288A6 /* BankTransaction.swift */; };
-		B81F74BC20D429BF008288A6 /* TransactionMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BB20D429BF008288A6 /* TransactionMatch.swift */; };
 		B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BD20D4546A008288A6 /* CheckerDragView.swift */; };
 		B81F74C020D467FA008288A6 /* CSwiftV.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BF20D467FA008288A6 /* CSwiftV.swift */; };
+		B83C12EF2454D61C00967DF4 /* FuseUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83C12EC2454D61C00967DF4 /* FuseUtilities.swift */; };
+		B83C12F02454D61C00967DF4 /* String+Fuse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83C12ED2454D61C00967DF4 /* String+Fuse.swift */; };
+		B83C12F12454D61C00967DF4 /* Fuse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83C12EE2454D61C00967DF4 /* Fuse.swift */; };
+		B8464CBA244794A8008763FE /* BankTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8464CB9244794A8008763FE /* BankTransaction.swift */; };
+		B8464CBC244794DF008763FE /* TransactionMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8464CBB244794DF008763FE /* TransactionMatch.swift */; };
 		B84EE35C20EE793B007C931C /* MainTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B84EE35B20EE793B007C931C /* MainTabViewController.swift */; };
+		B886CE5D244B76E200ABF3FE /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B886CE5C244B76E200ABF3FE /* AppState.swift */; };
+		B886CE60244B79DF00ABF3FE /* Combine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B886CE5F244B79DF00ABF3FE /* Combine.framework */; };
 		B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89B029B20BF98C40071EDCD /* CategoryViewController.swift */; };
-		B8A3487220E6E3480063E1E2 /* GatewayUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A3487120E6E3480063E1E2 /* GatewayUtil.swift */; };
 		B8A7984F20DB03B700E38848 /* MonthBalanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */; };
+		B8B2048E244675BB007CD287 /* RestGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B2048D244675BB007CD287 /* RestGateway.swift */; };
+		B8B20494244675D4007CD287 /* FFFTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B2048F244675D4007CD287 /* FFFTransaction.swift */; };
+		B8B20495244675D4007CD287 /* TransactionSeries.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B20490244675D4007CD287 /* TransactionSeries.swift */; };
+		B8B20496244675D4007CD287 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B20491244675D4007CD287 /* Category.swift */; };
+		B8B20497244675D4007CD287 /* TransactionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B20492244675D4007CD287 /* TransactionType.swift */; };
+		B8B20498244675D4007CD287 /* Balance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B20493244675D4007CD287 /* Balance.swift */; };
+		B8B2049A24467627007CD287 /* CoreExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B2049924467627007CD287 /* CoreExtensions.swift */; };
+		B8B2049C244677CF007CD287 /* LoginPresenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8B2049B244677CF007CD287 /* LoginPresenterDelegate.swift */; };
 		B8D0EB5220EA709C004CE2D9 /* DateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D0EB5120EA709C004CE2D9 /* DateView.swift */; };
 		B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */; };
 		B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F37FAE20BEEE8400AFE471 /* Grid.swift */; };
-		B8FB419A20E69F3A004942B9 /* CachingGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FB419920E69F3A004942B9 /* CachingGateway.swift */; };
 		F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C302038B11200A0A64E /* MainWindowController.swift */; };
 		F4449C352038B1E600A0A64E /* MainSplitViewContainerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C342038B1E600A0A64E /* MainSplitViewContainerController.swift */; };
 		F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4449C362038B29C00A0A64E /* DetailViewController.swift */; };
@@ -32,33 +49,44 @@
 		F4467ED92033DB690058D0D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467ED82033DB690058D0D8 /* AppDelegate.swift */; };
 		F4467EDD2033DB690058D0D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4467EDC2033DB690058D0D8 /* Assets.xcassets */; };
 		F4467EE02033DB690058D0D8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F4467EDE2033DB690058D0D8 /* Main.storyboard */; };
-		F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F062033E17D0058D0D8 /* Transaction.swift */; };
-		F4467F092033E17D0058D0D8 /* TransactionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F072033E17D0058D0D8 /* TransactionType.swift */; };
 		F4467F0F2033E1A70058D0D8 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0E2033E1A40058D0D8 /* Notifications.swift */; };
-		F4467F102033E4710058D0D8 /* Balance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0C2033E1920058D0D8 /* Balance.swift */; };
-		F4467F112033E4710058D0D8 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0B2033E1920058D0D8 /* Category.swift */; };
-		F4467F122033E4710058D0D8 /* RestGateway.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0D2033E1920058D0D8 /* RestGateway.swift */; };
-		F4467F132033E4710058D0D8 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4467F0A2033E1920058D0D8 /* Message.swift */; };
 		F46219D020432BEA006E08B9 /* DayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F46219CF20432BEA006E08B9 /* DayView.swift */; };
 		F4728C36203E40FD0085C04F /* TransListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4728C35203E40FD0085C04F /* TransListViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B803A9DC24574F86002860F3 /* DateViewImproved.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateViewImproved.swift; sourceTree = "<group>"; };
+		B80CEF7D2455CF520085CD7F /* StringMatcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringMatcher.swift; sourceTree = "<group>"; };
+		B80CEF7E2455CF520085CD7F /* LevenshteinDistance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LevenshteinDistance.swift; sourceTree = "<group>"; };
+		B80CEF7F2455CF520085CD7F /* CommonSubstrings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonSubstrings.swift; sourceTree = "<group>"; };
+		B80CEF802455CF520085CD7F /* String_Fuzzywuzzy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String_Fuzzywuzzy.swift; sourceTree = "<group>"; };
+		B80CEF812455CF520085CD7F /* StringProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringProcessor.swift; sourceTree = "<group>"; };
 		B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTransactionWindowController.swift; sourceTree = "<group>"; };
 		B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditTransactionWindowController.xib; sourceTree = "<group>"; };
 		B81F74B720D428BB008288A6 /* CheckerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerViewController.swift; sourceTree = "<group>"; };
-		B81F74B920D429A5008288A6 /* BankTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BankTransaction.swift; sourceTree = "<group>"; };
-		B81F74BB20D429BF008288A6 /* TransactionMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionMatch.swift; sourceTree = "<group>"; };
 		B81F74BD20D4546A008288A6 /* CheckerDragView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerDragView.swift; sourceTree = "<group>"; };
 		B81F74BF20D467FA008288A6 /* CSwiftV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSwiftV.swift; sourceTree = "<group>"; };
+		B83C12EC2454D61C00967DF4 /* FuseUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FuseUtilities.swift; sourceTree = "<group>"; };
+		B83C12ED2454D61C00967DF4 /* String+Fuse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Fuse.swift"; sourceTree = "<group>"; };
+		B83C12EE2454D61C00967DF4 /* Fuse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Fuse.swift; sourceTree = "<group>"; };
+		B8464CB9244794A8008763FE /* BankTransaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BankTransaction.swift; sourceTree = "<group>"; };
+		B8464CBB244794DF008763FE /* TransactionMatch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionMatch.swift; sourceTree = "<group>"; };
 		B84EE35B20EE793B007C931C /* MainTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabViewController.swift; sourceTree = "<group>"; };
+		B886CE5C244B76E200ABF3FE /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		B886CE5F244B79DF00ABF3FE /* Combine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Combine.framework; path = System/Library/Frameworks/Combine.framework; sourceTree = SDKROOT; };
 		B89B029B20BF98C40071EDCD /* CategoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewController.swift; sourceTree = "<group>"; };
-		B8A3487120E6E3480063E1E2 /* GatewayUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayUtil.swift; sourceTree = "<group>"; };
 		B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthBalanceView.swift; sourceTree = "<group>"; };
+		B8B2048D244675BB007CD287 /* RestGateway.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestGateway.swift; sourceTree = "<group>"; };
+		B8B2048F244675D4007CD287 /* FFFTransaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FFFTransaction.swift; sourceTree = "<group>"; };
+		B8B20490244675D4007CD287 /* TransactionSeries.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionSeries.swift; sourceTree = "<group>"; };
+		B8B20491244675D4007CD287 /* Category.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+		B8B20492244675D4007CD287 /* TransactionType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionType.swift; sourceTree = "<group>"; };
+		B8B20493244675D4007CD287 /* Balance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Balance.swift; sourceTree = "<group>"; };
+		B8B2049924467627007CD287 /* CoreExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreExtensions.swift; sourceTree = "<group>"; };
+		B8B2049B244677CF007CD287 /* LoginPresenterDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginPresenterDelegate.swift; sourceTree = "<group>"; };
 		B8D0EB5120EA709C004CE2D9 /* DateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateView.swift; sourceTree = "<group>"; };
 		B8E84A0320C6E01A00CBAD42 /* FFFViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFFViewController.swift; sourceTree = "<group>"; };
 		B8F37FAE20BEEE8400AFE471 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
-		B8FB419920E69F3A004942B9 /* CachingGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachingGateway.swift; sourceTree = "<group>"; };
 		F4449C302038B11200A0A64E /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
 		F4449C342038B1E600A0A64E /* MainSplitViewContainerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewContainerController.swift; sourceTree = "<group>"; };
 		F4449C362038B29C00A0A64E /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
@@ -71,12 +99,6 @@
 		F4467EDC2033DB690058D0D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F4467EDF2033DB690058D0D8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F4467EE12033DB690058D0D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F4467F062033E17D0058D0D8 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
-		F4467F072033E17D0058D0D8 /* TransactionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionType.swift; sourceTree = "<group>"; };
-		F4467F0A2033E1920058D0D8 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		F4467F0B2033E1920058D0D8 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
-		F4467F0C2033E1920058D0D8 /* Balance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Balance.swift; sourceTree = "<group>"; };
-		F4467F0D2033E1920058D0D8 /* RestGateway.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestGateway.swift; sourceTree = "<group>"; };
 		F4467F0E2033E1A40058D0D8 /* Notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifications.swift; sourceTree = "<group>"; };
 		F46219CF20432BEA006E08B9 /* DayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayView.swift; sourceTree = "<group>"; };
 		F4728C35203E40FD0085C04F /* TransListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransListViewController.swift; sourceTree = "<group>"; };
@@ -88,12 +110,43 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B886CE60244B79DF00ABF3FE /* Combine.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B80CEF7C2455CF300085CD7F /* FuzzyWuzzy */ = {
+			isa = PBXGroup;
+			children = (
+				B80CEF7F2455CF520085CD7F /* CommonSubstrings.swift */,
+				B80CEF7E2455CF520085CD7F /* LevenshteinDistance.swift */,
+				B80CEF802455CF520085CD7F /* String_Fuzzywuzzy.swift */,
+				B80CEF7D2455CF520085CD7F /* StringMatcher.swift */,
+				B80CEF812455CF520085CD7F /* StringProcessor.swift */,
+			);
+			path = FuzzyWuzzy;
+			sourceTree = "<group>";
+		};
+		B83C12EB2454D60400967DF4 /* Fuse */ = {
+			isa = PBXGroup;
+			children = (
+				B83C12EE2454D61C00967DF4 /* Fuse.swift */,
+				B83C12EC2454D61C00967DF4 /* FuseUtilities.swift */,
+				B83C12ED2454D61C00967DF4 /* String+Fuse.swift */,
+			);
+			path = Fuse;
+			sourceTree = "<group>";
+		};
+		B886CE5E244B79DF00ABF3FE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B886CE5F244B79DF00ABF3FE /* Combine.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		F4449C2F2038B0ED00A0A64E /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -123,6 +176,7 @@
 				B81F74BD20D4546A008288A6 /* CheckerDragView.swift */,
 				B8A7984E20DB03B700E38848 /* MonthBalanceView.swift */,
 				B8D0EB5120EA709C004CE2D9 /* DateView.swift */,
+				B803A9DC24574F86002860F3 /* DateViewImproved.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -132,6 +186,7 @@
 			children = (
 				F4467ED72033DB690058D0D8 /* FFF for Mac */,
 				F4467ED62033DB690058D0D8 /* Products */,
+				B886CE5E244B79DF00ABF3FE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -147,13 +202,17 @@
 			isa = PBXGroup;
 			children = (
 				F4467ED82033DB690058D0D8 /* AppDelegate.swift */,
+				B886CE5C244B76E200ABF3FE /* AppState.swift */,
+				F4467F0E2033E1A40058D0D8 /* Notifications.swift */,
 				F4467EDE2033DB690058D0D8 /* Main.storyboard */,
 				F4449C2F2038B0ED00A0A64E /* Controllers */,
 				F4449C3E203A19AA00A0A64E /* Views */,
 				F4467F052033E1710058D0D8 /* Entities */,
 				F4467F042033E15B0058D0D8 /* REST Gateway */,
-				F4467F0E2033E1A40058D0D8 /* Notifications.swift */,
 				B81F74BF20D467FA008288A6 /* CSwiftV.swift */,
+				B80CEF7C2455CF300085CD7F /* FuzzyWuzzy */,
+				B83C12EB2454D60400967DF4 /* Fuse */,
+				B8B2049924467627007CD287 /* CoreExtensions.swift */,
 				F4467EDC2033DB690058D0D8 /* Assets.xcassets */,
 				F4B69A802040DB26008AEF0E /* Supporting Files */,
 			);
@@ -163,10 +222,8 @@
 		F4467F042033E15B0058D0D8 /* REST Gateway */ = {
 			isa = PBXGroup;
 			children = (
-				B8FB419920E69F3A004942B9 /* CachingGateway.swift */,
-				F4467F0D2033E1920058D0D8 /* RestGateway.swift */,
-				F4467F0A2033E1920058D0D8 /* Message.swift */,
-				B8A3487120E6E3480063E1E2 /* GatewayUtil.swift */,
+				B8B2048D244675BB007CD287 /* RestGateway.swift */,
+				B8B2049B244677CF007CD287 /* LoginPresenterDelegate.swift */,
 			);
 			path = "REST Gateway";
 			sourceTree = "<group>";
@@ -174,12 +231,13 @@
 		F4467F052033E1710058D0D8 /* Entities */ = {
 			isa = PBXGroup;
 			children = (
-				F4467F062033E17D0058D0D8 /* Transaction.swift */,
-				F4467F072033E17D0058D0D8 /* TransactionType.swift */,
-				B81F74B920D429A5008288A6 /* BankTransaction.swift */,
-				B81F74BB20D429BF008288A6 /* TransactionMatch.swift */,
-				F4467F0C2033E1920058D0D8 /* Balance.swift */,
-				F4467F0B2033E1920058D0D8 /* Category.swift */,
+				B8464CB9244794A8008763FE /* BankTransaction.swift */,
+				B8B20493244675D4007CD287 /* Balance.swift */,
+				B8B20491244675D4007CD287 /* Category.swift */,
+				B8B2048F244675D4007CD287 /* FFFTransaction.swift */,
+				B8464CBB244794DF008763FE /* TransactionMatch.swift */,
+				B8B20490244675D4007CD287 /* TransactionSeries.swift */,
+				B8B20492244675D4007CD287 /* TransactionType.swift */,
 			);
 			path = Entities;
 			sourceTree = "<group>";
@@ -273,35 +331,45 @@
 			buildActionMask = 2147483647;
 			files = (
 				B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */,
-				B81F74BC20D429BF008288A6 /* TransactionMatch.swift in Sources */,
+				B8464CBA244794A8008763FE /* BankTransaction.swift in Sources */,
 				F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */,
 				F4449C352038B1E600A0A64E /* MainSplitViewContainerController.swift in Sources */,
-				F4467F102033E4710058D0D8 /* Balance.swift in Sources */,
+				B83C12F12454D61C00967DF4 /* Fuse.swift in Sources */,
 				B84EE35C20EE793B007C931C /* MainTabViewController.swift in Sources */,
 				B89B029C20BF98C40071EDCD /* CategoryViewController.swift in Sources */,
-				F4467F112033E4710058D0D8 /* Category.swift in Sources */,
-				B81F74BA20D429A5008288A6 /* BankTransaction.swift in Sources */,
-				F4467F122033E4710058D0D8 /* RestGateway.swift in Sources */,
 				B8D0EB5220EA709C004CE2D9 /* DateView.swift in Sources */,
 				B81F74B820D428BB008288A6 /* CheckerViewController.swift in Sources */,
-				F4467F132033E4710058D0D8 /* Message.swift in Sources */,
+				B8464CBC244794DF008763FE /* TransactionMatch.swift in Sources */,
 				F4449C3A2038B2DE00A0A64E /* CalendarViewController.swift in Sources */,
+				B80CEF852455CF520085CD7F /* String_Fuzzywuzzy.swift in Sources */,
+				B83C12F02454D61C00967DF4 /* String+Fuse.swift in Sources */,
+				B80CEF832455CF520085CD7F /* LevenshteinDistance.swift in Sources */,
 				F4467F0F2033E1A70058D0D8 /* Notifications.swift in Sources */,
-				F4467F092033E17D0058D0D8 /* TransactionType.swift in Sources */,
+				B80CEF842455CF520085CD7F /* CommonSubstrings.swift in Sources */,
+				B8B20495244675D4007CD287 /* TransactionSeries.swift in Sources */,
 				F4467ED92033DB690058D0D8 /* AppDelegate.swift in Sources */,
+				B886CE5D244B76E200ABF3FE /* AppState.swift in Sources */,
+				B8B2049C244677CF007CD287 /* LoginPresenterDelegate.swift in Sources */,
+				B80CEF862455CF520085CD7F /* StringProcessor.swift in Sources */,
 				B81F74C020D467FA008288A6 /* CSwiftV.swift in Sources */,
 				F4449C40203A19D300A0A64E /* DetailTableCellView.swift in Sources */,
+				B80CEF822455CF520085CD7F /* StringMatcher.swift in Sources */,
 				F4728C36203E40FD0085C04F /* TransListViewController.swift in Sources */,
-				F4467F082033E17D0058D0D8 /* Transaction.swift in Sources */,
 				F46219D020432BEA006E08B9 /* DayView.swift in Sources */,
 				F4449C322038B11200A0A64E /* MainWindowController.swift in Sources */,
 				B8E84A0520C6E01A00CBAD42 /* FFFViewController.swift in Sources */,
 				F4449C43203B3D0200A0A64E /* LoginWindowController.swift in Sources */,
+				B8B20498244675D4007CD287 /* Balance.swift in Sources */,
+				B8B2048E244675BB007CD287 /* RestGateway.swift in Sources */,
 				B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */,
-				B8A3487220E6E3480063E1E2 /* GatewayUtil.swift in Sources */,
-				B8FB419A20E69F3A004942B9 /* CachingGateway.swift in Sources */,
+				B803A9DD24574F86002860F3 /* DateViewImproved.swift in Sources */,
 				B8A7984F20DB03B700E38848 /* MonthBalanceView.swift in Sources */,
+				B8B2049A24467627007CD287 /* CoreExtensions.swift in Sources */,
+				B8B20497244675D4007CD287 /* TransactionType.swift in Sources */,
 				B8F37FAF20BEEE8400AFE471 /* Grid.swift in Sources */,
+				B83C12EF2454D61C00967DF4 /* FuseUtilities.swift in Sources */,
+				B8B20494244675D4007CD287 /* FFFTransaction.swift in Sources */,
+				B8B20496244675D4007CD287 /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,11 +505,12 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = b1;
 				DEVELOPMENT_TEAM = TQU5FGEV2A;
 				INFOPLIST_FILE = "FFF for Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ca.biickert.ii.FFF-for-Mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -456,11 +525,12 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = b1;
 				DEVELOPMENT_TEAM = TQU5FGEV2A;
 				INFOPLIST_FILE = "FFF for Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "ca.biickert.ii.FFF-for-Mac";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

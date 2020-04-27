@@ -7,19 +7,23 @@
 //
 
 import Cocoa
+import Combine
 
-class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDelegate, NSSearchFieldDelegate {
-	private let SpinnerToolbarItemID = NSToolbarItem.Identifier(rawValue: "Spinner")
+class MainWindowController: NSWindowController,
+							NSWindowDelegate,
+							NSToolbarDelegate,
+							NSSearchFieldDelegate,
+							LoginPresenterDelegate
+{
 	private let SearchToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Search")
-	private let DateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Date")
+	//private let DateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Date")
 	private let CustomDateToolbarItemID =  NSToolbarItem.Identifier(rawValue: "CustomDate")
 	private let AddToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Add")
 	private let BalanceToolbarItemID =  NSToolbarItem.Identifier(rawValue: "Balance")
 
-	@IBOutlet var spinner: NSProgressIndicator!
-	@IBOutlet var datePicker: NSDatePicker!
 	@IBOutlet var searchField: NSSearchField!
-	@IBOutlet var customDatePicker: DateView!
+	//@IBOutlet var customDatePicker: DateView!
+	@IBOutlet var datePickerImproved: DateViewImproved!
 	@IBOutlet var addButton: NSButton!
 	@IBOutlet var monthBalance: MonthBalanceView!
 	
@@ -40,17 +44,7 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 			app.currentDate = value
 		}
 	}
-	private var isTokenRequestInProgress = false
-	{
-		didSet {
-			if isTokenRequestInProgress {
-				spinner.startAnimation(self)
-			}
-			else {
-				spinner.stopAnimation(self)
-			}
-		}
-	}
+	var storage = Set<AnyCancellable>()
 	
     override func windowDidLoad() {
 		
@@ -62,34 +56,36 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(loginNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
+											   name: .loginResponse,
 											   object: nil)
 
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(logoutNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LogoutResponse.rawValue),
+											   name: .logoutResponse,
 											   object: nil)
 
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(dateChangeNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.CurrentMonthChanged.rawValue),
+											   name: .currentMonthChanged,
 											   object: nil)
 
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(transactionEditRequest(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.ShowEditForm.rawValue),
+											   name: .showEditForm,
 											   object: nil)
 
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(dataUpdated(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.DataUpdated.rawValue),
-											   object: nil)
+		NotificationCenter.default.publisher(for: .stateChange_MonthlyBalance)
+			.compactMap { $0.userInfo?["value"] as? BalanceSummary }
+			.receive(on: DispatchQueue.main)
+			.sink { bs in
+				self.updateBalanceView(with: bs)
+		}.store(in: &self.storage)
 
-		datePicker.dateValue = currentDate
 		titleDateFormatter.dateStyle = .long
 		updateWindowTitle()
 		
 		tabViewController = window?.contentViewController as? NSTabViewController
+		app.state.loginDelegate = self
     }
 	
 	private func updateWindowTitle() {
@@ -152,14 +148,11 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		if (itemIdentifier == SearchToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: SearchToolbarItemID, label: "Search", paletteLabel: "Search", toolTip: "Search for transactions", target: self, itemContent: self.searchField, action: nil)!
 		}
-		else if (itemIdentifier == SpinnerToolbarItemID) {
-			toolbarItem = customToolbarItem(itemForItemIdentifier: SpinnerToolbarItemID, label: "Waiting", paletteLabel: "Waiting", toolTip: "Waiting for a response", target: self, itemContent: self.spinner, action: nil)!
-		}
-		else if (itemIdentifier == DateToolbarItemID) {
-			toolbarItem = customToolbarItem(itemForItemIdentifier: DateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.datePicker, action: nil)!
-		}
+//		else if (itemIdentifier == DateToolbarItemID) {
+//			toolbarItem = customToolbarItem(itemForItemIdentifier: DateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.datePicker, action: nil)!
+//		}
 		else if (itemIdentifier == CustomDateToolbarItemID) {
-			toolbarItem = customToolbarItem(itemForItemIdentifier: CustomDateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.customDatePicker, action: nil)!
+			toolbarItem = customToolbarItem(itemForItemIdentifier: CustomDateToolbarItemID, label: "Current Date", paletteLabel: "Current Date", toolTip: "Change the current date", target: self, itemContent: self.datePickerImproved, action: nil)!
 		}
 		else if (itemIdentifier == AddToolbarItemID) {
 			toolbarItem = customToolbarItem(itemForItemIdentifier: AddToolbarItemID, label: "Add Transaction", paletteLabel: "Add", toolTip: "Create a new transaction", target: self, itemContent: self.addButton, action: nil, minSize: NSSize(width: 64, height: 64))!
@@ -175,83 +168,68 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 	
 	func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [CustomDateToolbarItemID, SpinnerToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, BalanceToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID]
+		return [CustomDateToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, BalanceToolbarItemID, NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID]
 	}
 	
 	func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, SpinnerToolbarItemID, DateToolbarItemID, AddToolbarItemID, BalanceToolbarItemID, CustomDateToolbarItemID]
+		return [NSToolbarItem.Identifier.flexibleSpace, SearchToolbarItemID, AddToolbarItemID, BalanceToolbarItemID, CustomDateToolbarItemID]
 	}
 	
 	func windowDidBecomeMain(_ notification: Notification) {
 		// Check for valid user credentials
-		if CachingGateway.shared.isLoggedIn == false {
+		if RestGateway.shared.userName == "" {
 			presentLoginSheet()
 		}
 	}
 	
+	func showLogin() {
+		DispatchQueue.main.async {
+			// Present modal sheet
+			let loginWindowController = LoginWindowController(windowNibName: "LoginWindowController")
+			self.window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
+				if responseCode == .stop {
+					// User pressed OK. Submit credentials. Dismiss sheet if successful.
+					// Store form values in defaults
+					let u = loginWindowController.usernameTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
+					let p = loginWindowController.passwordTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
+					RestGateway.setStoredCredentials(u, password: p)
+					// Send login notification
+					NotificationCenter.default.post(name: .loginResponse,
+													object: self)
+				} // Quit is .abort
+				loginWindowController.window?.close()
+			})
+		}
+	}
+	
+
 	private func presentLoginSheet() {
-		// Present modal sheet
-		let loginWindowController = LoginWindowController(windowNibName: "LoginWindowController")
-		window?.beginSheet(loginWindowController.window!, completionHandler: { responseCode in
-			if responseCode == .stop {
-				// User pressed OK. Submit credentials. Dismiss sheet if successful.
-				// Store form values in defaults
-				let u = loginWindowController.usernameTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
-				let p = loginWindowController.passwordTextField.stringValue.trimmingCharacters(in: CharacterSet.whitespaces)
-				RestGateway.setStoredCredentials(u, password: p)
-				
-				// Send off the request to the Gateway to log in
-				CachingGateway.shared.login()
-				self.isTokenRequestInProgress = true
-			} // Quit is .abort
-			loginWindowController.window?.close()
-		})
+		self.showLogin()
 	}
 	
 	@objc func loginNotificationReceived(_ notification: Notification) {
 		// Ignore unless the login form is showing: it's a refetch of the token.
-		isTokenRequestInProgress = false
 		dateChangeNotificationReceived(notification)
 	}
 	
 	@objc func logoutNotificationReceived(_ notification: Notification) {
-		updateBalanceView(with: nil)
 		presentLoginSheet()
 	}
 
 	@objc func dateChangeNotificationReceived(_ note: Notification) {
-		datePicker.dateValue = currentDate
 		DispatchQueue.main.async {
 			self.updateWindowTitle()
-			self.customDatePicker.date = self.app.currentDate
-		}
-		CachingGateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
-										 month: app.currentDateComponents.month)
-		{ [weak self] message in
-			if let balance = message.balanceSummary {
-				DispatchQueue.main.async {
-					self?.updateBalanceView(with: balance)
-				}
-			}
-		}
-	}
-	
-	@objc func dataUpdated(_ notification: Notification) {
-		CachingGateway.shared.getBalanceSummary(forYear: app.currentDateComponents.year,
-										 month: app.currentDateComponents.month)
-		{ [weak self] message in
-			DispatchQueue.main.async {
-				self?.updateBalanceView(with: message.balanceSummary)
-			}
+			self.datePickerImproved.date = self.app.currentDate
 		}
 	}
 	
 	private func updateBalanceView(with balanceSummary: BalanceSummary?) {
 		if let bs = balanceSummary {
 			let month = app.currentDateComponents.month
-			let balanceForCurrentMonth = bs.monthBalances[month]!
-			monthBalance.income = balanceForCurrentMonth.income.floatValue
-			monthBalance.expense = balanceForCurrentMonth.expense.floatValue
+			if let balanceForCurrentMonth = bs.balance(forMonth: month) {
+				monthBalance.income = Float(balanceForCurrentMonth.income)
+				monthBalance.expense = Float(balanceForCurrentMonth.expense)
+			}
 		}
 		else {
 			monthBalance.income = 0.0
@@ -260,62 +238,70 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	}
 
 	@objc func transactionEditRequest(_ note: NSNotification) {
-		if let info = note.userInfo as? Dictionary<String, Transaction> {
+		if let info = note.userInfo as? Dictionary<String, FFFTransaction> {
 			let transaction = info.first?.value
 			showEditForm(for: transaction)
 		}
 	}
 	
-	private func showEditForm(for transaction:Transaction?) {
+	
+	enum AddType {
+		case normal
+		case incomeExpensePair
+	}
+	
+	private func showEditForm(for transaction:FFFTransaction?, _ addType: AddType = .normal) {
+		// Nil transaction means a new transaction
+		var editTransaction:FFFTransaction! = transaction
+		if editTransaction == nil {
+			editTransaction = FFFTransaction()
+			editTransaction.date = app.currentDate
+		}
+		
+		// All edits are done based on a series
+		var series:TransactionSeries = NormalTransactionSeries()
+		series.templateTransaction = editTransaction
+		
+		if transaction == nil && addType == .incomeExpensePair {
+			series = IncomeExpenseTransactionSeries(templateTransaction: editTransaction)
+		}
+		
 		// Present modal sheet
 		let editWindowController = EditTransactionWindowController(windowNibName: "EditTransactionWindowController")
-		editWindowController.setTransaction(transaction)
+		editWindowController.setTransactionSeries(series)
 		window?.beginSheet(editWindowController.window!, completionHandler: { responseCode in
 			if responseCode == .stop {
 				/*
 				User pressed OK or Delete. Submit update/insert/delete.
-				If Delete: .deletedTransactions.first will be .transaction.
-				Otherwise: transaction.isNew -> create
-				Loop through all transactions in seriesTransactions
-				Loop through all transactions in deletedTransactions
 				*/
-				if let transaction = editWindowController.transaction {
-					if editWindowController.isDelete == false {
-						if transaction.isNew {
-							CachingGateway.shared.createTransaction(transaction: transaction, callback: self.editCallback)
-						}
-						else {
-							CachingGateway.shared.updateTransaction(transaction: transaction, callback: self.editCallback)
-						}
-						for seriesT in editWindowController.seriesTransactions {
-							if seriesT.isNew {
-								CachingGateway.shared.createTransaction(transaction: seriesT, callback: self.editCallback)
-							}
-							else if seriesT.modificationStatus == .dirty {
-								CachingGateway.shared.updateTransaction(transaction: seriesT, callback: self.editCallback)
-							}
-						}
+				if let tSeries = editWindowController.transactionSeries {
+					print("Save transaction series to database")
+					// Delete any (future) transactions that were redefined
+					let delIDs = tSeries.garbage.map { $0.id }
+					self.app.state.deleteTransactions(withIDs: delIDs)
+					
+					// Update any dirty transactions
+					let dirtyTransactions = tSeries.transactions.filter {
+						$0.modificationStatus == .dirty && $0.isNew == false
 					}
-					for deletedT in editWindowController.deletedTransactions {
-						if deletedT.isNew == false {
-							CachingGateway.shared.deleteTransaction(transaction: deletedT, callback: self.editCallback)
-						}
+					self.app.state.updateTransactions(dirtyTransactions)
+					if let firstT = dirtyTransactions.first {
+						self.app.saveRecentTransaction(firstT)
+					}
+
+					// Create any new transactions
+					let newTransactions = tSeries.transactions.filter {
+						$0.modificationStatus == .dirty && $0.isNew
+					}
+					self.app.state.createTransactions(newTransactions)
+					if let firstT = newTransactions.first {
+						self.app.saveRecentTransaction(firstT)
 					}
 				}
 			} // Cancel is .abort
 			
 			editWindowController.window?.close()
 		})
-	}
-	
-	private func editCallback(message: Message) {
-		if message.isError {
-			print(message)
-		}
-		// Not needed: the CachingGateway sends this notification
-//		else {
-//			NotificationCenter.default.post(name: NSNotification.Name(Notifications.DataUpdated.rawValue), object: nil)
-//		}
 	}
 
 	private var transactionListViewController: TransListViewController? {
@@ -334,12 +320,9 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 	func searchFieldDidEndSearching(_ sender: NSSearchField) {
 		transactionListViewController?.searchString = nil
 	}
-	
-	@IBAction func changeDate(_ sender: NSDatePicker) {
-		currentDate = datePicker.dateValue
-	}
-	@IBAction func changeDateCustom(_ sender: DateView) {
-		currentDate = customDatePicker.date
+
+	@IBAction func changeDateCustom(_ sender: DateViewImproved) {
+		currentDate = datePickerImproved.date
 	}
 	
 	@IBAction func addTransaction(_ sender: NSButton) {
@@ -350,27 +333,24 @@ class MainWindowController: NSWindowController, NSWindowDelegate, NSToolbarDeleg
 		if var duplicateTransaction = app.selectedTransaction {
 			// Copy on Write makes the clone
 			duplicateTransaction.id = -1
-			duplicateTransaction.isNew = true
 			showEditForm(for: duplicateTransaction)
 		}
 	}
 	
 	@IBAction func deleteTransaction(_ sender: Any) {
 		if let selected = app.selectedTransaction {
-			CachingGateway.shared.deleteTransaction(transaction: selected) { message in
-				// Don't have to do anything else
-			}
+			app.state.deleteTransactions(withIDs: [selected.id])
 		}
 	}
 	
 	@IBAction func logoutMenuItemSelected(_ sender: Any) {
-		CachingGateway.shared.logout()
+		RestGateway.forgetUser()
+		NotificationCenter.default.post(name: .logoutResponse,
+										object: self)
 	}
 	
 	@IBAction func refreshMenuItemSelected(_ sender: Any) {
-		CachingGateway.shared.clearCache()
-		let currentDate = app.currentDate
-		app.currentDate = Calendar.current.date(byAdding: .second, value: 1, to: currentDate)!
+		NotificationCenter.default.post(name: .refreshData, object: nil)
 	}
 	
 	@IBAction func todayMenuItemSelected(_ sender: Any) {

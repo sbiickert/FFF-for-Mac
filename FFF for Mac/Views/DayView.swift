@@ -166,7 +166,7 @@ class DayView: NSView {
 			insetRect.origin.y -= offsetY + 8 // 8 is padding
 			var ttString = ""
 			for tt in transactionTypes {
-				ttString += tt.emoji
+				ttString += tt.symbol
 			}
 			let attrString = NSAttributedString(string: ttString, attributes: emojiTextAttributes)
 			attrString.draw(in: insetRect)

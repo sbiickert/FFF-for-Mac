@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Combine
 
 class TransListViewController: FFFViewController {
 	@IBOutlet weak var tableView: NSTableView!
@@ -21,71 +22,58 @@ class TransListViewController: FFFViewController {
 	var searchString: String? {
 		didSet {
 			print("TransListViewController searchString set to \(String(describing: searchString))")
-			requestTransactions()
+			doSearch()
 		}
 	}
-	private var transactions = [Transaction]()
+	var isSearchStringEmpty: Bool {
+		return searchString == nil || searchString!.trimmingCharacters(in: CharacterSet.whitespaces) == ""
+	}
+	
+	private var transactions = [FFFTransaction]()
+	private var searchTransactions = [FFFTransaction]()
+	
+	private var storage = Set<AnyCancellable>()
 
 	private var savedSortDescriptors: [NSSortDescriptor]?
 	
-	private func requestTransactions() {
-		if CachingGateway.shared.isLoggedIn {
-			if searchString == nil || searchString!.trimmingCharacters(in: CharacterSet.whitespaces) == "" {
-				// Regular list of monthly transactions
-				let components = app.currentDateComponents
-				CachingGateway.shared.getTransactions(forYear:components.year, month: components.month) {[weak self] message in
-					if let t = message.transactions {
-						self?.transactions = t
-						DispatchQueue.main.async {
-							if self != nil && self!.savedSortDescriptors != nil {
-								self!.tableView.sortDescriptors = self!.savedSortDescriptors!
-								self!.savedSortDescriptors = nil
-							}
-							else {
-								self?.tableView.reloadData()
-							}
-						}
-					}
+	private func doSearch() {
+		self.searchTransactions = [FFFTransaction]()
+		if isSearchStringEmpty {
+			// Empty search: Revert to regular list of monthly transactions
+			DispatchQueue.main.async {
+				if self.savedSortDescriptors != nil {
+					self.tableView.sortDescriptors = self.savedSortDescriptors!
+					self.savedSortDescriptors = nil
 				}
-			}
-			else {
-				// Search results
-				CachingGateway.shared.getSearchResults(searchString!) {[weak self] message in
-					if let t = message.transactions {
-						self?.transactions = t
-						DispatchQueue.main.async{
-							if self?.savedSortDescriptors == nil {
-								// This is the first search. We are going to save the sorting
-								// so that when we stop searching, we can revert it back.
-								self?.savedSortDescriptors = self?.tableView.sortDescriptors
-							}
-							self?.tableView.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
-							//self?.tableView.reloadData()
-						}
-					}
+				else {
+					self.tableView.reloadData()
 				}
 			}
 		}
+		else {
+			// Search results
+			let req = RestGateway.shared.createRequestGetSearchResults(searchString!)
+			URLSession.shared.dataTaskPublisher(for: req)
+				.map { $0.data }
+				.replaceError(with: Data())
+				.decode(type: [CodableTransaction].self, decoder: JSONDecoder())
+				.replaceError(with: [CodableTransaction]())
+				.map { ctArray in
+					ctArray.map { $0.transaction }
+				}
+				.receive(on: DispatchQueue.main)
+				.sink { tArray in
+					self.searchTransactions = tArray
+					if self.savedSortDescriptors == nil {
+						// This is the first search. We are going to save the sorting
+						// so that when we stop searching, we can revert it back.
+						self.savedSortDescriptors = self.tableView.sortDescriptors
+					}
+					self.tableView.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+			}.store(in: &self.storage)
+		}
 	}
-	
-	// MARK: Notifications
-	override func loginNotificationReceived(_ note: Notification) {
-		requestTransactions()
-	}
-	
-	override func logoutNotificationReceived(_ note: Notification) {
-		self.transactions.removeAll()
-		tableView.reloadData()
-	}
-	
-	override func currentDateChanged(_ notification: Notification) {
-		requestTransactions()
-	}
-	
-	override func dataUpdated(_ notification: Notification) {
-		requestTransactions()
-	}
-	
+		
 	// MARK: ViewController
 
     override func viewDidLoad() {
@@ -111,11 +99,20 @@ class TransListViewController: FFFViewController {
 		// Double-click to edit
 		tableView.target = self
 		tableView.doubleAction = #selector(doubleAction(_:))
+		
+		NotificationCenter.default.publisher(for: .stateChange_MonthlyTransactions)
+			.compactMap { $0.userInfo?["value"] as? [FFFTransaction] }
+			.receive(on: DispatchQueue.main)
+			.sink { transactions in
+				self.transactions = transactions
+				self.doSearch()
+		}.store(in: &self.storage)
 	}
 	
 	@objc func doubleAction(_ tableView:NSTableView) {
-		let t = transactions[tableView.clickedRow]
-		NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+		let row = tableView.clickedRow
+		let t = isSearchStringEmpty ? transactions[row] : searchTransactions[row]
+		NotificationCenter.default.post(name: .showEditForm,
 										object: self,
 										userInfo: ["t": t])
 	}
@@ -127,7 +124,7 @@ class TransListViewController: FFFViewController {
 
 extension TransListViewController: NSTableViewDataSource {
 	func numberOfRows(in tableView: NSTableView) -> Int {
-		return transactions.count
+		return isSearchStringEmpty ? transactions.count : searchTransactions.count
 	}
 	
 	func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
@@ -137,39 +134,50 @@ extension TransListViewController: NSTableViewDataSource {
 			tableView.reloadData()
 			return
 		}
+
+		// Sort functions
+		func sortByAmount(lhs: FFFTransaction, rhs: FFFTransaction) -> Bool {
+			if sortDescriptor.ascending {
+				return lhs.amount < rhs.amount
+			}
+			return lhs.amount > rhs.amount
+		}
+		func sortByDate(lhs: FFFTransaction, rhs: FFFTransaction) -> Bool {
+			if sortDescriptor.ascending {
+				return lhs.date < rhs.date
+			}
+			return lhs.date > rhs.date
+		}
+		func sortByTTDesc(lhs: FFFTransaction, rhs: FFFTransaction) -> Bool {
+			if sortDescriptor.ascending {
+				return lhs.transactionType.name < rhs.transactionType.name
+			}
+			return lhs.transactionType.name > rhs.transactionType.name
+		}
+		func sortByDesc(lhs: FFFTransaction, rhs: FFFTransaction) -> Bool {
+			if sortDescriptor.ascending {
+					return lhs.description < rhs.description
+				}
+			return lhs.description > rhs.description
+		}
+
+		// Sort both monthly transactions and search results. Only one is showing.
 		switch sortDescriptor.key {
 		case "amount":
-			transactions.sort {lhs, rhs in
-				if sortDescriptor.ascending {
-					return lhs.amount < rhs.amount
-				}
-				return lhs.amount > rhs.amount
-			}
+			transactions.sort(by: sortByAmount(lhs:rhs:))
+			searchTransactions.sort(by: sortByAmount(lhs:rhs:))
 		case "date":
-			transactions.sort {lhs, rhs in
-				if sortDescriptor.ascending {
-					return lhs.date < rhs.date
-				}
-				return lhs.date > rhs.date
-			}
+			transactions.sort(by: sortByDate(lhs:rhs:))
+			searchTransactions.sort(by: sortByDate(lhs:rhs:))
 		case "transactionType.description":
-			transactions.sort {lhs, rhs in
-				if sortDescriptor.ascending {
-					return lhs.transactionType!.description < rhs.transactionType!.description
-				}
-				return lhs.transactionType!.description > rhs.transactionType!.description
-			}
+			transactions.sort(by: sortByTTDesc(lhs:rhs:))
+			searchTransactions.sort(by: sortByTTDesc(lhs:rhs:))
 		default:
-			transactions.sort {lhs, rhs in
-				if sortDescriptor.ascending {
-					return lhs.description ?? "" < rhs.description ?? ""
-				}
-				return lhs.description ?? "" > rhs.description ?? ""
-			}
+			transactions.sort(by: sortByDesc(lhs:rhs:))
+			searchTransactions.sort(by: sortByDesc(lhs:rhs:))
 		}
 		tableView.reloadData()
 	}
-
 }
 
 extension TransListViewController: NSTableViewDelegate {
@@ -187,7 +195,8 @@ extension TransListViewController: NSTableViewDelegate {
 		var textColor = NSColor.controlTextColor
 		var cellIdentifier: String = ""
 		
-		if row >= transactions.count {
+		let limit = isSearchStringEmpty ? transactions.count : searchTransactions.count
+		if row >= limit {
 			return nil
 		}
 		
@@ -198,7 +207,7 @@ extension TransListViewController: NSTableViewDelegate {
 		let currFormatter = NumberFormatter()
 		currFormatter.numberStyle = .currency
 		
-		let t = transactions[row]
+		let t = isSearchStringEmpty ? transactions[row] : searchTransactions[row]
 		
 		if tableColumn == tableView.tableColumns[0] {
 			text = dateFormatter.string(from: t.date)
@@ -206,21 +215,21 @@ extension TransListViewController: NSTableViewDelegate {
 		}
 		else if tableColumn == tableView.tableColumns[1] {
 			text = currFormatter.string(from: NSNumber(value: t.amount))!
-			if t.transactionType?.isExpense == false {
+			if t.transactionType.isExpense == false {
 				textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
 			}
 			cellIdentifier = CellID.Amount
 		}
 		else if tableColumn == tableView.tableColumns[2] {
-			text = t.transactionType!.emoji + " " + t.transactionType!.description
+			text = t.transactionType.symbol + " " + t.transactionType.name
 //			image = t.transactionType!.icon
-			if t.transactionType?.isExpense == false {
+			if t.transactionType.isExpense == false {
 				textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
 			}
 			cellIdentifier = CellID.TransactionType
 		}
 		else if tableColumn == tableView.tableColumns[3] {
-			text = t.description ?? ""
+			text = t.description
 			cellIdentifier = CellID.Description
 		}
 		
@@ -236,7 +245,8 @@ extension TransListViewController: NSTableViewDelegate {
 
 	func tableViewSelectionDidChange(_ notification: Notification) {
 		if tableView.selectedRow >= 0 {
-			let t = transactions[tableView.selectedRow]
+			let row = tableView.selectedRow
+			let t = isSearchStringEmpty ? transactions[row] : searchTransactions[row]
 			app.selectedTransaction = t
 		}
 		else {

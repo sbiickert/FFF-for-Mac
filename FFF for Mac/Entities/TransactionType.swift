@@ -6,88 +6,74 @@
 //  Copyright © 2016 Simon Biickert. All rights reserved.
 //
 
-import Cocoa
+import AppKit
 
-enum TransactionTypeKey: String {
-	case ID = "id"
-	case Name = "name"
-	case Category = "transactionCategory"
-	case Symbol = "symbol"
-}
-
-struct TransactionType: Equatable, Hashable {
-	var code: Int
-	var description: String
-	var emoji: String
-	var isExpense: Bool
+struct TransactionType: Equatable, Hashable, Codable, Identifiable {
+	var id: Int
+	var name: String
+	var symbol: String
+	var category: String
 	
-	init(dictionary: NSDictionary) {
-		let tempID = Int(dictionary[TransactionTypeKey.ID.rawValue] as! String)
-		code = tempID!
-		description = dictionary[TransactionTypeKey.Name.rawValue] as! String
-		emoji = dictionary[TransactionTypeKey.Symbol.rawValue] as! String
-		if let category = dictionary[TransactionTypeKey.Category.rawValue] as? String {
-			isExpense = category == "EXPENSE"
-		}
-		else { isExpense = false }
+	var isExpense: Bool {
+		return category == "EXPENSE"
 	}
 	
-	
-	var dictionary: NSDictionary {
-		let dict = NSMutableDictionary()
-		
-		dict[TransactionTypeKey.ID.rawValue] = String(self.code)
-		dict[TransactionTypeKey.Name.rawValue] = self.description
-		dict[TransactionTypeKey.Category.rawValue] = self.isExpense ? "EXPENSE" : "INCOME"
-		dict[TransactionTypeKey.Symbol.rawValue] = self.emoji
-		
-		return dict
+	static var defaultExpense: TransactionType {
+		return transactionType(forCode: 6)! // Other
+	}
+	static var defaultIncome: TransactionType {
+		return transactionType(forCode: 31)! // Other
 	}
 
 	static func transactionType(forCode code: Int) -> TransactionType? {
 		let allTransactionTypes = transactionTypes
 		
 		for tt in allTransactionTypes {
-			if tt.code == code {
+			if tt.id == code {
 				return tt
 			}
 		}
 		return nil
 	}
 	
+	private static var _transactionTypes = [TransactionType]()
 	static var transactionTypes: [TransactionType] {
 		get {
-			var expenses = transactionTypesForExpense()
-			let income = transactionTypesForIncome()
-			expenses.append(contentsOf: income)
-			return expenses
+			if _transactionTypes.count == 0 {
+				// Load some placeholder types. Will be replaced by web content.
+				_transactionTypes = loadPlaceholderTransactionTypes()
+			}
+			return _transactionTypes
+		}
+		set (values) {
+			_transactionTypes = values.sorted { $0.name < $1.name }
 		}
 	}
 	
+	static func transactionTypes(forExpense: Bool) -> [TransactionType] {
+		return forExpense ? transactionTypesForExpense() : transactionTypesForIncome()
+	}
+	
 	static func transactionTypesForExpense() -> [TransactionType] {
-		let defaults = UserDefaults.standard
-		let defaultsTypes = defaults.array(forKey: DefaultsKey.ExpenseTypes.rawValue)
-		let expenseTypes = TransactionType.arrayOfDefaultsToArrayOfTransactionTypes(defaultsTypes! as NSArray, areExpenses: true)
-		
+		let expenseTypes = transactionTypes.filter { $0.isExpense }
 		return expenseTypes
 	}
 	
 	static func transactionTypesForIncome() -> [TransactionType] {
-		let defaults = UserDefaults.standard
-		let defaultsTypes = defaults.array(forKey: DefaultsKey.IncomeTypes.rawValue)
-		let incomeTypes = TransactionType.arrayOfDefaultsToArrayOfTransactionTypes(defaultsTypes! as NSArray, areExpenses: false)
-		
+		let incomeTypes = transactionTypes.filter { $0.isExpense == false }
 		return incomeTypes
 	}
 	
-	static func arrayOfDefaultsToArrayOfTransactionTypes(_ defaults: NSArray, areExpenses: Bool) -> [TransactionType] {
-		var returnArray = [TransactionType]()
-		for ao in defaults {
-			let info = ao as! NSDictionary
-			var tt = TransactionType(dictionary: info)
-			tt.isExpense = areExpenses
-			returnArray.append(tt)
+	private static func loadPlaceholderTransactionTypes() -> [TransactionType] {
+		var types = [TransactionType]()
+		if let asset = NSDataAsset(name: "TransactionTypes", bundle: Bundle.main) {
+			do {
+				types = try JSONDecoder().decode([TransactionType].self, from: asset.data)
+			}
+			catch  let err {
+				print("Err", err)
+			}
 		}
-		return returnArray;
+		return types
 	}
 }

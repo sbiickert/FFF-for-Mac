@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class LoginWindowController: NSWindowController {
+class LoginWindowController: NSWindowController, NSTextFieldDelegate {
 
 	@IBOutlet weak var usernameTextField: NSTextField!
 	@IBOutlet weak var passwordTextField: NSSecureTextField!
@@ -42,10 +42,11 @@ class LoginWindowController: NSWindowController {
 	
 	override func windowDidLoad() {
         super.windowDidLoad()
-
+		
+		self.usernameTextField.delegate = self
+		self.passwordTextField.delegate = self
         // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 		
 		// http://www.knowstack.com/swift-nsdatepicker-sample-code-2-using-beginsheet/
     }
-    
 }

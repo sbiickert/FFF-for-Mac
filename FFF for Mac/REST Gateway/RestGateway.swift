@@ -1,6 +1,6 @@
 //
-//  Gateway.swift
-//  FFFMobile
+//  RestGateway.swift
+//  FFF ∞
 //
 //  Created by Simon Biickert on 2016-07-15.
 //  Copyright © 2016 Simon Biickert. All rights reserved.
@@ -11,6 +11,7 @@ import Security
 
 let APP_ERROR_DOMAIN = "ca.biickert.fff.ErrorDomain"
 
+// MARK: Types used
 enum CredentialsConstants: String {
 	case KeychainUsernameIdentifier = "FFFMobileUser"
 	case KeychainPasswordIdentifier = "FFFMobilePassword"
@@ -30,446 +31,22 @@ enum RestResource: String {
 	case SearchResource = "search"
 	case SeriesResource = "series"
 	case SummaryResource = "summary"
-	case TokenResource = "token"
 	case TransactionResource = "transaction"
 	case TransactionsResource = "transactions"
-	case TransactionTypesResource = "transactiontype"
+	case TransactionTypesResource = "transactiontypes"
+	case HeartbeatResource = "heartbeat"
 }
 
-enum ResponseKey: String {
-	// Keys for reponse notifications
-	case Success = "success"
-	case Error = "error"
-	case Sender = "sender"
-	case Message = "message"
-	case ResourcePath = "path"
-	case ResourceNotificationName = "notificationName"
-	case ResourceQParams = "queryParams"
-	case Transaction = "transaction"
-	case Url = "url"
-	case Code = "code"
-	case FullName = "userName"
-	case Key = "key"
-	case IncomeTypes = "incomeTypes"
-	case ExpenseTypes = "expenseTypes"
-	case Transactions = "transactions"
-	case Token = "token"
-	case BalanceSummary = "summary"
+enum TransactionTypeCategory: String {
+	case All = "ALL"
+	case Expense = "EXP"
+	case Income = "INC"
 }
 
-
-class RestGateway: NSObject, Gateway, URLSessionDelegate {
-	// Symfony "http://localhost:8000"
-	// MAMP    "http://localhost:8888/FFF4/services/web/app.php"
-	// Linode  "https://biickert.ca/FFF4/services/web"
-	private static let debugURL:String? = nil//"http://localhost:8888/FFF4/services/web/app.php"  // set to nil to ignore
-	private static let defaultURL = "https://www.biickert.ca/FFF4/services/web"
-	static let shared = RestGateway()
-	
-	var userName: String!
-	var fullName: String?
-
-	private(set) var url: String!
-	private var password: String!
-	private var session: URLSession?
-	private var token: Token?
-	
-	private override init() {
-		super.init()
-		if RestGateway.debugURL != nil {
-			self.url = RestGateway.debugURL!
-		}
-		// At the moment, no way to edit Preferences, so this causes old URL to stay forever
-//		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
-//			self.url = defaultsUrl
-//		}
-		else {
-			self.url = RestGateway.defaultURL
-		}
-		let config = URLSessionConfiguration.default
-		session = Foundation.URLSession(configuration: config, delegate: self, delegateQueue: nil)
-		
-		let (u, p) = RestGateway.getStoredCredentials()
-		self.userName = String(describing: u)
-		self.password = String(describing: p)
-	}
-	
-	var isDebugging: Bool {
-		return RestGateway.debugURL != nil
-	}
-	
-	// MARK: Public API
-	var isLoggedIn: Bool {
-		get {
-			return token != nil && token!.isExpired == false
-		}
-	}
-	func login() {
-		retrieveToken()
-	}
-	
-	func logout() {
-		self.fullName = nil;
-		self.token = nil;
-		self.postLogoutNotification()
-	}
-	
-	func getTransaction(withID id:Int, callback: @escaping (Message) -> Void) {
-		// url/transaction/id/json?token=
-		let fullUrl = String(format: "%@/%@/%@/json?token=%@",
-							 self.url,
-							 RestResource.TransactionResource.rawValue,
-							 String(id),
-							 self.token!.tokenString)
-		print("Fetching transaction: \(fullUrl)");
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	func createTransaction(transaction: Transaction, callback: @escaping (Message) -> Void) {
-		// POST url/transaction?token=
-		let fullUrl = String(format: "%@/%@?token=%@",
-							 self.url,
-							 RestResource.TransactionResource.rawValue,
-							 self.token!.tokenString)
-
-		// Turn the transaction into a POST body
-		let bodyString = self.postBodyForTransaction(transaction)
-		let bodyData = bodyString.data(using: String.Encoding.utf8)
-
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
-		request.httpMethod = "POST"
-		request.httpBody = bodyData
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	func updateTransaction(transaction: Transaction, callback: @escaping (Message) -> Void) {
-		// PUT url/transaction/id?token=
-		let fullUrl = String(format: "%@/%@/%@?token=%@",
-							 self.url,
-							 RestResource.TransactionResource.rawValue,
-							 String(transaction.id),
-							 self.token!.tokenString)
-		
-		// Turn the transaction into a POST body
-		let bodyString = self.postBodyForTransaction(transaction)
-		let bodyData = bodyString.data(using: String.Encoding.utf8)
-		
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
-		request.httpMethod = "PUT"
-		request.httpBody = bodyData
-		self.makeRequest(request: request, callback: callback)
-	}
-
-	func deleteTransaction(transaction: Transaction, callback: @escaping (Message) -> Void) {
-		self.deleteTransaction(withID: transaction.id, callback: callback)
-	}
-	
-	func deleteTransaction(withID id:Int, callback: @escaping (Message) -> Void) {
-		// DELETE url/transaction/id?token=
-		let fullUrl = String(format: "%@/%@/%@?token=%@",
-							 self.url,
-							 RestResource.TransactionResource.rawValue,
-							 String(id),
-							 self.token!.tokenString)
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		request.httpMethod = "DELETE"
-		self.makeRequest(request: request, callback: callback)
-	}
-
-	func getTransactions(forYear year:Int, month:Int,
-						 callback: @escaping (Message) -> Void) {
-		self.getTransactions(forYear: year, month: month, day:-1, limitedTo: nil, callback: callback)
-	}
-
-	func getTransactions(forYear year:Int, month:Int, day:Int,
-						 callback: @escaping (Message) -> Void) {
-		self.getTransactions(forYear: year, month: month, day: day, limitedTo: nil, callback: callback)
-	}
-
-	func getTransactions(forYear year:Int, month:Int, day: Int, limitedTo tt:TransactionType?,
-						 callback: @escaping (Message) -> Void) {
-		// url/transactions/year/month/day/json?token=
-		var fullUrl = String(format: "%@/%@/%@/%@/%@/json?token=%@",
-							 self.url,
-							 RestResource.TransactionsResource.rawValue,
-							 String(year),
-							 String(month),
-							 String(day),
-							 self.token!.tokenString)
-		if tt != nil {
-			fullUrl += "&tt=" + String(tt!.code)
-		}
-		print("Fetching transactions: \(fullUrl)");
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	func getTransactionSeries(withID id:String, callback: @escaping (Message) -> Void) {
-		// url/series/seriesID/json?token=
-		let fullUrl = String(format: "%@/%@/%@/json?token=%@",
-							 self.url,
-							 RestResource.SeriesResource.rawValue,
-							 id,
-							 self.token!.tokenString)
-		print("Getting transactions in series: \(fullUrl)");
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	func getSearchResults(_ query:String ,
-							callback: @escaping (Message) -> Void) {
-		// url/search/json?token=&q=
-		let fullUrl = String(format: "%@/%@/json?token=%@&q=%@",
-							 self.url,
-							 RestResource.SearchResource.rawValue,
-							 self.token!.tokenString,
-							 query)
-		print("Searching for transactions: \(fullUrl)");
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	func getTransactionTypes(callback: @escaping (Message) -> Void) {
-		// url/transactiontype/json
-		let fullUrl = String(format: "%@/%@/json",
-							 self.url,
-							 RestResource.TransactionTypesResource.rawValue)
-		print("Fetching transaction types: \(fullUrl)");
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	func getBalanceSummary(forYear year:Int, month:Int,
-						   callback: @escaping (Message) -> Void) {
-		// url/balance/year/month/day/json?token=
-		let fullUrl = String(format: "%@/%@/%@/%@/-1/json?token=%@",
-							 self.url,
-							 RestResource.BalanceResource.rawValue,
-							 String(year),
-							 String(month),
-							 self.token!.tokenString)
-		print("Fetching balance summary: \(fullUrl)");
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	func getCategorySummary(forYear year:Int, month:Int,
-							callback: @escaping (Message) -> Void) {
-		// url/summary/year/month/day/json?token=
-		let fullUrl = String(format: "%@/%@/%@/%@/-1/json?token=%@",
-							 self.url,
-							 RestResource.SummaryResource.rawValue,
-							 String(year),
-							 String(month),
-							 self.token!.tokenString)
-		print("Fetching category summary: \(fullUrl)");
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		self.makeRequest(request: request, callback: callback)
-	}
-	
-	// MARK: Private API
-	
-	private func makeRequest(request:NSURLRequest, callback: @escaping (Message) -> Void) {
-		processRequest(request as URLRequest) {info in
-			let success = (info[ResponseKey.Success.rawValue] as! NSNumber).boolValue
-			if (success) {
-				let message = info[ResponseKey.Message.rawValue] as! Message
-				if message.code == 201 {
-					// A transaction was created. Fetch it and return it.
-					self.getTransaction(withID: message.createdTransactionID!, callback: callback)
-				}
-				else {
-					callback(message)
-				}
-			}
-		}
-	}
-	
-	private func retrieveToken() {
-		// Get the latest, just in case they've been updated
-		let (u, p) = RestGateway.getStoredCredentials()
-		self.userName = String(u!)
-		self.password = String(p!)
-		
-		let fullUrl = String(format: "%@/%@/%@/json?p=%@", self.url, RestResource.TokenResource.rawValue, self.userName, self.password)
-		print("Fetching token: \(fullUrl)");
-		
-		let request = NSMutableURLRequest(url: URL(string: fullUrl)!)
-		processRequest(request as URLRequest) {[weak self] info in
-			let success = (info[ResponseKey.Success.rawValue] as! NSNumber).boolValue
-			if (success) {
-				let message = info[ResponseKey.Message.rawValue] as! Message
-				let tokenInfo = message.content[ResponseKey.Token.rawValue] as! NSDictionary
-				self?.fullName = tokenInfo[ResponseKey.FullName.rawValue] as? String;
-				self?.token = Token(token: tokenInfo[ResponseKey.Key.rawValue] as! String)
-				print("\(String(describing: self?.fullName)) fetched a key: \(String(describing: self?.token))");
-				
-				DispatchQueue.main.async {
-					self?.postLoginNotification(info)
-				}
-			}
-			else {
-				DispatchQueue.main.async {
-					self?.login()
-				}
-			}
-		}
-	}
-	
-	func postBodyForTransaction(_ transaction: Transaction) -> String {
-		let units: Set<Calendar.Component> = [.day, .month, .year]
-		let components = Calendar.current.dateComponents(units, from: transaction.date)
-		
-		// I suspect that the problems with special characters in the descriptions are caused here. Removing.
-		// .stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
-		let content = ["tt": String(format: "%d", arguments: [transaction.transactionType!.code]),
-					   "amount": String(format: "%.2f", arguments: [transaction.amount]),
-					   "description": transaction.description,
-					   "seriesid": transaction.seriesID,
-					   "y": String(format: "%d", arguments: [components.year!]),
-					   "m": String(format: "%d", arguments: [components.month!]),
-					   "d": String(format: "%d", arguments: [components.day!])]
-		
-		var params = [String]()
-		for keyValue in content {
-			params.append(String(format: "%@=%@", keyValue.0, keyValue.1 ?? ""))
-		}
-		
-		return params.joined(separator: "&")
-	}
-	
-	func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (Foundation.URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-		completionHandler(Foundation.URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
-	}
-	
-	func processRequest(_ request: URLRequest, closure: @escaping (_ info: NSDictionary) -> Void) {
-		var info = NSDictionary()
-		
-		
-		let task = session?.dataTask(with: request, completionHandler: {(data: Data?, response: URLResponse?, error: Error?) -> Void in
-			if (error != nil) {
-				print("Error requesting token: \(String(describing: error))")
-				info = [ResponseKey.Success.rawValue: NSNumber(value: false),
-						ResponseKey.Error.rawValue: error as AnyObject,
-						ResponseKey.Sender.rawValue: self]
-			}
-			else {
-				do {
-					let json = try JSONSerialization.jsonObject(with: data!, options: [])
-					let dict = json as! NSDictionary
-					let message = Message(dictionary: dict)
-					if message.isError {
-						print("Got error back from server: \(message.code): \(String(describing: message.content[ResponseKey.Code.rawValue]))")
-						let swiftDict = self.convertNSDictionary(message.content)
-						let messageError = NSError(domain: APP_ERROR_DOMAIN, code: message.code, userInfo: swiftDict)
-						info = [ResponseKey.Success.rawValue: NSNumber(value: false),
-								ResponseKey.Error.rawValue: messageError,
-								ResponseKey.Sender.rawValue: self];
-					}
-					else {
-						// Got a message
-						info = [ResponseKey.Success.rawValue: NSNumber(value: true),
-								ResponseKey.Message.rawValue: message,
-								ResponseKey.Sender.rawValue: self];
-					}
-				}
-				catch {
-					
-					print("Malformed JSON requesting token: \(error)");
-					let responseString = String(data: data!, encoding: String.Encoding.utf8)
-					print(responseString!)
-					info = [ResponseKey.Success.rawValue: NSNumber(value: false),
-							ResponseKey.Error.rawValue: error as AnyObject,
-							ResponseKey.Sender.rawValue: self];
-				}
-			}
-			
-			// Execute closure
-			closure(info)
-		})
-		task?.resume()
-	}
-	
-	func convertNSDictionary(_ nsDict:NSDictionary) -> [String: Any] {
-		var dict = [String: Any]()
-		for key in nsDict.allKeys {
-			let sKey = String(describing:key)
-			dict[sKey] = nsDict[key]
-		}
-		return dict
-	}
-	
-	private func postLoginNotification(_ info: NSDictionary) {
-		NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.LoginResponse.rawValue),
-										object: self,
-										userInfo: info as [NSObject: AnyObject])
-	}
-	
-	private func postLogoutNotification() {
-		NotificationCenter.default.post(name: Notification.Name(rawValue: Notifications.LogoutResponse.rawValue),
-										object: self,
-										userInfo: nil)
-	}
-	
-	// MARK: Secure storage of credentials
-	
-	static let kSecClassGenericPasswordValue = NSString(format: kSecClassGenericPassword);
-	static let kSecClassValue = NSString(format: kSecClass);
-	static let kSecAttrServiceValue = NSString(format: kSecAttrService);
-	static let kSecValueDataValue = NSString(format: kSecValueData);
-	static let kSecMatchLimitValue = NSString(format: kSecMatchLimit);
-	static let kSecReturnDataValue = NSString(format: kSecReturnData);
-	static let kSecMatchLimitOneValue = NSString(format: kSecMatchLimitOne);
-	static let kSecAttrAccountValue = NSString(format: kSecAttrAccount);
-	
-	private static func getStoredString(_ key: NSString) -> NSString? {
-		let keychainQuery = NSDictionary(
-			objects: [kSecClassGenericPasswordValue,
-					  key,
-					  kCFBooleanTrue!,
-					  kSecMatchLimitOneValue],
-			forKeys: [kSecClassValue, kSecAttrServiceValue, kSecReturnDataValue, kSecMatchLimitValue]);
-		var dataTypeRef: AnyObject?
-		let status: OSStatus = SecItemCopyMatching(keychainQuery, &dataTypeRef)
-		var value: NSString?
-		if (status == errSecSuccess) {
-			let retrievedData: Data? = dataTypeRef as? Data
-			if let result = NSString(data: retrievedData!, encoding: String.Encoding.utf8.rawValue) {
-				value = result
-			}
-		}
-		else {
-			print("Nothing was retrieved from the keychain. Status code \(status)")
-		}
-		return value
-	}
-	
-	static func getStoredCredentials() -> (username: NSString?, password: NSString?) {
-		return (username: getStoredString(CredentialsConstants.KeychainUsernameIdentifier.rawValue as NSString),
-				password: getStoredString(CredentialsConstants.KeychainPasswordIdentifier.rawValue as NSString) )
-	}
-	
-	private static func setStoredString(_ key: NSString, value: NSString) {
-		let dataFromString: Data = value.data(using: String.Encoding.utf8.rawValue)!;
-		let keychainQuery = NSDictionary(
-			objects: [kSecClassGenericPasswordValue,
-					  key,
-					  dataFromString],
-			forKeys: [kSecClassValue, kSecAttrServiceValue, kSecValueDataValue]);
-		SecItemDelete(keychainQuery as CFDictionary);
-		let _result: OSStatus = SecItemAdd(keychainQuery as CFDictionary, nil);
-		if _result != 0 {
-			print("Storing string in keychain result: \(_result)")
-		}
-	}
-	
-	static func setStoredCredentials(_ username: String, password: String) {
-		setStoredString(CredentialsConstants.KeychainUsernameIdentifier.rawValue as NSString, value: username as NSString)
-		setStoredString(CredentialsConstants.KeychainPasswordIdentifier.rawValue as NSString, value: password as NSString)
-	}
+enum DateArgOption: String {
+	case Year = "Y"
+	case YearMonth = "YM"
+	case YearMonthDay = "YMD"
 }
 
 struct DataFormatter {
@@ -480,7 +57,6 @@ struct DataFormatter {
 		dateFormatter?.dateFormat = fffDateFormat
 		dateFormatter?.timeZone = TimeZone.current
 	}
-	
 	
 	static func dateFromFFFDateString(_ dateString: String) -> Date? {
 		if (dateFormatter == nil) {
@@ -495,5 +71,571 @@ struct DataFormatter {
 		}
 		return dateFormatter!.string(from: date)
 	}
+}
+
+struct CodableTransaction: Codable {
+	var id: Int = 0
+	var tt: Int = 0
+	var amount: Float = 0.0
+	var description: String?
+	var seriesid: String?
+	var y: Int = 0
+	var m: Int = 0
+	var d: Int = 0
 	
+	init(transaction:FFFTransaction) {
+		id = transaction.id
+		tt = transaction.transactionType.id
+		amount = transaction.amount
+		description = transaction.description
+		seriesid = transaction.seriesID
+		let components = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: transaction.date)
+		y = components.year!
+		m = components.month!
+		d = components.day!
+	}
+	
+	var date: Date {
+		if let theDate = Calendar.current.date(from: DateComponents(year: y, month: m, day: d)) {
+			return theDate
+		}
+		return Date()
+	}
+	
+	var transaction: FFFTransaction {
+		let t = FFFTransaction(id: id,
+							   amount: amount,
+							   transactionType: TransactionType.transactionType(forCode: tt) ?? TransactionType.defaultExpense,
+							   description: description ?? "",
+							   date: date,
+							   seriesID: seriesid,
+							   modificationStatus: .clean)
+		return t
+	}
+}
+
+struct CodableOpResult: Codable {
+	var message: String
+	var ids: [Int]
+}
+
+struct RequestResult {
+	var isError = false
+	var code = 0
+	var text: String? // JSON encoded
+	var data: Data? // JSON binary
+}
+
+
+// MARK: The Gateway Class
+class RestGateway: NSObject, URLSessionDelegate {
+	// Running in PHP server: http://localhost:8000
+	// Running in MAMP: http://localhost:8888/FFF5/public
+	private static let debugURL:String? = "http://localhost:8888/FFF5/public"  // set to nil to ignore
+	private static let defaultURL = "https://www.biickert.ca/FFF5/public"
+	static let shared = RestGateway()
+
+	var userName: String! {
+		let (u, _) = RestGateway.getStoredCredentials()
+		return u ?? ""
+	}
+	private var password: String! {
+		let (_, p) = RestGateway.getStoredCredentials()
+		return p ?? ""
+	}
+
+	private(set) var url: String!
+	private var _session: URLSession?
+	
+	private override init() {
+		super.init()
+		if RestGateway.debugURL != nil {
+			self.url = RestGateway.debugURL!
+		}
+		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
+			self.url = defaultsUrl
+		}
+		else {
+			self.url = RestGateway.defaultURL
+		}
+		let config = URLSessionConfiguration.default
+		_session = Foundation.URLSession(configuration: config, delegate: self, delegateQueue: nil)
+	}
+	
+	var session: URLSession? {
+		return _session
+	}
+
+	var isDebugging: Bool {
+		return RestGateway.debugURL != nil
+	}
+	
+	private var httpBasicLogin:String {
+		let loginString = String(format: "%@:%@", userName, password)
+		let loginData = loginString.data(using: String.Encoding.utf8)!
+		return loginData.base64EncodedString()
+	}
+	
+	// MARK: Request Factory - GET
+	func createRequestGetTransaction(withID id:Int) -> URLRequest {
+		// url/transaction/id.json
+		let fullUrl = String(format: "%@/%@/%@.json",
+							 self.url,
+							 RestResource.TransactionResource.rawValue,
+							 String(id))
+		print("Fetching transaction: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+
+	func createRequestGetTransactions(forYear year:Int, month:Int) -> URLRequest {
+		return self.createRequestGetTransactions(forYear: year, month: month, day:-1, limitedTo: nil)
+	}
+
+	func createRequestGetTransactions(forYear year:Int, month:Int, day:Int) -> URLRequest {
+		return self.createRequestGetTransactions(forYear: year, month: month, day: day, limitedTo: nil)
+	}
+
+	func createRequestGetTransactions(forYear year:Int, month:Int, day: Int, limitedTo tt:TransactionType?) -> URLRequest {
+		// url/transactions/year/month/day/json
+		var fullUrl = String(format: "%@/%@/%@/%@/%@/json",
+							 self.url,
+							 RestResource.TransactionsResource.rawValue,
+							 String(year),
+							 String(month),
+							 String(day))
+		if tt != nil {
+			fullUrl += "?tt=" + String(tt!.id)
+		}
+		print("Fetching transactions: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+	
+	func createRequestGetTransactionSeries(withID id:String) -> URLRequest {
+		// url/transactions/seriesID.json
+		let fullUrl = String(format: "%@/%@/%@/%@.json",
+							 self.url,
+							 RestResource.TransactionsResource.rawValue,
+							 RestResource.SeriesResource.rawValue,
+							 id)
+		print("Getting transactions in series: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+	
+	func createRequestGetTransactions(withIDs tids:[Int]) -> URLRequest {
+		// url/transactions/json
+		var fullUrl = String(format: "%@/%@/json",
+							 self.url,
+							 RestResource.TransactionsResource.rawValue)
+		print("Getting transactions with ids: \(tids)");
+		
+		// Turn the transaction IDs into a GET query
+		var tidStrings = [String]()
+		for tid in tids { tidStrings.append(String(tid)) }
+		fullUrl += "?tids=" + tidStrings.joined(separator: ",")
+
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+	
+	func createRequestGetSearchResults(_ query:String) -> URLRequest {
+		// url/search/json?q=
+		assert(query.trimmingCharacters(in: .whitespaces).isEmpty == false, "Empty query passed to createRequestGetSearchResults(:)")
+		let fullUrl = String(format: "%@/%@/json?q=%@",
+							 self.url,
+							 RestResource.SearchResource.rawValue,
+							 query)
+		print("Searching for transactions: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+	
+	func createRequestGetSearchResults(_ query:String, from:Date, to:Date) -> URLRequest {
+		// url/search/json?q=&from=&to=
+		let fromString = DataFormatter.fffDateStringFromDate(from)
+		let toString = DataFormatter.fffDateStringFromDate(to)
+		let fullUrl = String(format: "%@/%@/json?q=%@&from=%@&to=%@",
+							 self.url,
+							 RestResource.SearchResource.rawValue,
+							 query, fromString, toString)
+		print("Searching for transactions: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+
+	func createRequestGetTransactionTypes(category:TransactionTypeCategory = .All) -> URLRequest {
+		// url/transactiontypes/json
+		let fullUrl = String(format: "%@/%@/%@.json",
+							 self.url,
+							 RestResource.TransactionTypesResource.rawValue,
+							 category.rawValue)
+		print("Fetching transaction types: \(fullUrl)");
+		let request = URLRequest(url: URL(string: fullUrl)!)
+		return request
+	}
+
+	func createRequestGetBalanceSummary(forYear year:Int, month:Int) -> URLRequest {
+		// url/balance/year/month/day/json
+		let fullUrl = String(format: "%@/%@/%@/%@/-1/json",
+							 self.url,
+							 RestResource.BalanceResource.rawValue,
+							 String(year),
+							 String(month))
+		print("Fetching balance summary: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+	
+	func createRequestGetCategorySummary(forYear year:Int, month:Int) -> URLRequest {
+		// url/summary/year/month/json
+		let fullUrl = String(format: "%@/%@/%@/%@/json",
+							 self.url,
+							 RestResource.SummaryResource.rawValue,
+							 String(year),
+							 String(month))
+		print("Fetching category summary: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+	
+	func createRequestGetHeartbeat() -> URLRequest {
+		// url/heartbeat
+		let fullUrl = String(format: "%@/%@",
+							 self.url,
+							 RestResource.HeartbeatResource.rawValue)
+		print("Checking login credentials with heartbeat: \(fullUrl)");
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		return request
+	}
+
+	// MARK: Request Factory - POST
+	func createRequestCreateTransaction(transaction: FFFTransaction) -> URLRequest {
+		assert(transaction.isValid, "Attempt to create an invalid transaction")
+		// POST url/transaction
+		let fullUrl = String(format: "%@/%@",
+							 self.url,
+							 RestResource.TransactionResource.rawValue)
+
+		// Turn the transaction into a POST body
+		let bodyString = self.postBodyForTransactions([transaction])
+		let bodyData = bodyString.data(using: String.Encoding.utf8)
+
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
+		request.httpMethod = "POST"
+		request.httpBody = bodyData
+		return request
+	}
+
+	func createRequestCreateTransactions(transactions: [FFFTransaction]) -> URLRequest {
+		for t in transactions {
+			assert(t.isValid, "Attempt to create an invalid transaction")
+		}
+		// url/transactions
+		let fullUrl = String(format: "%@/%@",
+							 self.url,
+							 RestResource.TransactionsResource.rawValue)
+		print("Creating transactions");
+
+		// Turn the transactions into a POST body
+		let bodyString = self.postBodyForTransactions(transactions)
+		let bodyData = bodyString.data(using: String.Encoding.utf8)
+		
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
+		request.httpMethod = "POST"
+		request.httpBody = bodyData
+		return request
+	}
+
+	// MARK: Request Factory - PUT
+	func createRequestUpdateTransaction(transaction: FFFTransaction) -> URLRequest {
+		assert(transaction.isValid, "Attempt to update a transaction with invalid data")
+		// PUT url/transaction/id
+		let fullUrl = String(format: "%@/%@/%@",
+							 self.url,
+							 RestResource.TransactionResource.rawValue,
+							 String(transaction.id))
+		
+		// Turn the transaction into a POST body
+		let bodyString = self.postBodyForTransactions([transaction])
+		let bodyData = bodyString.data(using: String.Encoding.utf8)
+		
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
+		request.httpMethod = "PUT"
+		request.httpBody = bodyData
+		return request
+	}
+	
+	func createRequestUpdateTransactions(transactions: [FFFTransaction]) -> URLRequest {
+		for t in transactions {
+			assert(t.isValid, "Attempt to update a transaction with invalid data")
+		}
+		// PUT url/transactions/id
+		let fullUrl = String(format: "%@/%@",
+							 self.url,
+							 RestResource.TransactionsResource.rawValue)
+		
+		// Turn the transactions into a POST body
+		let bodyString = self.postBodyForTransactions(transactions)
+		let bodyData = bodyString.data(using: String.Encoding.utf8)
+		
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
+		request.httpMethod = "PUT"
+		request.httpBody = bodyData
+		return request
+	}
+
+	// MARK: Request Factory - DELETE
+	func createRequestDeleteTransaction(transaction: FFFTransaction) -> URLRequest {
+		return self.createRequestDeleteTransaction(withID: transaction.id)
+	}
+	
+	func createRequestDeleteTransaction(withID id:Int) -> URLRequest {
+		// DELETE url/transaction/id
+		let fullUrl = String(format: "%@/%@/%@",
+							 self.url,
+							 RestResource.TransactionResource.rawValue,
+							 String(id))
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		request.httpMethod = "DELETE"
+		return request
+	}
+	
+	func createRequestDeleteTransactions(withIDs tids:[Int]) -> URLRequest {
+		// DELETE url/transactions
+		let fullUrl = String(format: "%@/%@",
+							 self.url,
+							 RestResource.TransactionsResource.rawValue)
+		
+		// Turn the transaction IDs into a POST body
+		var bodyData:Data? = nil
+		let jsonEncoder = JSONEncoder()
+		do {
+			let jsonData = try jsonEncoder.encode(tids)
+			bodyData = String(data: jsonData, encoding: .utf8)!.data(using: .utf8)
+		}
+		catch {
+			print("Error encoding transaction IDs")
+		}
+
+		var request = URLRequest(url: URL(string: fullUrl)!)
+		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
+		request.httpMethod = "DELETE"
+		request.httpBody = bodyData
+		return request
+	}
+	
+	
+	// MARK: Making Requests
+	
+//	func makeRequest(request:URLRequest, callback: @escaping (RequestResult) -> Void) {
+//		// Always ensure the current credentials are passed
+//		var r = request // parameter is immutable, need to put in a var
+//		if let _ = r.value(forHTTPHeaderField: "Authorization") {
+//			r.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+//		}
+//
+//		processRequest(r as URLRequest) {info in
+//			if (info.isError == false) {
+//				if info.code == 201 {
+//					// One or more transaction were created. Fetch them and return them.
+//					do {
+//						let resultData = try JSONDecoder().decode(CodableOpResult.self, from: info.data!)
+//						print("Created transactions \(resultData.ids)")
+//						let req = self.createRequestGetTransactions(withIDs: resultData.ids)
+//						self.makeRequest(request: req, callback: callback)
+//					} catch let err {
+//						print("Err", err)
+//					}
+//				}
+//				else {
+//					callback(info)
+//				}
+//			}
+//			else {
+//				if info.code == 401 {
+//					// Prompt for user credentials then resubmit the request
+//					print("Need to prompt for credentials")
+//					if let delegate = RestGateway.loginDelegate {
+//						delegate.showLogin(failedRequest: (r, callback))
+//					}
+//				}
+//			}
+//		}
+//	}
+	
+	private func postBodyForTransactions(_ transactions: [FFFTransaction]) -> String {
+		// Convert transaction to JSON here
+		var simpleTransactions: [CodableTransaction] = []
+		for t in transactions { simpleTransactions.append(CodableTransaction(transaction: t)) }
+		let jsonEncoder = JSONEncoder()
+		do {
+			let jsonData = try jsonEncoder.encode(simpleTransactions)
+			let jsonString = String(data: jsonData, encoding: .utf8)!
+			return jsonString
+		}
+		catch {
+			return "Error encoding transactions"
+		}
+	}
+	
+	func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (Foundation.URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+		completionHandler(Foundation.URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
+	}
+	
+//	private func processRequest(_ request: URLRequest, closure: @escaping (_ info: RequestResult) -> Void) {
+//		var info = RequestResult()
+//
+//		let task = _session?.dataTask(with: request, completionHandler: {(data: Data?, response: URLResponse?, error: Error?) -> Void in
+//			if let nonNilError = error {
+//				print("Error making request: \(String(describing: nonNilError))")
+//				info.isError = true
+//				info.text = nonNilError.localizedDescription
+//				switch nonNilError.localizedDescription {
+//				case "Could not connect to the server.":
+//					// TODO: Raise Hell
+//					info.code = -9998
+//				default:
+//					info.code = -9999
+//				}
+//			}
+//			else {
+//				let httpResponse = response as! HTTPURLResponse
+//				let responseContent = String(data: data!, encoding: String.Encoding.utf8)
+//				info.code = httpResponse.statusCode
+//				info.text = responseContent
+//				info.data = data
+//
+//				do {
+//					// This will fail for non-JSON
+//					let json = try JSONSerialization.jsonObject(with: data!, options: [])
+//					let _ = json as? NSDictionary
+//				}
+//				catch {
+//					print("Malformed JSON returned from request: \(error)");
+//					print(responseContent ?? "Null content")
+//					info.isError = true
+//				}
+//
+//				if (httpResponse.statusCode >= 400) {
+//					/*
+//						NOTE TO FUTURE SELF:
+//						If you get persistent 401's, check that the request isn't being redirected.
+//						The Authorization header is dropped on redirect, and this class does not
+//						have any explicit support for handling it.
+//					*/
+//					print("HTTP request error. Code: \(httpResponse.statusCode)")
+//					info.isError = true
+//				}
+//			}
+//
+//			// Execute closure
+//			closure(info)
+//		})
+//		task?.resume()
+//	}
+	
+	// MARK: Secure storage of credentials
+	
+//	static let kSecClassGenericPasswordValue = NSString(format: kSecClassGenericPassword);
+//	static let kSecClassValue = NSString(format: kSecClass);
+//	static let kSecAttrServiceValue = NSString(format: kSecAttrService);
+//	static let kSecValueDataValue = NSString(format: kSecValueData);
+//	static let kSecMatchLimitValue = NSString(format: kSecMatchLimit);
+//	static let kSecReturnDataValue = NSString(format: kSecReturnData);
+//	static let kSecMatchLimitOneValue = NSString(format: kSecMatchLimitOne);
+//	static let kSecAttrAccountValue = NSString(format: kSecAttrAccount);
+	
+	enum CredentialStorageMode {
+		case Temporary
+		case Stored
+	}
+	
+	static var credentialStorageMode: CredentialStorageMode = .Temporary
+	private static var tempCredentials = (username: "", password: "")
+	
+	static func forgetUser() {
+		setStoredCredentials("", password: "")
+	}
+	
+	private static var protectionSpace: URLProtectionSpace {
+		let ps = URLProtectionSpace(host: "localhost", port: 8888, protocol: "http", realm: nil, authenticationMethod: "http")
+		return ps
+	}
+	
+	static func setStoredCredentials(_ username: String, password: String) {
+		if credentialStorageMode == .Stored {
+			let creds = URLCredential(user: username, password: password, persistence: .permanent)
+			URLCredentialStorage.shared.setDefaultCredential(creds, for: protectionSpace)
+		}
+		else {
+			tempCredentials = (username, password)
+		}
+	}
+	
+	static func getStoredCredentials() -> (username: String?, password: String?) {
+		if credentialStorageMode == .Stored {
+			let creds = URLCredentialStorage.shared.defaultCredential(for: protectionSpace)
+			return (username: creds?.user, password: creds?.password)
+		}
+		else {
+			return tempCredentials
+		}
+	}
+	
+//	private static func getStoredString(_ key: String) -> String? {
+//		let keychainQuery = NSDictionary(
+//			objects: [kSecClassGenericPasswordValue,
+//					  key,
+//					  kCFBooleanTrue as Any,
+//					  kSecMatchLimitOneValue],
+//			forKeys: [kSecClassValue, kSecAttrServiceValue, kSecReturnDataValue, kSecMatchLimitValue]);
+//		var dataTypeRef: AnyObject?
+//		let status: OSStatus = SecItemCopyMatching(keychainQuery, &dataTypeRef)
+//		var value: NSString?
+//		if (status == errSecSuccess) {
+//			let retrievedData: Data? = dataTypeRef as? Data
+//			if let result = NSString(data: retrievedData!, encoding: String.Encoding.utf8.rawValue) {
+//				value = result
+//			}
+//		}
+//		else {
+//			print("Nothing was retrieved from the keychain. Status code \(status)")
+//		}
+//		return value as String?
+//	}
+//
+//	private static func setStoredString(_ key: String, value: String) {
+//		let dataFromString: Data = value.data(using: String.Encoding(rawValue: String.Encoding.utf8.rawValue))!;
+//		let keychainQuery = NSDictionary(
+//			objects: [kSecClassGenericPasswordValue,
+//					  key,
+//					  dataFromString],
+//			forKeys: [kSecClassValue, kSecAttrServiceValue, kSecValueDataValue]);
+//		SecItemDelete(keychainQuery as CFDictionary);
+//		let _result: OSStatus = SecItemAdd(keychainQuery as CFDictionary, nil);
+//		if _result != 0 {
+//			print("Storing string in keychain result: \(_result)")
+//		}
+//	}
 }

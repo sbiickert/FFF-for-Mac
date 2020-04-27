@@ -38,17 +38,16 @@ struct BankTransaction {
 		return false
 	}
 
-	func getMatchScore(with t:Transaction) -> Float {
+	func getMatchScore(with t:FFFTransaction) -> Float {
 		let interval = Calendar.current.dateComponents(BankTransaction.unitsD, from: date, to: t.date)
 		
 		let daysDiff = abs(interval.day!)
 		var amountDiff:Float = abs(t.amount - amount)
 		
-		if let tt = t.transactionType {
-			if tt.isExpense {
-				// BankTransaction will be negative, FFF amount is positive
-				amountDiff = abs(t.amount + amount)
-			}
+		if t.transactionType.isExpense {
+			// BankTransaction will be negative, FFF amount is positive
+			assert(t.amount > 0.0) // sjb putting this here
+			amountDiff = abs(t.amount + amount)
 		}
 		
 		// Right date, right amount

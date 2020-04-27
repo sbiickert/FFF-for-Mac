@@ -7,17 +7,20 @@
 //
 
 import Cocoa
+import Combine
 
 class CheckerViewController: FFFViewController {
 
 	@IBOutlet weak var dragAndDropLabel: NSTextField!
 	@IBOutlet weak var outlineView: NSOutlineView!
 	@IBOutlet weak var outlineScrollView: NSScrollView!
+	@IBOutlet weak var progressSpinner: NSProgressIndicator!
 	
 	@IBOutlet weak var alignButton: NSButton!
 	@IBOutlet weak var createButton: NSButton!
 	@IBOutlet weak var doneButton: NSButton!
-		
+	
+	private var storage = Set<AnyCancellable>()
 	var bankTransactions = [BankTransaction]() {
 		didSet {
 			transactions.removeAll()
@@ -32,7 +35,7 @@ class CheckerViewController: FFFViewController {
 			outlineScrollView.isHidden = (bankTransactions.count == 0)
 		}
 	}
-	private(set) var transactions = [Transaction]()
+	private(set) var transactions = [FFFTransaction]()
 	private(set) var matches = [TransactionMatch]() {
 		didSet {
 			outlineView.reloadData()
@@ -61,23 +64,17 @@ class CheckerViewController: FFFViewController {
 		if let ms = item as? MatchScore {
 			var t = ms.transaction
 			if let tm = outlineView.parent(forItem: item) as? TransactionMatch {
-				let bt = tm.bankTransaction!
+				let bt = tm.bankTransaction
 				t.amount = abs(bt.amount)
 				t.date = bt.date
-				CachingGateway.shared.updateTransaction(transaction: t) {  message in  //[weak self]
-					// Replace the transaction in the stored list and refresh check
-					// At the moment, this is redundant because any data update refreshes the whole list
-//					if let seq = self?.transactions.enumerated() {
-//						for (index, storedTransaction) in seq {
-//							if t.id == storedTransaction.id {
-//								self?.transactions.remove(at: index)
-//								self?.transactions.append(t)
-//								self?.check()
-//								break
-//							}
-//						}
-//					}
-				}
+				// Puts the corrected transaction into our list
+				self.transactions = self.transactions.filter { $0.id != t.id }
+				self.transactions.append(t)
+				// Updates the transaction in the database
+				// Does not trigger dataRefreshed
+				app.state.updateTransactions([t])
+				// Redo the check
+				self.check()
 			}
 		}
 	}
@@ -96,18 +93,18 @@ class CheckerViewController: FFFViewController {
 		}
 
 		if bt != nil {
-			var t = Transaction()
+			var t = FFFTransaction()
 			let isExpense = bt!.amount < 0
 			t.amount = abs(bt!.amount)
 			if isExpense {
-				t.transactionType = TransactionType.transactionTypesForExpense().first
+				t.transactionType = TransactionType.defaultExpense
 			}
 			else {
-				t.transactionType = TransactionType.transactionTypesForIncome().first
+				t.transactionType = TransactionType.defaultIncome
 			}
 			t.date = bt!.date
 			t.description = bt!.description
-			NotificationCenter.default.post(name: NSNotification.Name(Notifications.ShowEditForm.rawValue),
+			NotificationCenter.default.post(name: .showEditForm,
 											object: self,
 											userInfo: ["t": t])
 		}
@@ -127,91 +124,194 @@ class CheckerViewController: FFFViewController {
 		if let cdv = view as? CheckerDragView {
 			cdv.delegate = self
 		}
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(openBankFileNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.OpenBankFile.rawValue),
-											   object: nil)
+		
+		NotificationCenter.default.publisher(for: .openBankFile)
+			.compactMap { $0.userInfo?["filename"] as? String }
+			.sink { filename in
+				self.openBankFile(filename: filename)
+			}.store(in: &self.storage)
+		
+		// Sent by app.state
+		NotificationCenter.default.publisher(for: .transactionsCreated)
+			.compactMap { $0.userInfo?["t"] as? [FFFTransaction]}
+			.sink { tList in
+				self.transactions.append(contentsOf: tList)
+				self.check()
+			}.store(in: &self.storage)
     }
 	
-	@objc func openBankFileNotificationReceived(_ notification: Notification) {
-		// userinfo has the name of the file at key "filename"
-		if let userInfo = notification.userInfo, let filename = userInfo["filename"] as? String {
-			let url = URL(fileURLWithPath: filename)
-			tabViewController?.selectedTabViewItemIndex = 3  // Show this
-			self.openCSV(url)
-		}
+	private func openBankFile(filename: String) {
+		let url = URL(fileURLWithPath: filename)
+		tabViewController?.selectedTabViewItemIndex = 3  // Show this
+		self.openCSV(url)
 	}
 	
 	private func loadTransactionsForBankTransactions() {
+		progressSpinner.doubleValue = 0.0
+		progressSpinner.isHidden = false
+		
 		// Clear old data
 		self.transactions.removeAll()
 		self.matches = [TransactionMatch]()
 		
 		// Need to get all FFF transactions covering bank records
 		if bankTransactions.count > 0 {
-			var timeWindow = [(year:Int, month:Int)]()
+			var fromDate: Date? = nil
+			var toDate: Date? = nil
 			for bt in bankTransactions {
-				let ym = getYM(from: bt.date)
-				if timeWindow.count == 0 || timeWindow.last! != ym {
-					timeWindow.append(ym)
+				if fromDate == nil || bt.date < fromDate! {
+					fromDate = bt.date
+				}
+				if toDate == nil || bt.date > toDate! {
+					toDate = bt.date
 				}
 			}
 			
-			for ym in timeWindow {
-				CachingGateway.shared.getTransactions(forYear: ym.year, month: ym.month) {message in
-					if var received = message.transactions {
-						received.append(contentsOf: self.transactions)
-						self.transactions = received
-						self.check()
+			let req = RestGateway.shared.createRequestGetSearchResults("", from: fromDate!, to: toDate!)
+			progressSpinner.doubleValue = 10
+			URLSession.shared.dataTaskPublisher(for: req)
+				.tryMap { output in
+					guard let response = output.response as? HTTPURLResponse, response.statusCode == 200 else {
+						return Data()
 					}
+					return output.data
 				}
-			}
+				.decode(type: [CodableTransaction].self, decoder: JSONDecoder())
+				.replaceError(with: [CodableTransaction]())
+				.map { ctArray in
+					ctArray.map { $0.transaction }
+				}
+				.sink { tArray in
+					self.transactions = tArray
+					self.check()
+					// check() will continue updating the spinner and hide it
+				}.store(in: &self.storage)
 		}
 	}
 	
-	override func dataUpdated(_ notification: Notification) {
+	override func dataRefreshed(_ notification: Notification) {
 		DispatchQueue.main.async {
 			self.loadTransactionsForBankTransactions()
 		}
 	}
 	
 	private func check() {
-		// Will be called multiple times if the timeWindow spans multiple months
 		var mList = [TransactionMatch]()
 		
-		var transactionsWorkingList = transactions
-		
+		// Whether this is called from loadTransactionsForBankTransactions
+		// or from align or create
+		DispatchQueue.main.async {
+			self.progressSpinner.isHidden = false
+			self.progressSpinner.doubleValue = 50
+		}
+
 		for bt in bankTransactions {
-			let tm = TransactionMatch(with: bt)
-			for (index, t) in transactionsWorkingList.enumerated() {
-				tm.addTransaction(t)  // Will only be appended if score > 0.0
-				if tm.matchType == .complete {
-					// Don't need to evaluate this transaction any more
-					transactionsWorkingList.remove(at: index)
-					// Can't be a possible for any other bank transaction
-					for previousMatch in mList {
-						previousMatch.removeFromPossibles(t)
+			let tm = self.checkTransaction(bt: bt)
+			mList.append(tm)
+		}
+		DispatchQueue.main.async { self.progressSpinner.doubleValue = 70 }
+		
+		// At this point, all TransactionMatches in mList are .none or .partial
+		mList.forEach { $0.sortPossibles() }
+		mList.sort { $0.score > $1.score }
+		
+		for tm in mList {
+			for possible in tm.possibleMatches {
+				if possible.isCloseEnough {
+					tm.matchedTransaction = possible.transaction
+					tm.possibleMatches.removeAll()
+					// Since this matched, it can't be a match for others
+					for otherTM in mList {
+						otherTM.removeFromPossibles(tm.matchedTransaction!)
 					}
 					break
 				}
 			}
-			if tm.matchType != .none {
-				mList.append(tm)
+		}
+		DispatchQueue.main.async { self.progressSpinner.doubleValue = 80 }
+
+		// Now that we've made the job as small as possible, apply fuzzy string to description
+		for (i, tm) in mList.enumerated() {
+			if tm.matchType == .partial {
+				for (j, score) in tm.possibleMatches.enumerated() {
+					let fuzz = fuzzyScore(find: score.transaction.description, in: tm.bankTransaction.description)
+					mList[i].possibleMatches[j].descScore = fuzz
+				}
+				mList[i].possibleMatches.sort { $0.totalScore > $1.totalScore }
 			}
 		}
+		DispatchQueue.main.async { self.progressSpinner.doubleValue = 90 }
+
 		// Sort by status
 		mList.sort {lhs, rhs in
+			// .none < .partial < .complete
 			return lhs.matchType.rawValue < rhs.matchType.rawValue
 		}
+		
+		// Set matches, will update outlineview
 		DispatchQueue.main.async { [weak self] in
-			// Set matches, will update outlineview
+			self?.progressSpinner.doubleValue = 100
+			self?.progressSpinner.isHidden = true
 			self?.matches = mList
 		}
 	}
 	
-	private func getYM(from date:Date) -> (year:Int, month:Int) {
-		let components = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: date)
-		return (year: components.year!, month: components.month!)
+	private func checkTransaction(bt: BankTransaction) -> TransactionMatch {
+		let tMatch = TransactionMatch(with: bt)
+		
+		for t in self.transactions {
+			var dateDiff = calcDateDiff(date1: t.date, date2: bt.date)
+			let amtDiff = abs(t.amount - abs(bt.amount)) //t.amount is always positive
+			
+			// Amount score. Perfect is 1.0, approaches zero
+			var amtScore:Float = 0.0
+			if amtDiff < t.amount {
+				let pctAmtDiff = (t.amount - amtDiff) / t.amount
+				amtScore = pctAmtDiff * pctAmtDiff
+			}
+			
+			// Date score. Perfect is 1.0. Zero at 14 days.
+			var dateScore:Float = 0.0
+			dateDiff = min(dateDiff, 14)
+			let dateDiffValue = Float(14 - dateDiff) / 14.0
+			dateScore = dateDiffValue * dateDiffValue
+			
+			let matchScore = MatchScore(amountScore: amtScore, dateScore: dateScore, descScore: 0.0, transaction: t)
+			
+			if matchScore.dateScore == 0 || matchScore.amountScore < 0.5 || matchScore.totalScore < 1.0 {
+				// skip
+			}
+			else {
+				// Description Score (1.0 for perfect, fuzzy logic)
+				// This step is slow, so commenting it out. Will apply desc string to the sorting of .partials
+				// matchScore.descScore = fuzzyScore(find: t.description, in: bt.description)
+				tMatch.possibleMatches.append(matchScore)
+			}
+		}
+		return tMatch
+	}
+	
+//	private var savedDateDiffs = Dictionary<String, Int>()
+	private func calcDateDiff(date1:Date, date2: Date) -> Int {
+//		let dates = [date1, date2].sorted()
+//		let key = "\(dates)"
+//		if let diff = savedDateDiffs[key] {
+//			return diff
+//		}
+		let diff = abs(Calendar.current.dateComponents([.day], from: date1, to: date2).day!)
+//		savedDateDiffs[key] = diff
+		return diff
+	}
+	
+//	private var fuse = Fuse()
+	private func fuzzyScore(find str1: String, in str2: String) -> Float {
+		// FuzzyWuzzy: same as used in python, but slower
+		let fuzzScore = String.fuzzTokenSetRatio(str1: str1, str2: str2) // 0 to 100
+		return Float(fuzzScore) / 100.0
+		// Fuse: faster, but not fast enough
+//		if let result = fuse.search(t.description.uppercased(), in: bt.description.uppercased()) {
+//			matchScore.descScore = Float(result.score)
+//		}
 	}
 }
 
@@ -235,7 +335,7 @@ extension CheckerViewController: NSOutlineViewDataSource {
 	func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
 		if let tm = item as? TransactionMatch {
 			if tm.matchType == .complete {
-				return MatchScore(score: 1.0, transaction: tm.matchedTransaction!)
+				return tm.matchedTransaction!
 			}
 			return tm.possibleMatches[index]
 		}
@@ -296,6 +396,31 @@ extension CheckerViewController: NSOutlineViewDelegate {
 				text = tm.bankTransaction.description
 			}
 		}
+		if let transaction = item as? FFFTransaction {
+			if tableColumn == outlineView.tableColumns[0] {
+				cellIdentifier = CellID.Date
+				text = dateFormatter.string(from: transaction.date)
+			}
+			else if tableColumn == outlineView.tableColumns[1] {
+				cellIdentifier = CellID.Amount
+				text = currFormatter.string(from: NSNumber(value: transaction.amount))!
+				if transaction.transactionType.isExpense == false {
+					textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+				}
+			}
+			else if tableColumn == outlineView.tableColumns[2] {
+				cellIdentifier = CellID.TransactionType
+				let emoji = transaction.transactionType.symbol
+				text = emoji + " " + (transaction.transactionType.name)
+				if transaction.transactionType.isExpense == false {
+					textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
+				}
+			}
+			else if tableColumn == outlineView.tableColumns[3] {
+				cellIdentifier = CellID.Description
+				text = transaction.description
+			}
+		}
 		if let ms = item as? MatchScore {
 			if tableColumn == outlineView.tableColumns[0] {
 				cellIdentifier = CellID.Date
@@ -304,22 +429,22 @@ extension CheckerViewController: NSOutlineViewDelegate {
 			else if tableColumn == outlineView.tableColumns[1] {
 				cellIdentifier = CellID.Amount
 				text = currFormatter.string(from: NSNumber(value: ms.transaction.amount))!
-				if ms.transaction.transactionType?.isExpense == false {
+				if ms.transaction.transactionType.isExpense == false {
 					textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
 				}
 			}
 			else if tableColumn == outlineView.tableColumns[2] {
 				cellIdentifier = CellID.TransactionType
-				let emoji = ms.transaction.transactionType?.emoji ?? "💥"
-				text = emoji + " " + (ms.transaction.transactionType?.description ?? "")
-				if ms.transaction.transactionType?.isExpense == false {
+				let emoji = ms.transaction.transactionType.symbol
+				text = emoji + " " + (ms.transaction.transactionType.name)
+				if ms.transaction.transactionType.isExpense == false {
 					textColor = NSColor(named: NSColor.Name("incomeTextColor")) ?? NSColor.purple
 				}
 			}
 			else if tableColumn == outlineView.tableColumns[3] {
 				cellIdentifier = CellID.Description
-				let pct = pctFormatter.string(from: NSNumber(value: ms.score))
-				text = "\(pct ?? ""):  \(ms.transaction.description ?? "")"
+				let pct = pctFormatter.string(from: NSNumber(value: ms.totalScore))
+				text = "\(pct ?? ""):  \(ms.transaction.description)"
 			}
 		}
 		let id = NSUserInterfaceItemIdentifier(cellIdentifier)
@@ -339,9 +464,9 @@ extension CheckerViewController: NSOutlineViewDelegate {
 		let item = outlineView.item(atRow: outlineView.selectedRow)
 		
 		// Determine if the selected item is a match score with < 100%
-		if let ms = item as? MatchScore {
-			isAlignEnabled = ms.score < 1.0
-			isCreateEnabled = ms.score < 1.0
+		if let _ = item as? MatchScore {
+			isAlignEnabled = true
+			isCreateEnabled = true
 		}
 		// Or if this is a TransactionMatch that is .partial or .none
 		if let tm = item as? TransactionMatch {

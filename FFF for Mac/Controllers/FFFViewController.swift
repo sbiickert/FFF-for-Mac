@@ -41,25 +41,29 @@ class FFFViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(loginNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LoginResponse.rawValue),
-											   object: nil)
-		NotificationCenter.default.addObserver(self,
-											   selector: #selector(logoutNotificationReceived(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.LogoutResponse.rawValue),
-											   object: nil)
+//		NotificationCenter.default.addObserver(self,
+//											   selector: #selector(loginNotificationReceived(_:)),
+//											   name: .loginResponse,
+//											   object: nil)
+//		NotificationCenter.default.addObserver(self,
+//											   selector: #selector(logoutNotificationReceived(_:)),
+//											   name: .logoutResponse,
+//											   object: nil)
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(currentDateChanged(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.CurrentMonthChanged.rawValue),
+											   name: .currentMonthChanged,
 											   object: nil)
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(currentDayChanged(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.CurrentDayChanged.rawValue),
+											   name: .currentDayChanged,
 											   object: nil)
 		NotificationCenter.default.addObserver(self,
 											   selector: #selector(dataUpdated(_:)),
-											   name: NSNotification.Name(rawValue: Notifications.DataUpdated.rawValue),
+											   name: .dataUpdated,
+											   object: nil)
+		NotificationCenter.default.addObserver(self,
+											   selector: #selector(dataRefreshed(_:)),
+											   name: .dataRefreshed,
 											   object: nil)
     }
 	
@@ -72,8 +76,9 @@ class FFFViewController: NSViewController {
 	@objc func currentDateChanged(_ notification: Notification) {}
 	
 	@objc func currentDayChanged(_ notification: Notification) {}
-
-	@objc func dataUpdated(_ notification: Notification) {
-	}
+	
+	@objc func dataUpdated(_ notification: Notification) {}
+	
+	@objc func dataRefreshed(_ notification: Notification) {}
 
 }

@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Combine
 
 class CalendarViewController: FFFViewController {
 	struct Values {
@@ -17,7 +18,7 @@ class CalendarViewController: FFFViewController {
 	@IBOutlet weak var calendarView: NSView!
 	private var grid = Grid(layout: Grid.Layout.dimensions(rowCount: 6, columnCount: 7))
 	private var dayViews = [DayView]()
-	private var monthBalance: BalanceSummary?
+	private var storage = Set<AnyCancellable>()
 
 	@IBOutlet weak var sundayLabel: NSTextField!
 	@IBOutlet weak var mondayLabel: NSTextField!
@@ -48,7 +49,7 @@ class CalendarViewController: FFFViewController {
 	
 	private func dayViewFor(dayOfMonth day:Int) -> DayView? {
 		let offset = dayOfWeekOffsetForTheFirst
-		let index = day + offset
+		let index = day + offset - 1
 		return dayViews[index]
 	}
 	
@@ -82,6 +83,36 @@ class CalendarViewController: FFFViewController {
 		repointCenteringConstraint(for: fridayLabel, to: dayViews[5])
 		repointCenteringConstraint(for: saturdayLabel, to: dayViews[6])
 		view.needsLayout = true
+		
+		NotificationCenter.default.publisher(for: .currentMonthChanged)
+			.receive(on: DispatchQueue.main)
+			.sink { _ in
+				print("CalendarViewController received currentMonthChanged")
+				self.clearViewContent()
+				self.updateView(forceUpdate: true)
+		}.store(in: &self.storage)
+		
+		NotificationCenter.default.publisher(for: .currentDayChanged)
+			.receive(on: DispatchQueue.main)
+			.sink { _ in
+				self.updateView(forceUpdate: true)
+		}.store(in: &self.storage)
+		
+		NotificationCenter.default.publisher(for: .stateChange_MonthlyBalance)
+			.compactMap { $0.userInfo?["value"] as? BalanceSummary }
+			.receive(on: DispatchQueue.main)
+			.sink { bs in
+				print("CalendarViewController received stateChange_MonthlyBalance")
+				self.updateViewBalances(with: bs)
+		}.store(in: &self.storage)
+		
+		NotificationCenter.default.publisher(for: .stateChange_MonthlyTransactions)
+			.compactMap { $0.userInfo?["value"] as? [FFFTransaction] }
+			.receive(on: DispatchQueue.main)
+			.sink { transactions in
+				print("CalendarViewController received stateChange_MonthlyTransactions")
+				self.updateViewTransactions(with: transactions)
+		}.store(in: &self.storage)
 	}
 	
 	private func repointCenteringConstraint(for item:NSView, to target:NSView) {
@@ -109,38 +140,18 @@ class CalendarViewController: FFFViewController {
 	
 	private func updateView(forceUpdate force:Bool = false) {
 		if updateGrid() || force {
-			let components = app.currentDateComponents
+			let ymd = app.currentDateComponents
 			// Animate day views to grid
 			for (index, dayView) in dayViews.enumerated() {
 				let dayOfMonth = index - dayOfWeekOffsetForTheFirst + 1 // +1 because we don't start with day zero
 				dayView.dayOfMonth = -1
-				dayView.expenseAmount = 0.0
-				dayView.incomeAmount = 0.0
 				if dayOfMonth >= 1 && dayOfMonth <= numberOfDaysInCurrentMonth {
 					dayView.dayOfMonth = dayOfMonth
-					if dayOfMonth == components.day {
+					if dayOfMonth == ymd.day {
 						dayView.backgroundColor = NSColor(named: NSColor.Name("currentDayBackgroundColor")) ?? NSColor.purple
 					}
 					else {
 						dayView.backgroundColor = NSColor.controlBackgroundColor
-					}
-					dayView.removeAllTransactionTypes()
-					if let bal = monthBalance {
-						if dayOfMonth < bal.dayBalances.count {
-							if let dayBal = bal.dayBalances[dayOfMonth] {
-								dayView.expenseAmount = dayBal.expense.doubleValue
-								dayView.incomeAmount = dayBal.income.doubleValue
-								CachingGateway.shared.getCachedTransactions(forYear: components.year,
-																			month: components.month,
-																			day: dayOfMonth) { message in
-									if let transactions = message.transactions {
-										for t in transactions {
-											dayView.addTransactionType(t.transactionType)
-										}
-									}
-								}
-							}
-						}
 					}
 				}
 				if let frame = getFrame(for: dayView) {
@@ -150,6 +161,39 @@ class CalendarViewController: FFFViewController {
 		}
 	}
 	
+	private func clearViewContent() {
+		dayViews.forEach { dayView in
+			dayView.removeAllTransactionTypes()
+			dayView.incomeAmount = 0
+			dayView.expenseAmount = 0
+		}
+	}
+	
+	private func updateViewBalances(with balanceSummary: BalanceSummary) {
+		for dayView in dayViews {
+			dayView.expenseAmount = 0.0
+			dayView.incomeAmount = 0.0
+			if balanceSummary.year > -1 { // -1 year is signal of empty summary
+				if dayView.dayOfMonth >= 1 {
+					if let dayBal = balanceSummary.balance(forDay: dayView.dayOfMonth) {
+						dayView.expenseAmount = Double(dayBal.expense)
+						dayView.incomeAmount = Double(dayBal.income)
+					}
+				}
+			}
+		}
+	}
+	
+	private func updateViewTransactions(with transactions: [FFFTransaction]) {
+		dayViews.forEach { $0.removeAllTransactionTypes() }
+		for t in transactions {
+			if let dayView = self.dayViewFor(dayOfMonth: t.dayOfMonth) {
+				dayView.addTransactionType(t.transactionType)
+			}
+		}
+		dayViews.forEach { $0.setNeedsDisplay($0.bounds) }
+	}
+
 	@discardableResult
 	func updateGrid() -> Bool {
 		var gridChanged = false
@@ -183,47 +227,6 @@ class CalendarViewController: FFFViewController {
 			app.setDayOfMonth(dayView.dayOfMonth)
 		}
 	}
-
-	// MARK: Notifications
-	
-	override func loginNotificationReceived(_ notification: Notification) {
-		requestDataForMonth(currentDate)
-	}
-	
-	override func logoutNotificationReceived(_ notification: Notification) {
-		monthBalance = nil
-		DispatchQueue.main.async {
-			self.updateView(forceUpdate: true)
-		}
-	}
-
-	override func currentDateChanged(_ notification: Notification) {
-		requestDataForMonth(app.currentDate)
-	}
-
-	override func currentDayChanged(_ notification: Notification) {
-		updateView(forceUpdate: true)
-	}
-
-	override func dataUpdated(_ notification: Notification) {
-		requestDataForMonth(app.currentDate)
-	}
-
-	func requestDataForMonth(_ date: Date) {
-		let components = app.currentDateComponents
-		CachingGateway.shared.getBalanceSummary(forYear: components.year, month: components.month) {message in
-			self.monthBalance = message.balanceSummary
-			DispatchQueue.main.async {
-				self.updateView(forceUpdate: true)
-			}
-		}
-		CachingGateway.shared.getTransactions(forYear: components.year, month: components.month) {message in
-			DispatchQueue.main.async {
-				self.updateView(forceUpdate: true)
-			}
-		}
-	}
-
 }
 
 
