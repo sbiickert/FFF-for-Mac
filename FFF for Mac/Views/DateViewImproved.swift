@@ -31,20 +31,17 @@ class DateViewImproved: NSControl {
 				switch index {
 				case .previousYear:
 					date = Calendar.current.date(byAdding: .year, value: -1, to: date)!
-					sendAction()
 				case .previousMonth:
 					date = Calendar.current.date(byAdding: .month, value: -1, to: date)!
-					sendAction()
 				case .nextMonth:
 					date = Calendar.current.date(byAdding: .month, value: 1, to: date)!
-					sendAction()
 				case .nextYear:
 					date = Calendar.current.date(byAdding: .year, value: 1, to: date)!
-					sendAction()
 				case .current:
 					// Go to today
 					date = Date()
 				}
+				sendAction()
 			}
 			self.selectedSegment = nil
 		}

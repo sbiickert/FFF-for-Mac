@@ -18,6 +18,8 @@
 		B81F74B820D428BB008288A6 /* CheckerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74B720D428BB008288A6 /* CheckerViewController.swift */; };
 		B81F74BE20D4546A008288A6 /* CheckerDragView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BD20D4546A008288A6 /* CheckerDragView.swift */; };
 		B81F74C020D467FA008288A6 /* CSwiftV.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81F74BF20D467FA008288A6 /* CSwiftV.swift */; };
+		B832E11F245BC5FC0011C413 /* EditTransactionPairWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B832E11D245BC5FC0011C413 /* EditTransactionPairWindowController.swift */; };
+		B832E120245BC5FC0011C413 /* EditTransactionPairWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B832E11E245BC5FC0011C413 /* EditTransactionPairWindowController.xib */; };
 		B83C12EF2454D61C00967DF4 /* FuseUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83C12EC2454D61C00967DF4 /* FuseUtilities.swift */; };
 		B83C12F02454D61C00967DF4 /* String+Fuse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83C12ED2454D61C00967DF4 /* String+Fuse.swift */; };
 		B83C12F12454D61C00967DF4 /* Fuse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B83C12EE2454D61C00967DF4 /* Fuse.swift */; };
@@ -66,6 +68,8 @@
 		B81F74B720D428BB008288A6 /* CheckerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerViewController.swift; sourceTree = "<group>"; };
 		B81F74BD20D4546A008288A6 /* CheckerDragView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckerDragView.swift; sourceTree = "<group>"; };
 		B81F74BF20D467FA008288A6 /* CSwiftV.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSwiftV.swift; sourceTree = "<group>"; };
+		B832E11D245BC5FC0011C413 /* EditTransactionPairWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTransactionPairWindowController.swift; sourceTree = "<group>"; };
+		B832E11E245BC5FC0011C413 /* EditTransactionPairWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditTransactionPairWindowController.xib; sourceTree = "<group>"; };
 		B83C12EC2454D61C00967DF4 /* FuseUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FuseUtilities.swift; sourceTree = "<group>"; };
 		B83C12ED2454D61C00967DF4 /* String+Fuse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Fuse.swift"; sourceTree = "<group>"; };
 		B83C12EE2454D61C00967DF4 /* Fuse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Fuse.swift; sourceTree = "<group>"; };
@@ -162,6 +166,8 @@
 				F4449C42203B3D0200A0A64E /* LoginWindowController.xib */,
 				B81C7AF520CAD72F007C6D69 /* EditTransactionWindowController.swift */,
 				B81C7AF620CAD72F007C6D69 /* EditTransactionWindowController.xib */,
+				B832E11D245BC5FC0011C413 /* EditTransactionPairWindowController.swift */,
+				B832E11E245BC5FC0011C413 /* EditTransactionPairWindowController.xib */,
 				B81F74B720D428BB008288A6 /* CheckerViewController.swift */,
 			);
 			path = Controllers;
@@ -318,6 +324,7 @@
 			files = (
 				B81C7AF820CAD72F007C6D69 /* EditTransactionWindowController.xib in Resources */,
 				F4449C44203B3D0200A0A64E /* LoginWindowController.xib in Resources */,
+				B832E120245BC5FC0011C413 /* EditTransactionPairWindowController.xib in Resources */,
 				F4467EDD2033DB690058D0D8 /* Assets.xcassets in Resources */,
 				F4467EE02033DB690058D0D8 /* Main.storyboard in Resources */,
 			);
@@ -330,6 +337,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B832E11F245BC5FC0011C413 /* EditTransactionPairWindowController.swift in Sources */,
 				B81C7AF720CAD72F007C6D69 /* EditTransactionWindowController.swift in Sources */,
 				B8464CBA244794A8008763FE /* BankTransaction.swift in Sources */,
 				F4449C372038B29C00A0A64E /* DetailViewController.swift in Sources */,

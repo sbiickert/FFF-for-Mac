@@ -412,17 +412,18 @@ class IncomeExpenseTransactionSeries: TransactionSeries {
 	var needToLoadSeriesTransactions = false
 	
 	init(templateTransaction t: FFFTransaction) {
-		pair.primary = t
-		pair.secondary = t
+		primaryTransaction = t
+		secondaryTransaction = t
 		generateTransactionsInSeries()
 	}
 	
 	var repeatInfo = RepeatInfo.None
 	
-	private var pair: (primary: FFFTransaction, secondary: FFFTransaction)
+	var primaryTransaction: FFFTransaction
+	var secondaryTransaction: FFFTransaction
 	var transactions: [FFFTransaction] {
 		get {
-			return [pair.primary, pair.secondary]
+			return [primaryTransaction, secondaryTransaction]
 		}
 		set {
 			if newValue.count > 0 {
@@ -440,25 +441,25 @@ class IncomeExpenseTransactionSeries: TransactionSeries {
 	
 	var templateTransaction: FFFTransaction? {
 		get {
-			return pair.primary
+			return primaryTransaction
 		}
 		set {
 			guard let t = newValue else { return }
-			pair.primary = t
+			primaryTransaction = t
 			generateTransactionsInSeries()
 		}
 	}
 	
 	var isValid: Bool {
-		return pair.primary.isValid && pair.secondary.isValid
+		return primaryTransaction.isValid && secondaryTransaction.isValid
 	}
 	
 	var isClean: Bool {
-		return pair.primary.modificationStatus == .clean && garbage.count == 0
+		return primaryTransaction.modificationStatus == .clean && garbage.count == 0
 	}
 	
 	var isExpense: Bool {
-		return pair.primary.isExpense
+		return primaryTransaction.isExpense
 	}
 	
 	var isSeries: Bool {
@@ -467,51 +468,51 @@ class IncomeExpenseTransactionSeries: TransactionSeries {
 	
 	var transactionType: TransactionType {
 		get {
-			return pair.primary.transactionType
+			return primaryTransaction.transactionType
 		}
 		set {
-			pair.primary.transactionType = newValue
-			if pair.primary.isExpense {
-				pair.secondary.transactionType = TransactionType.defaultIncome
+			primaryTransaction.transactionType = newValue
+			if primaryTransaction.isExpense {
+				secondaryTransaction.transactionType = TransactionType.defaultIncome
 			}
 			else {
-				pair.secondary.transactionType = TransactionType.defaultExpense
+				secondaryTransaction.transactionType = TransactionType.defaultExpense
 			}
 		}
 	}
 	
 	var date: Date {
 		get {
-			return pair.primary.date
+			return primaryTransaction.date
 		}
 		set {
-			pair.primary.date = newValue
-			pair.secondary.date = newValue
+			primaryTransaction.date = newValue
+			secondaryTransaction.date = newValue
 		}
 	}
 	
 	var description: String {
 		get {
-			return pair.primary.description
+			return primaryTransaction.description
 		}
 		set {
-			pair.primary.description = newValue
-			pair.secondary.description = newValue
+			primaryTransaction.description = newValue
+			secondaryTransaction.description = newValue
 		}
 	}
 	
 	var amountString: String {
 		get {
-			return pair.primary.amountString
+			return primaryTransaction.amountString
 		}
 		set {
-			pair.primary.amountString = newValue
-			pair.secondary.amountString = newValue
+			primaryTransaction.amountString = newValue
+			secondaryTransaction.amountString = newValue
 		}
 	}
 	
 	var transactionTypeLabel: String {
-		return pair.primary.transactionTypeLabel
+		return primaryTransaction.transactionTypeLabel
 	}
 	
 	func loadExistingSeriesTransactions(callback: @escaping ((Bool) -> Void)) {
@@ -521,14 +522,14 @@ class IncomeExpenseTransactionSeries: TransactionSeries {
 	var garbage = [FFFTransaction]()
 	func generateTransactionsInSeries() {
 		// Create the secondary based on the primary
-		let secondaryTT = pair.primary.isExpense ? TransactionType.defaultIncome : TransactionType.defaultExpense
-		pair.secondary = FFFTransaction(id: -1,
-										amount: pair.primary.amount,
-										transactionType: secondaryTT,
-										description: pair.primary.description,
-										date: pair.primary.date,
-										seriesID: pair.primary.seriesID,
-										modificationStatus: .dirty)
+		let secondaryTT = primaryTransaction.isExpense ? TransactionType.defaultIncome : TransactionType.defaultExpense
+		secondaryTransaction = FFFTransaction(id: -1,
+			amount: primaryTransaction.amount,
+			transactionType: secondaryTT,
+			description: primaryTransaction.description,
+			date: primaryTransaction.date,
+			seriesID: primaryTransaction.seriesID,
+			modificationStatus: .dirty)
 	}
 	
 	func prepareForDeletion() {

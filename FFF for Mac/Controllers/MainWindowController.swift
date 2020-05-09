@@ -266,15 +266,12 @@ class MainWindowController: NSWindowController,
 			series = IncomeExpenseTransactionSeries(templateTransaction: editTransaction)
 		}
 		
-		// Present modal sheet
-		let editWindowController = EditTransactionWindowController(windowNibName: "EditTransactionWindowController")
-		editWindowController.setTransactionSeries(series)
-		window?.beginSheet(editWindowController.window!, completionHandler: { responseCode in
+		func editWindowCallback(_ responseCode: NSApplication.ModalResponse) -> Void {
 			if responseCode == .stop {
 				/*
 				User pressed OK or Delete. Submit update/insert/delete.
 				*/
-				if let tSeries = editWindowController.transactionSeries {
+				if let tSeries = (editWindowController as? TransactionSeriesEditor)?.transactionSeries {
 					print("Save transaction series to database")
 					// Delete any (future) transactions that were redefined
 					let delIDs = tSeries.garbage.map { $0.id }
@@ -301,8 +298,18 @@ class MainWindowController: NSWindowController,
 			} // Cancel is .abort
 			
 			editWindowController.window?.close()
-		})
+		}
+		
+		// Present modal sheet
+		let editWindowController = (addType == .normal) ?
+			EditTransactionWindowController(windowNibName: "EditTransactionWindowController") :
+			EditTransactionPairWindowController(windowNibName: "EditTransactionPairWindowController")
+		if let tse = editWindowController as? TransactionSeriesEditor {
+			tse.setTransactionSeries(series)
+		}
+		window?.beginSheet(editWindowController.window!, completionHandler: editWindowCallback)
 	}
+	
 
 	private var transactionListViewController: TransListViewController? {
 		for vc in tabViewController!.children {
@@ -326,7 +333,16 @@ class MainWindowController: NSWindowController,
 	}
 	
 	@IBAction func addTransaction(_ sender: NSButton) {
-		showEditForm(for: nil)
+		if NSEvent.modifierFlags.contains(.option) {
+			showEditForm(for: nil, .incomeExpensePair)
+		}
+		else {
+			showEditForm(for: nil)
+		}
+	}
+	
+	@IBAction func addIncomeExpense(_ sender: Any) {
+		showEditForm(for: nil, .incomeExpensePair)
 	}
 	
 	@IBAction func duplicateTransaction(_ sender: Any) {

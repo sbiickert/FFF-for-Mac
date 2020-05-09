@@ -131,7 +131,7 @@ struct RequestResult {
 class RestGateway: NSObject, URLSessionDelegate {
 	// Running in PHP server: http://localhost:8000
 	// Running in MAMP: http://localhost:8888/FFF5/public
-	private static let debugURL:String? = "http://localhost:8888/FFF5/public"  // set to nil to ignore
+	private static let debugURL:String? = nil // "http://localhost:8888/FFF5/public"  // set to nil to ignore
 	private static let defaultURL = "https://www.biickert.ca/FFF5/public"
 	static let shared = RestGateway()
 
@@ -152,9 +152,9 @@ class RestGateway: NSObject, URLSessionDelegate {
 		if RestGateway.debugURL != nil {
 			self.url = RestGateway.debugURL!
 		}
-		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
-			self.url = defaultsUrl
-		}
+//		else if let defaultsUrl = UserDefaults.standard.string(forKey: DefaultsKey.ServerUrl.rawValue) {
+//			self.url = defaultsUrl
+//		}
 		else {
 			self.url = RestGateway.defaultURL
 		}

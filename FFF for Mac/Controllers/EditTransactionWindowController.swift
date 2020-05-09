@@ -8,7 +8,12 @@
 
 import Cocoa
 
-class EditTransactionWindowController: NSWindowController, NSTextFieldDelegate {
+protocol TransactionSeriesEditor {
+	var transactionSeries:TransactionSeries! { get }
+	func setTransactionSeries(_ series:TransactionSeries)
+}
+
+class EditTransactionWindowController: NSWindowController, NSTextFieldDelegate, TransactionSeriesEditor {
 	
 	func setTransactionSeries(_ series:TransactionSeries) {
 		self.transactionSeries = series
@@ -29,13 +34,6 @@ class EditTransactionWindowController: NSWindowController, NSTextFieldDelegate {
 //				self.updateUI()
 //			}
 		}
-	}
-	
-	var transactionSeriesIsNormal: Bool {
-		if let _ = transactionSeries as? IncomeExpenseTransactionSeries {
-			return false
-		}
-		return true  // nil will return true
 	}
 
 	@IBOutlet weak var expenseCheckbox: NSButton!
