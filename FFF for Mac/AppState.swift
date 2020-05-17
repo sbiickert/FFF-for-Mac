@@ -13,18 +13,18 @@ class AppState {
 	private var storage = Set<AnyCancellable>()
 	var loginDelegate: LoginPresenterDelegate?
 
+	// MARK: Init creates all of the combine notification listeners
+	
 	init() {
 		// When the user logs in
 		NotificationCenter.default.publisher(for: .loginResponse)
 			.sink { _ in
 				self.requestMonthData()
-				//self.requestDayData()
 		}.store(in: &self.storage)
 		
 		// When the user logs out
 		NotificationCenter.default.publisher(for: .logoutResponse)
 			.sink { _ in
-				//self.currentDayTransactions = [FFFTransaction]()
 				self.currentMonthBalance = nil
 				self.currentMonthCategories = nil
 				self.currentMonthTransactions = [FFFTransaction]()
@@ -34,7 +34,6 @@ class AppState {
 		NotificationCenter.default.publisher(for: .currentMonthChanged)
 			.sink { _ in
 				self.requestMonthData()
-				//self.requestDayData()
 		}.store(in: &self.storage)
 		
 		// When just the day of month changes
@@ -47,7 +46,6 @@ class AppState {
 		NotificationCenter.default.publisher(for: .dataUpdated)
 			.sink { _ in
 				self.requestMonthData()
-				//self.requestDayData()
 		}.store(in: &self.storage)
 		
 		// When the user requests a refresh
@@ -55,9 +53,10 @@ class AppState {
 			.sink { _ in
 				self.willTriggerDataRefreshedNotification = true
 				self.requestMonthData() // Will trigger .dataRefreshed when currentMonthTransactions loads
-				//self.requestDayData()
 		}.store(in: &self.storage)
 	}
+	
+	// MARK: Requests data for the current month
 	
 	private func requestMonthData() {
 		// Request month bal, cat, transactions here
@@ -102,24 +101,15 @@ class AppState {
 		}.store(in: &self.storage)
 	}
 	
-//	private func requestDayData() {
-//		// Request day transactions here
-//		let ymd = self.currentDateComponents
-//		let tReq = RestGateway.shared.createRequestGetTransactions(forYear: ymd.year, month: ymd.month, day: ymd.day)
-//		URLSession.shared.dataTaskPublisher(for: tReq)
-//			.map { $0.data }
-//			.replaceError(with: Data())
-//			.decode(type: [CodableTransaction].self, decoder: JSONDecoder())
-//			.replaceError(with: [CodableTransaction]())
-//			.map { ctArray in
-//				ctArray.map { $0.transaction }
-//			}
-//			.sink { tArray in
-//				self.currentDayTransactions = tArray
-//		}.store(in: &self.storage)
-//	}
+	// MARK: all edits go through these functions
 	
 	func createTransactions(_ createdTransactions: [FFFTransaction]) {
+		// External calls have to register for undo
+		createTransactions(createdTransactions, registerForUndo: true)
+	}
+
+	private func createTransactions(_ createdTransactions: [FFFTransaction], registerForUndo: Bool) {
+		// Internal calls might be from an undo/redo, don't want to register them as edits in that case
 		guard createdTransactions.count > 0 else { return }
 		
 		// Insert the new transactions locally
@@ -137,26 +127,54 @@ class AppState {
 										object: self,
 										userInfo: ["t": createdTransactions])
 		
+		enum HTTPError: LocalizedError {
+			case statusCode
+		}
+
 		let req = RestGateway.shared.createRequestCreateTransactions(transactions: createdTransactions)
 		URLSession.shared.dataTaskPublisher(for: req)
-			.map { $0.data }
-			.replaceError(with: Data())
+			.tryMap { output in
+				guard let response = output.response as? HTTPURLResponse, response.statusCode == 201 else {
+					throw HTTPError.statusCode
+				}
+				return output.data
+			}
 			.decode(type: [CodableTransaction].self, decoder: JSONDecoder())
 			.replaceError(with: [CodableTransaction]())
 			.sink { ct_list in
+				// Store created transactions in undo stack
+				let tList = ct_list.map { $0.transaction }
+				if registerForUndo {
+					self.pushUndo(Undoable(action: .create, original: [FFFTransaction](), result: tList))
+				}
+				// Send notification
 				NotificationCenter.default.post(name: .dataUpdated, object: nil)
 			}.store(in: &self.storage)
 
 	}
 	
 	func updateTransactions(_ updatedTransactions: [FFFTransaction]) {
+		// External calls have to register for undo
+		updateTransactions(updatedTransactions, registerForUndo: true)
+	}
+	
+	private func updateTransactions(_ updatedTransactions: [FFFTransaction], registerForUndo: Bool) {
+		// Internal calls might be from an undo/redo, don't want to register them as edits in that case
 		guard updatedTransactions.count > 0 else { return }
 		
-		// Replace the local copies with the edited
+		// Replace the local copies with the edited,
+		// keeping the originals for undo
+		var originals = [FFFTransaction]()
 		for dirtyT in updatedTransactions {
 			if let index = currentMonthTransactions.firstIndex(where: { $0.id == dirtyT.id }) {
+				originals.append(currentMonthTransactions[index])
 				currentMonthTransactions[index] = dirtyT
 			}
+		}
+		
+		// Store the originals for undo
+		if registerForUndo {
+			pushUndo(Undoable(action: .update, original: originals, result: updatedTransactions))
 		}
 
 		let req = RestGateway.shared.createRequestUpdateTransactions(transactions: updatedTransactions)
@@ -170,11 +188,23 @@ class AppState {
 			}.store(in: &self.storage)
 	}
 	
-	func deleteTransactions(withIDs delIDs:[Int]) {
-		guard delIDs.count > 0 else { return }
+	func deleteTransactions(_ deletedTransactions:[FFFTransaction]) {
+		// External calls have to register for undo
+		deleteTransactions(deletedTransactions, registerForUndo: true)
+	}
+	
+	private func deleteTransactions(_ deletedTransactions:[FFFTransaction], registerForUndo: Bool) {
+		// Internal calls might be from an undo/redo, don't want to register them as edits in that case
+		guard deletedTransactions.count > 0 else { return }
 		
 		// Remove from the local transaction store if their id is in delIDs
+		let delIDs = deletedTransactions.map { $0.id }
 		currentMonthTransactions = currentMonthTransactions.filter { delIDs.contains($0.id) == false }
+		
+		// Store the transactions for undo
+		if registerForUndo {
+			pushUndo(Undoable(action: .delete, original: deletedTransactions, result: [FFFTransaction]()))
+		}
 		
 		let req = RestGateway.shared.createRequestDeleteTransactions(withIDs: delIDs)
 		URLSession.shared.dataTaskPublisher(for: req)
@@ -186,7 +216,67 @@ class AppState {
 				NotificationCenter.default.post(name: .dataUpdated, object: nil)
 			}.store(in: &self.storage)
 	}
+	
+	// MARK: Undo and Redo Support
+	
+	var undoManager: UndoManager?
+	
+	/*
+	*  Trying to solve a problem:
+	*  If an Undo or Redo operation deletes 1..N transactions, the inverse operation
+	*  creates transactions with different ids. Then the inverse-inverse operation will
+	*  try to delete the transactions with the original ids, not the new ones.
+	*  This map is meant to allow tracing of old ids to new ids so that later operations
+	*  will be able to substitute them.
+	*/
+	private var mappingOldIdsToNewIds = Dictionary<Int, Int>()
+	
+	private func pushUndo(_ value: Undoable) {
+		print("pushUndo \(value.description)\nOriginal: \(value.original)\nResult:\(value.result)")
+		self.undoManager?.registerUndo(withTarget: self) { selfTarget in
+			switch value.action {
+			case .create:
+				print("Undoing created transactions")
+				print("\(value.result) -> []")
+				selfTarget.deleteTransactions(value.result, registerForUndo: false)
+			case .update:
+				print("Undoing updated transactions")
+				print("\(value.result) -> \(value.original)")
+				selfTarget.updateTransactions(value.original, registerForUndo: false)
+			case .delete:
+				print("Undoing deleted transactions")
+				print("[] -> \(value.original)")
+				selfTarget.createTransactions(value.original, registerForUndo: false)
+			}
+			selfTarget.pushRedo(value)
+		}
+		self.undoManager?.setActionName(value.description)
+	}
+	
+	private func pushRedo(_ value: Undoable) {
+		print("pushRedo \(value.description)\nOriginal: \(value.original)\nResult:\(value.result)")
+		self.undoManager?.registerUndo(withTarget: self) { selfTarget in
+			switch value.action {
+			case .create:
+				print("Redoing created transactions")
+				print("[] -> \(value.result)")
+				selfTarget.createTransactions(value.result, registerForUndo: false)
+			case .update:
+				print("Redoing updated transactions")
+				print("\(value.original) -> \(value.result)")
+				selfTarget.updateTransactions(value.result, registerForUndo: false)
+			case .delete:
+				print("Redoing deleted transactions")
+				print("\(value.original) -> []")
+				selfTarget.deleteTransactions(value.original, registerForUndo: false)
+			}
+			selfTarget.pushUndo(value)
+		}
+		self.undoManager?.setActionName(value.description)
+	}
 
+	// MARK: Date Management
+	
 	var currentDate = Date() {
 		didSet {
 			let oldComponents = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: oldValue)
@@ -207,6 +297,16 @@ class AppState {
 			return (year:components.year!, month:components.month!, day:components.day!)
 		}
 	}
+	
+	func setDayOfMonth(_ day:Int) {
+		var components = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: currentDate)
+		components.setValue(day, for: .day)
+		if let newDate = Calendar.current.date(from: components) {
+			currentDate = newDate
+		}
+	}
+
+	// MARK: Properties trigger notifications when set
 	
 	private var willTriggerDataRefreshedNotification = false
 	private var currentMonthTransactions = [FFFTransaction]() {
@@ -246,5 +346,34 @@ class AppState {
 			NotificationCenter.default.post(name: .stateChange_MonthlyCategories,
 											object: self, userInfo: ["value": currentMonthCategories ?? CategorySummary()])
 		}
+	}
+}
+
+struct Undoable {
+	enum Action {
+		case create
+		case update
+		case delete
+	}
+	
+	let action: Action
+	let original: [FFFTransaction]
+	let result: [FFFTransaction]
+	
+	var count: Int {
+		return max(original.count, result.count)
+	}
+	
+	var description: String {
+		var verb = ""
+		switch action {
+		case .create:
+			verb = "Create"
+		case .update:
+			verb = "Update"
+		case .delete:
+			verb = "Delete"
+		}
+		return "\(verb) \(self.count == 1 ? "Transaction" : "Transactions")"
 	}
 }

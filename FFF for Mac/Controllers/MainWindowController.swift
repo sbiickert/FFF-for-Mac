@@ -38,10 +38,10 @@ class MainWindowController: NSWindowController,
 	}
 	var currentDate: Date {
 		get {
-			return app.currentDate
+			return app.state.currentDate
 		}
 		set(value) {
-			app.currentDate = value
+			app.state.currentDate = value
 		}
 	}
 	var storage = Set<AnyCancellable>()
@@ -86,10 +86,19 @@ class MainWindowController: NSWindowController,
 		
 		tabViewController = window?.contentViewController as? NSTabViewController
 		app.state.loginDelegate = self
+		
+		
+		app.state.undoManager = self._undoManager
     }
 	
+	private var _undoManager = UndoManager()
+	
+	func windowWillReturnUndoManager(_ window: NSWindow) -> UndoManager? {
+		return _undoManager
+	}
+	
 	private func updateWindowTitle() {
-		var title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.currentDate)
+		var title = "Fantastic Fiduciary Friend - " + titleDateFormatter.string(from: app.state.currentDate)
 		if RestGateway.shared.isDebugging {
 			title = "DEBUGGING " + title
 		}
@@ -219,13 +228,13 @@ class MainWindowController: NSWindowController,
 	@objc func dateChangeNotificationReceived(_ note: Notification) {
 		DispatchQueue.main.async {
 			self.updateWindowTitle()
-			self.datePickerImproved.date = self.app.currentDate
+			self.datePickerImproved.date = self.app.state.currentDate
 		}
 	}
 	
 	private func updateBalanceView(with balanceSummary: BalanceSummary?) {
 		if let bs = balanceSummary {
-			let month = app.currentDateComponents.month
+			let month = app.state.currentDateComponents.month
 			if let balanceForCurrentMonth = bs.balance(forMonth: month) {
 				monthBalance.income = Float(balanceForCurrentMonth.income)
 				monthBalance.expense = Float(balanceForCurrentMonth.expense)
@@ -255,7 +264,7 @@ class MainWindowController: NSWindowController,
 		var editTransaction:FFFTransaction! = transaction
 		if editTransaction == nil {
 			editTransaction = FFFTransaction()
-			editTransaction.date = app.currentDate
+			editTransaction.date = app.state.currentDate
 		}
 		
 		// All edits are done based on a series
@@ -274,8 +283,7 @@ class MainWindowController: NSWindowController,
 				if let tSeries = (editWindowController as? TransactionSeriesEditor)?.transactionSeries {
 					print("Save transaction series to database")
 					// Delete any (future) transactions that were redefined
-					let delIDs = tSeries.garbage.map { $0.id }
-					self.app.state.deleteTransactions(withIDs: delIDs)
+					self.app.state.deleteTransactions(tSeries.garbage)
 					
 					// Update any dirty transactions
 					let dirtyTransactions = tSeries.transactions.filter {
@@ -355,10 +363,18 @@ class MainWindowController: NSWindowController,
 	
 	@IBAction func deleteTransaction(_ sender: Any) {
 		if let selected = app.selectedTransaction {
-			app.state.deleteTransactions(withIDs: [selected.id])
+			app.state.deleteTransactions([selected])
 		}
 	}
 	
+	@IBAction func undo(_ sender: Any) {
+		undoManager?.undo() // instance is shared with app.state
+	}
+	
+	@IBAction func redo(_ sender: Any) {
+		undoManager?.redo() // instance is shared with app.state
+	}
+
 	@IBAction func logoutMenuItemSelected(_ sender: Any) {
 		RestGateway.forgetUser()
 		NotificationCenter.default.post(name: .logoutResponse,
@@ -370,23 +386,23 @@ class MainWindowController: NSWindowController,
 	}
 	
 	@IBAction func todayMenuItemSelected(_ sender: Any) {
-		app.currentDate = Date()
+		app.state.currentDate = Date()
 	}
 	
 	@IBAction func nextMonthMenuItemSelected(_ sender: Any) {
-		app.currentDate = Calendar.current.date(byAdding: .month, value: 1, to: app.currentDate)!
+		app.state.currentDate = Calendar.current.date(byAdding: .month, value: 1, to: app.state.currentDate)!
 	}
 	
 	@IBAction func prevMonthMenuItemSelected(_ sender: Any) {
-		app.currentDate = Calendar.current.date(byAdding: .month, value: -1, to: app.currentDate)!
+		app.state.currentDate = Calendar.current.date(byAdding: .month, value: -1, to: app.state.currentDate)!
 	}
 	
 	@IBAction func nextYearMenuItemSelected(_ sender: Any) {
-		app.currentDate = Calendar.current.date(byAdding: .year, value: 1, to: app.currentDate)!
+		app.state.currentDate = Calendar.current.date(byAdding: .year, value: 1, to: app.state.currentDate)!
 	}
 	
 	@IBAction func prevYearMenuItemSelected(_ sender: Any) {
-		app.currentDate = Calendar.current.date(byAdding: .year, value: -1, to: app.currentDate)!
+		app.state.currentDate = Calendar.current.date(byAdding: .year, value: -1, to: app.state.currentDate)!
 	}
 
 	@IBAction func showCalendarMenuItemSelected(_ sender: Any) {

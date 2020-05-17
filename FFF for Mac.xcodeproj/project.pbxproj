@@ -513,7 +513,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = b1;
+				CURRENT_PROJECT_VERSION = b2;
 				DEVELOPMENT_TEAM = TQU5FGEV2A;
 				INFOPLIST_FILE = "FFF for Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -533,7 +533,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = b1;
+				CURRENT_PROJECT_VERSION = b2;
 				DEVELOPMENT_TEAM = TQU5FGEV2A;
 				INFOPLIST_FILE = "FFF for Mac/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

@@ -26,29 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	
 	var state = AppState()
 	var storage = Set<AnyCancellable>()
-	
-	// Convenience referring to state object -- for now
-	var currentDate: Date {
-		get {
-			return self.state.currentDate
-		}
-		set {
-			self.state.currentDate = newValue
-		}
-	}
-	// Convenience referring to state object -- for now
-	var currentDateComponents: (year:Int, month:Int, day:Int) {
-		return state.currentDateComponents
-	}
-	
-	func setDayOfMonth(_ day:Int) {
-		var components = Calendar.current.dateComponents(AppDelegate.unitsYMD, from: currentDate)
-		components.setValue(day, for: .day)
-		if let newDate = Calendar.current.date(from: components) {
-			currentDate = newDate
-		}
-	}
-	
+		
 	var selectedTransaction: FFFTransaction?
 
 	func application(_ sender: NSApplication, openFile filename: String) -> Bool {

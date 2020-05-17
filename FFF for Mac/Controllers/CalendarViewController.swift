@@ -140,7 +140,7 @@ class CalendarViewController: FFFViewController {
 	
 	private func updateView(forceUpdate force:Bool = false) {
 		if updateGrid() || force {
-			let ymd = app.currentDateComponents
+			let ymd = app.state.currentDateComponents
 			// Animate day views to grid
 			for (index, dayView) in dayViews.enumerated() {
 				let dayOfMonth = index - dayOfWeekOffsetForTheFirst + 1 // +1 because we don't start with day zero
@@ -224,7 +224,7 @@ class CalendarViewController: FFFViewController {
 	
 	@IBAction func dayClicked(_ gestureRecognizer: NSClickGestureRecognizer) {
 		if let dayView = gestureRecognizer.view as? DayView {
-			app.setDayOfMonth(dayView.dayOfMonth)
+			app.state.setDayOfMonth(dayView.dayOfMonth)
 		}
 	}
 }

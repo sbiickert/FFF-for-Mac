@@ -131,7 +131,7 @@ struct RequestResult {
 class RestGateway: NSObject, URLSessionDelegate {
 	// Running in PHP server: http://localhost:8000
 	// Running in MAMP: http://localhost:8888/FFF5/public
-	private static let debugURL:String? = nil // "http://localhost:8888/FFF5/public"  // set to nil to ignore
+	private static let debugURL:String? = "http://localhost:8888/FFF5/public"  // set to nil to ignore
 	private static let defaultURL = "https://www.biickert.ca/FFF5/public"
 	static let shared = RestGateway()
 
@@ -320,31 +320,31 @@ class RestGateway: NSObject, URLSessionDelegate {
 	}
 
 	// MARK: Request Factory - POST
-	func createRequestCreateTransaction(transaction: FFFTransaction) -> URLRequest {
-		assert(transaction.isValid, "Attempt to create an invalid transaction")
-		// POST url/transaction
-		let fullUrl = String(format: "%@/%@",
-							 self.url,
-							 RestResource.TransactionResource.rawValue)
-
-		// Turn the transaction into a POST body
-		let bodyString = self.postBodyForTransactions([transaction])
-		let bodyData = bodyString.data(using: String.Encoding.utf8)
-
-		var request = URLRequest(url: URL(string: fullUrl)!)
-		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
-		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
-		request.httpMethod = "POST"
-		request.httpBody = bodyData
-		return request
-	}
+//	func createRequestCreateTransaction(transaction: FFFTransaction) -> URLRequest {
+//		assert(transaction.isValid, "Attempt to create an invalid transaction")
+//		// POST url/transaction
+//		let fullUrl = String(format: "%@/%@",
+//							 self.url,
+//							 RestResource.TransactionResource.rawValue)
+//
+//		// Turn the transaction into a POST body
+//		let bodyString = self.postBodyForTransactions([transaction])
+//		let bodyData = bodyString.data(using: String.Encoding.utf8)
+//
+//		var request = URLRequest(url: URL(string: fullUrl)!)
+//		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+//		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
+//		request.httpMethod = "POST"
+//		request.httpBody = bodyData
+//		return request
+//	}
 
 	func createRequestCreateTransactions(transactions: [FFFTransaction]) -> URLRequest {
 		for t in transactions {
 			assert(t.isValid, "Attempt to create an invalid transaction")
 		}
 		// url/transactions
-		let fullUrl = String(format: "%@/%@",
+		let fullUrl = String(format: "%@/%@?returnTransactions=true",
 							 self.url,
 							 RestResource.TransactionsResource.rawValue)
 		print("Creating transactions");
@@ -362,25 +362,25 @@ class RestGateway: NSObject, URLSessionDelegate {
 	}
 
 	// MARK: Request Factory - PUT
-	func createRequestUpdateTransaction(transaction: FFFTransaction) -> URLRequest {
-		assert(transaction.isValid, "Attempt to update a transaction with invalid data")
-		// PUT url/transaction/id
-		let fullUrl = String(format: "%@/%@/%@",
-							 self.url,
-							 RestResource.TransactionResource.rawValue,
-							 String(transaction.id))
-		
-		// Turn the transaction into a POST body
-		let bodyString = self.postBodyForTransactions([transaction])
-		let bodyData = bodyString.data(using: String.Encoding.utf8)
-		
-		var request = URLRequest(url: URL(string: fullUrl)!)
-		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
-		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
-		request.httpMethod = "PUT"
-		request.httpBody = bodyData
-		return request
-	}
+//	func createRequestUpdateTransaction(transaction: FFFTransaction) -> URLRequest {
+//		assert(transaction.isValid, "Attempt to update a transaction with invalid data")
+//		// PUT url/transaction/id
+//		let fullUrl = String(format: "%@/%@/%@",
+//							 self.url,
+//							 RestResource.TransactionResource.rawValue,
+//							 String(transaction.id))
+//		
+//		// Turn the transaction into a POST body
+//		let bodyString = self.postBodyForTransactions([transaction])
+//		let bodyData = bodyString.data(using: String.Encoding.utf8)
+//		
+//		var request = URLRequest(url: URL(string: fullUrl)!)
+//		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+//		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
+//		request.httpMethod = "PUT"
+//		request.httpBody = bodyData
+//		return request
+//	}
 	
 	func createRequestUpdateTransactions(transactions: [FFFTransaction]) -> URLRequest {
 		for t in transactions {
@@ -404,21 +404,25 @@ class RestGateway: NSObject, URLSessionDelegate {
 	}
 
 	// MARK: Request Factory - DELETE
-	func createRequestDeleteTransaction(transaction: FFFTransaction) -> URLRequest {
-		return self.createRequestDeleteTransaction(withID: transaction.id)
+//	func createRequestDeleteTransaction(transaction: FFFTransaction) -> URLRequest {
+//		return self.createRequestDeleteTransactions(transactions: [transaction])
+//	}
+	
+	func createRequestDeleteTransactions(transactions: [FFFTransaction]) -> URLRequest {
+		return self.createRequestDeleteTransactions(withIDs: transactions.map { $0.id })
 	}
 	
-	func createRequestDeleteTransaction(withID id:Int) -> URLRequest {
-		// DELETE url/transaction/id
-		let fullUrl = String(format: "%@/%@/%@",
-							 self.url,
-							 RestResource.TransactionResource.rawValue,
-							 String(id))
-		var request = URLRequest(url: URL(string: fullUrl)!)
-		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
-		request.httpMethod = "DELETE"
-		return request
-	}
+//	func createRequestDeleteTransaction(withID id:Int) -> URLRequest {
+//		// DELETE url/transaction/id
+//		let fullUrl = String(format: "%@/%@/%@",
+//							 self.url,
+//							 RestResource.TransactionResource.rawValue,
+//							 String(id))
+//		var request = URLRequest(url: URL(string: fullUrl)!)
+//		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
+//		request.httpMethod = "DELETE"
+//		return request
+//	}
 	
 	func createRequestDeleteTransactions(withIDs tids:[Int]) -> URLRequest {
 		// DELETE url/transactions

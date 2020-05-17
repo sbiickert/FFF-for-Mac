@@ -222,3 +222,8 @@ extension FFFTransaction: Equatable {
 	}
 }
 
+extension FFFTransaction: CustomDebugStringConvertible  {
+	var debugDescription: String {
+		return "[\(isExpense ? "E":"I")] \(transactionType.symbol)-\(id) \(FFFTransaction.currencyFormatter.string(from: NSNumber(value: amount)) ?? "-9999") '\(description)'"
+	}
+}

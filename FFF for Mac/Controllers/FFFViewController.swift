@@ -17,10 +17,10 @@ class FFFViewController: NSViewController {
 
 	var currentDate:Date {
 		get {
-			return app.currentDate
+			return app.state.currentDate
 		}
 		set(value) {
-			app.currentDate = value
+			app.state.currentDate = value
 		}
 	}
 	
