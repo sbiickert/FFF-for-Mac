@@ -147,6 +147,17 @@ class AppState {
 				if registerForUndo {
 					self.pushUndo(Undoable(action: .create, original: [FFFTransaction](), result: tList))
 				}
+				else {
+					// This was an undo/redo operation. Find the equivalent deleted transactions in the archive
+					for fffT in tList {
+						for archivedT in self.archiveOfDeletedTransactions.reversed() {
+							if fffT.equalForTemplate(with: archivedT) {
+								self.mappingOldIdsToNewIds[archivedT.id] = fffT.id
+								break
+							}
+						}
+					}
+				}
 				// Send notification
 				NotificationCenter.default.post(name: .dataUpdated, object: nil)
 			}.store(in: &self.storage)
@@ -197,15 +208,29 @@ class AppState {
 		// Internal calls might be from an undo/redo, don't want to register them as edits in that case
 		guard deletedTransactions.count > 0 else { return }
 		
-		// Remove from the local transaction store if their id is in delIDs
-		let delIDs = deletedTransactions.map { $0.id }
-		currentMonthTransactions = currentMonthTransactions.filter { delIDs.contains($0.id) == false }
-		
 		// Store the transactions for undo
+		var realDeletedTransactions = [FFFTransaction]()
 		if registerForUndo {
+			realDeletedTransactions = deletedTransactions
 			pushUndo(Undoable(action: .delete, original: deletedTransactions, result: [FFFTransaction]()))
 		}
+		else {
+			// This is an Undo/Redo. Possible that the UndoManager has an old copy with the wrong ID.
+			// We need to see if these ids are old, and if so find the right ids so as to delete the current copies.
+			for var fffT in deletedTransactions {
+				fffT.id = self.findNewestIDForPreviouslyDeletedTransaction(fffT)
+				realDeletedTransactions.append(fffT)
+			}
+		}
 		
+		// Any time transactions are deleted, keep a copy just in case the delete is undone
+		// And we need to line up the created (undo) feature with the deleted feature
+		archiveOfDeletedTransactions.append(contentsOf: realDeletedTransactions)
+		
+		// Remove from the local transaction store if their id is in delIDs
+		let delIDs = realDeletedTransactions.map { $0.id }
+		currentMonthTransactions = currentMonthTransactions.filter { delIDs.contains($0.id) == false }
+
 		let req = RestGateway.shared.createRequestDeleteTransactions(withIDs: delIDs)
 		URLSession.shared.dataTaskPublisher(for: req)
 			.map { $0.data }
@@ -229,7 +254,16 @@ class AppState {
 	*  This map is meant to allow tracing of old ids to new ids so that later operations
 	*  will be able to substitute them.
 	*/
+	private var archiveOfDeletedTransactions = [FFFTransaction]()
 	private var mappingOldIdsToNewIds = Dictionary<Int, Int>()
+	private func findNewestIDForPreviouslyDeletedTransaction(_ transaction: FFFTransaction) -> Int {
+		var searchID = transaction.id
+		// If an undo / redo happened multiple times, keep searching
+		while mappingOldIdsToNewIds.keys.contains(searchID) {
+			searchID = mappingOldIdsToNewIds[searchID]!
+		}
+		return searchID
+	}
 	
 	private func pushUndo(_ value: Undoable) {
 		print("pushUndo \(value.description)\nOriginal: \(value.original)\nResult:\(value.result)")
@@ -246,6 +280,7 @@ class AppState {
 			case .delete:
 				print("Undoing deleted transactions")
 				print("[] -> \(value.original)")
+				// This will create transactions with different ids
 				selfTarget.createTransactions(value.original, registerForUndo: false)
 			}
 			selfTarget.pushRedo(value)
@@ -260,6 +295,7 @@ class AppState {
 			case .create:
 				print("Redoing created transactions")
 				print("[] -> \(value.result)")
+				// This will create transactions with different ids
 				selfTarget.createTransactions(value.result, registerForUndo: false)
 			case .update:
 				print("Redoing updated transactions")
