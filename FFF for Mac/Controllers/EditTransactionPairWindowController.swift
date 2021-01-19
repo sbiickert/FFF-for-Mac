@@ -115,7 +115,8 @@ class EditTransactionPairWindowController: NSWindowController, NSTextFieldDelega
 	}
 	
 	@IBAction func amountChanged(_ sender: NSTextField) {
-		transactionSeries.amountString = sender.stringValue.replacingOccurrences(of: "$", with: "")
+		let cleanAmount = sender.stringValue.replacingOccurrences(of: "$", with: "").replacingOccurrences(of: ",", with: "")
+		transactionSeries.amountString = cleanAmount
 		updateUI(sender)
 	}
 	

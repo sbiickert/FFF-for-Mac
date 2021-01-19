@@ -57,8 +57,12 @@ class AppState {
 	}
 	
 	// MARK: Requests data for the current month
+	private var cancellableRequests = Set<AnyCancellable>()
 	
 	private func requestMonthData() {
+		// If there is an outstanding set of requests for month data, cancel them.
+		self.cancellableRequests.removeAll()
+		
 		// Request month bal, cat, transactions here
 		let ymd = self.currentDateComponents
 		let bReq = RestGateway.shared.createRequestGetBalanceSummary(forYear: ymd.year, month: ymd.month)
@@ -74,7 +78,7 @@ class AppState {
 			.replaceError(with: BalanceSummary())
 			.sink { bs in
 				self.currentMonthBalance = (bs.year == -1) ? nil : bs
-		}.store(in: &self.storage)
+		}.store(in: &self.cancellableRequests)
 
 		let cReq = RestGateway.shared.createRequestGetCategorySummary(forYear: ymd.year, month: ymd.month)
 		URLSession.shared.dataTaskPublisher(for: cReq)
@@ -84,7 +88,7 @@ class AppState {
 			.replaceError(with: CategorySummary())
 			.sink { cs in
 				self.currentMonthCategories = (cs.year == -1) ? nil : cs
-		}.store(in: &self.storage)
+		}.store(in: &self.cancellableRequests)
 
 		// Request current month transactions
 		let tReq = RestGateway.shared.createRequestGetTransactions(forYear: ymd.year, month: ymd.month)
@@ -98,7 +102,7 @@ class AppState {
 			}
 			.sink { tArray in
 				self.currentMonthTransactions = tArray
-		}.store(in: &self.storage)
+		}.store(in: &self.cancellableRequests)
 	}
 	
 	// MARK: all edits go through these functions

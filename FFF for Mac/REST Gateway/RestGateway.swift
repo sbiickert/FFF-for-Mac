@@ -131,7 +131,7 @@ struct RequestResult {
 class RestGateway: NSObject, URLSessionDelegate {
 	// Running in PHP server: http://localhost:8000
 	// Running in MAMP: http://localhost:8888/FFF5/public
-	private static let debugURL:String? = "http://localhost:8888/FFF5/public"  // set to nil to ignore
+	private static let debugURL:String? = nil // "http://localhost:8888/FFF5/public"  // set to nil to ignore
 	private static let defaultURL = "https://www.biickert.ca/FFF5/public"
 	static let shared = RestGateway()
 
@@ -320,25 +320,6 @@ class RestGateway: NSObject, URLSessionDelegate {
 	}
 
 	// MARK: Request Factory - POST
-//	func createRequestCreateTransaction(transaction: FFFTransaction) -> URLRequest {
-//		assert(transaction.isValid, "Attempt to create an invalid transaction")
-//		// POST url/transaction
-//		let fullUrl = String(format: "%@/%@",
-//							 self.url,
-//							 RestResource.TransactionResource.rawValue)
-//
-//		// Turn the transaction into a POST body
-//		let bodyString = self.postBodyForTransactions([transaction])
-//		let bodyData = bodyString.data(using: String.Encoding.utf8)
-//
-//		var request = URLRequest(url: URL(string: fullUrl)!)
-//		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
-//		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
-//		request.httpMethod = "POST"
-//		request.httpBody = bodyData
-//		return request
-//	}
-
 	func createRequestCreateTransactions(transactions: [FFFTransaction]) -> URLRequest {
 		for t in transactions {
 			assert(t.isValid, "Attempt to create an invalid transaction")
@@ -362,26 +343,6 @@ class RestGateway: NSObject, URLSessionDelegate {
 	}
 
 	// MARK: Request Factory - PUT
-//	func createRequestUpdateTransaction(transaction: FFFTransaction) -> URLRequest {
-//		assert(transaction.isValid, "Attempt to update a transaction with invalid data")
-//		// PUT url/transaction/id
-//		let fullUrl = String(format: "%@/%@/%@",
-//							 self.url,
-//							 RestResource.TransactionResource.rawValue,
-//							 String(transaction.id))
-//		
-//		// Turn the transaction into a POST body
-//		let bodyString = self.postBodyForTransactions([transaction])
-//		let bodyData = bodyString.data(using: String.Encoding.utf8)
-//		
-//		var request = URLRequest(url: URL(string: fullUrl)!)
-//		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
-//		request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "content-type")
-//		request.httpMethod = "PUT"
-//		request.httpBody = bodyData
-//		return request
-//	}
-	
 	func createRequestUpdateTransactions(transactions: [FFFTransaction]) -> URLRequest {
 		for t in transactions {
 			assert(t.isValid, "Attempt to update a transaction with invalid data")
@@ -404,25 +365,9 @@ class RestGateway: NSObject, URLSessionDelegate {
 	}
 
 	// MARK: Request Factory - DELETE
-//	func createRequestDeleteTransaction(transaction: FFFTransaction) -> URLRequest {
-//		return self.createRequestDeleteTransactions(transactions: [transaction])
-//	}
-	
 	func createRequestDeleteTransactions(transactions: [FFFTransaction]) -> URLRequest {
 		return self.createRequestDeleteTransactions(withIDs: transactions.map { $0.id })
 	}
-	
-//	func createRequestDeleteTransaction(withID id:Int) -> URLRequest {
-//		// DELETE url/transaction/id
-//		let fullUrl = String(format: "%@/%@/%@",
-//							 self.url,
-//							 RestResource.TransactionResource.rawValue,
-//							 String(id))
-//		var request = URLRequest(url: URL(string: fullUrl)!)
-//		request.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
-//		request.httpMethod = "DELETE"
-//		return request
-//	}
 	
 	func createRequestDeleteTransactions(withIDs tids:[Int]) -> URLRequest {
 		// DELETE url/transactions
@@ -451,43 +396,6 @@ class RestGateway: NSObject, URLSessionDelegate {
 	
 	
 	// MARK: Making Requests
-	
-//	func makeRequest(request:URLRequest, callback: @escaping (RequestResult) -> Void) {
-//		// Always ensure the current credentials are passed
-//		var r = request // parameter is immutable, need to put in a var
-//		if let _ = r.value(forHTTPHeaderField: "Authorization") {
-//			r.setValue("Basic \(httpBasicLogin)", forHTTPHeaderField: "Authorization")
-//		}
-//
-//		processRequest(r as URLRequest) {info in
-//			if (info.isError == false) {
-//				if info.code == 201 {
-//					// One or more transaction were created. Fetch them and return them.
-//					do {
-//						let resultData = try JSONDecoder().decode(CodableOpResult.self, from: info.data!)
-//						print("Created transactions \(resultData.ids)")
-//						let req = self.createRequestGetTransactions(withIDs: resultData.ids)
-//						self.makeRequest(request: req, callback: callback)
-//					} catch let err {
-//						print("Err", err)
-//					}
-//				}
-//				else {
-//					callback(info)
-//				}
-//			}
-//			else {
-//				if info.code == 401 {
-//					// Prompt for user credentials then resubmit the request
-//					print("Need to prompt for credentials")
-//					if let delegate = RestGateway.loginDelegate {
-//						delegate.showLogin(failedRequest: (r, callback))
-//					}
-//				}
-//			}
-//		}
-//	}
-	
 	private func postBodyForTransactions(_ transactions: [FFFTransaction]) -> String {
 		// Convert transaction to JSON here
 		var simpleTransactions: [CodableTransaction] = []
@@ -506,58 +414,6 @@ class RestGateway: NSObject, URLSessionDelegate {
 	func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (Foundation.URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
 		completionHandler(Foundation.URLSession.AuthChallengeDisposition.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
 	}
-	
-//	private func processRequest(_ request: URLRequest, closure: @escaping (_ info: RequestResult) -> Void) {
-//		var info = RequestResult()
-//
-//		let task = _session?.dataTask(with: request, completionHandler: {(data: Data?, response: URLResponse?, error: Error?) -> Void in
-//			if let nonNilError = error {
-//				print("Error making request: \(String(describing: nonNilError))")
-//				info.isError = true
-//				info.text = nonNilError.localizedDescription
-//				switch nonNilError.localizedDescription {
-//				case "Could not connect to the server.":
-//					// TODO: Raise Hell
-//					info.code = -9998
-//				default:
-//					info.code = -9999
-//				}
-//			}
-//			else {
-//				let httpResponse = response as! HTTPURLResponse
-//				let responseContent = String(data: data!, encoding: String.Encoding.utf8)
-//				info.code = httpResponse.statusCode
-//				info.text = responseContent
-//				info.data = data
-//
-//				do {
-//					// This will fail for non-JSON
-//					let json = try JSONSerialization.jsonObject(with: data!, options: [])
-//					let _ = json as? NSDictionary
-//				}
-//				catch {
-//					print("Malformed JSON returned from request: \(error)");
-//					print(responseContent ?? "Null content")
-//					info.isError = true
-//				}
-//
-//				if (httpResponse.statusCode >= 400) {
-//					/*
-//						NOTE TO FUTURE SELF:
-//						If you get persistent 401's, check that the request isn't being redirected.
-//						The Authorization header is dropped on redirect, and this class does not
-//						have any explicit support for handling it.
-//					*/
-//					print("HTTP request error. Code: \(httpResponse.statusCode)")
-//					info.isError = true
-//				}
-//			}
-//
-//			// Execute closure
-//			closure(info)
-//		})
-//		task?.resume()
-//	}
 	
 	// MARK: Secure storage of credentials
 	

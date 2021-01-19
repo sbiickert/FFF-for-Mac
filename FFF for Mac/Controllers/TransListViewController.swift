@@ -111,10 +111,12 @@ class TransListViewController: FFFViewController {
 	
 	@objc func doubleAction(_ tableView:NSTableView) {
 		let row = tableView.clickedRow
-		let t = isSearchStringEmpty ? transactions[row] : searchTransactions[row]
-		NotificationCenter.default.post(name: .showEditForm,
-										object: self,
-										userInfo: ["t": t])
+		if row >= 0 { // -1 is double-click on the header
+			let t = isSearchStringEmpty ? transactions[row] : searchTransactions[row]
+			NotificationCenter.default.post(name: .showEditForm,
+											object: self,
+											userInfo: ["t": t])
+		}
 	}
 
 	override func viewWillAppear() {
