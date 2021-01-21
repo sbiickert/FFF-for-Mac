@@ -61,6 +61,9 @@ class AppState {
 	
 	private func requestMonthData() {
 		// If there is an outstanding set of requests for month data, cancel them.
+		for cancellableRequest in cancellableRequests {
+			cancellableRequest.cancel()
+		}
 		self.cancellableRequests.removeAll()
 		
 		// Request month bal, cat, transactions here
