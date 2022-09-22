@@ -130,9 +130,9 @@ struct RequestResult {
 // MARK: The Gateway Class
 class RestGateway: NSObject, URLSessionDelegate {
 	// Running in PHP server: http://localhost:8000
-	// Running in MAMP: http://localhost:8888/FFF5/public
-	private static let debugURL:String? = nil // "http://localhost:8888/FFF5/public"  // set to nil to ignore
-	private static let defaultURL = "https://www.biickert.ca/FFF5/public"
+	// Running in MAMP: http://localhost:8888/FFF6/public
+	private static let debugURL:String? = nil // "http://localhost:8888/FFF6/public"  // set to nil to ignore
+	private static let defaultURL = "https://www.biickert.ca/FFF6/public"
 	static let shared = RestGateway()
 
 	var userName: String! {
